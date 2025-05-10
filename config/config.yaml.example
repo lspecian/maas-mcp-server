@@ -1,0 +1,23 @@
+server:
+  host: "localhost"
+  port: 8082
+maas_instances:
+  default:
+    api_url: "http://your-maas-server:5240/MAAS"
+    api_key: "consumer:token:secret"
+  # Add more instances as needed:
+  # example:
+  #   api_url: "http://maas.example.com/MAAS"
+  #   api_key: "consumer:token:secret"
+auth:
+  enabled: false
+  type: "apikey"
+  api_key: "YOUR_MCP_API_KEY"
+  user_store: "memory"  # "memory" or "file"
+  store_file: "data/users.json"  # Path to file store if using file store
+  rate_limit:
+    enabled: true
+    max_attempts: 5
+    window: 300  # Time window in seconds (5 minutes)
+logging:
+  level: "info"

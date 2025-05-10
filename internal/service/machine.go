@@ -1,0 +1,404 @@
+package service
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net/http"
+
+	"github.com/canonical/gomaasclient/entity"
+	"github.com/sirupsen/logrus"
+
+	"github.com/lspecian/maas-mcp-server/internal/models"
+)
+
+// Common error types for service operations
+var (
+	ErrNotFound           = errors.New("resource not found")
+	ErrBadRequest         = errors.New("invalid request parameters")
+	ErrInternalServer     = errors.New("internal server error")
+	ErrServiceUnavailable = errors.New("service unavailable")
+	ErrConflict           = errors.New("resource conflict")
+	ErrForbidden          = errors.New("operation not permitted")
+)
+
+// ServiceError represents an error with HTTP status code mapping
+type ServiceError struct {
+	Err        error
+	StatusCode int
+	Message    string
+}
+
+// Error implements the error interface
+func (e *ServiceError) Error() string {
+	if e.Message != "" {
+		return e.Message
+	}
+	return e.Err.Error()
+}
+
+// Unwrap returns the wrapped error
+func (e *ServiceError) Unwrap() error {
+	return e.Err
+}
+
+// MachineService handles machine management operations
+type MachineService struct {
+	maasClient MachineClient
+	logger     *logrus.Logger
+}
+
+// NewMachineService creates a new machine service instance
+func NewMachineService(client MachineClient, logger *logrus.Logger) *MachineService {
+	return &MachineService{
+		maasClient: client,
+		logger:     logger,
+	}
+}
+
+// ListMachines retrieves a list of machines with optional filtering
+func (s *MachineService) ListMachines(ctx context.Context, filters map[string]string) ([]models.MachineContext, error) {
+	s.logger.WithFields(logrus.Fields{
+		"filters": filters,
+	}).Debug("Listing machines")
+
+	// Validate filters if needed
+	if err := validateFilters(filters); err != nil {
+		return nil, &ServiceError{
+			Err:        ErrBadRequest,
+			StatusCode: http.StatusBadRequest,
+			Message:    fmt.Sprintf("Invalid filters: %v", err),
+		}
+	}
+
+	// Call MAAS client to list machines
+	machines, err := s.maasClient.ListMachines(filters)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to list machines from MAAS")
+		return nil, mapClientError(err)
+	}
+
+	// Convert MAAS machines to MCP context
+	result := make([]models.MachineContext, len(machines))
+	for i, m := range machines {
+		machineContext := models.MaasMachineToMCPContext(&m)
+		result[i] = *machineContext
+	}
+
+	s.logger.WithField("count", len(result)).Debug("Successfully retrieved machines")
+	return result, nil
+}
+
+// GetMachine retrieves a specific machine by ID
+func (s *MachineService) GetMachine(ctx context.Context, id string) (*models.MachineContext, error) {
+	s.logger.WithField("id", id).Debug("Getting machine by ID")
+
+	// Validate ID
+	if id == "" {
+		return nil, &ServiceError{
+			Err:        ErrBadRequest,
+			StatusCode: http.StatusBadRequest,
+			Message:    "Machine ID is required",
+		}
+	}
+
+	// Call MAAS client to get machine
+	machine, err := s.maasClient.GetMachine(id)
+	if err != nil {
+		s.logger.WithError(err).WithField("id", id).Error("Failed to get machine from MAAS")
+		return nil, mapClientError(err)
+	}
+
+	// Convert MAAS machine to MCP context
+	result := models.MaasMachineToMCPContext(machine)
+
+	s.logger.WithField("id", id).Debug("Successfully retrieved machine")
+	return result, nil
+}
+
+// GetMachinePowerState retrieves the power state of a specific machine
+func (s *MachineService) GetMachinePowerState(ctx context.Context, id string) (string, error) {
+	s.logger.WithField("id", id).Debug("Getting machine power state")
+
+	// Validate ID
+	if id == "" {
+		return "", &ServiceError{
+			Err:        ErrBadRequest,
+			StatusCode: http.StatusBadRequest,
+			Message:    "Machine ID is required",
+		}
+	}
+
+	// Call MAAS client to get machine
+	machine, err := s.maasClient.GetMachine(id)
+	if err != nil {
+		s.logger.WithError(err).WithField("id", id).Error("Failed to get machine from MAAS")
+		return "", mapClientError(err)
+	}
+
+	s.logger.WithFields(logrus.Fields{
+		"id":          id,
+		"power_state": machine.PowerState,
+	}).Debug("Successfully retrieved machine power state")
+
+	return machine.PowerState, nil
+}
+
+// AllocateMachine allocates a machine based on constraints
+func (s *MachineService) AllocateMachine(ctx context.Context, constraints map[string]string) (*models.MachineContext, error) {
+	s.logger.WithField("constraints", constraints).Debug("Allocating machine")
+
+	// Validate constraints
+	if err := validateConstraints(constraints); err != nil {
+		return nil, &ServiceError{
+			Err:        ErrBadRequest,
+			StatusCode: http.StatusBadRequest,
+			Message:    fmt.Sprintf("Invalid constraints: %v", err),
+		}
+	}
+
+	// Convert constraints to MAAS allocation parameters
+	params := convertConstraintsToParams(constraints)
+
+	// Call MAAS client to allocate machine
+	machine, err := s.maasClient.AllocateMachine(params)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to allocate machine from MAAS")
+		return nil, mapClientError(err)
+	}
+
+	// Convert MAAS machine to MCP context
+	result := models.MaasMachineToMCPContext(machine)
+
+	s.logger.WithFields(logrus.Fields{
+		"id":   machine.SystemID,
+		"name": machine.Hostname,
+	}).Info("Successfully allocated machine")
+
+	return result, nil
+}
+
+// DeployMachine deploys a machine with specified OS and configuration
+func (s *MachineService) DeployMachine(ctx context.Context, id string, osConfig map[string]string) (*models.MachineContext, error) {
+	s.logger.WithFields(logrus.Fields{
+		"id":        id,
+		"os_config": osConfig,
+	}).Debug("Deploying machine")
+
+	// Validate ID
+	if id == "" {
+		return nil, &ServiceError{
+			Err:        ErrBadRequest,
+			StatusCode: http.StatusBadRequest,
+			Message:    "Machine ID is required",
+		}
+	}
+
+	// Validate OS configuration
+	if err := validateOSConfig(osConfig); err != nil {
+		return nil, &ServiceError{
+			Err:        ErrBadRequest,
+			StatusCode: http.StatusBadRequest,
+			Message:    fmt.Sprintf("Invalid OS configuration: %v", err),
+		}
+	}
+
+	// Convert OS configuration to MAAS deployment parameters
+	params := convertOSConfigToParams(osConfig)
+
+	// Call MAAS client to deploy machine
+	machine, err := s.maasClient.DeployMachine(id, params)
+	if err != nil {
+		s.logger.WithError(err).WithField("id", id).Error("Failed to deploy machine from MAAS")
+		return nil, mapClientError(err)
+	}
+
+	// Convert MAAS machine to MCP context
+	result := models.MaasMachineToMCPContext(machine)
+
+	s.logger.WithFields(logrus.Fields{
+		"id":   machine.SystemID,
+		"name": machine.Hostname,
+	}).Info("Successfully started machine deployment")
+
+	return result, nil
+}
+
+// ReleaseMachine releases a machine back to the available pool
+func (s *MachineService) ReleaseMachine(ctx context.Context, id string, comment string) error {
+	s.logger.WithFields(logrus.Fields{
+		"id":      id,
+		"comment": comment,
+	}).Debug("Releasing machine")
+
+	// Validate ID
+	if id == "" {
+		return &ServiceError{
+			Err:        ErrBadRequest,
+			StatusCode: http.StatusBadRequest,
+			Message:    "Machine ID is required",
+		}
+	}
+
+	// Call MAAS client to release machine
+	err := s.maasClient.ReleaseMachine([]string{id}, comment)
+	if err != nil {
+		s.logger.WithError(err).WithField("id", id).Error("Failed to release machine from MAAS")
+		return mapClientError(err)
+	}
+
+	s.logger.WithField("id", id).Info("Successfully released machine")
+	return nil
+}
+
+// PowerOnMachine powers on a machine
+func (s *MachineService) PowerOnMachine(ctx context.Context, id string) (*models.MachineContext, error) {
+	s.logger.WithField("id", id).Debug("Powering on machine")
+
+	// Validate ID
+	if id == "" {
+		return nil, &ServiceError{
+			Err:        ErrBadRequest,
+			StatusCode: http.StatusBadRequest,
+			Message:    "Machine ID is required",
+		}
+	}
+
+	// Call MAAS client to power on machine
+	machine, err := s.maasClient.PowerOnMachine(id)
+	if err != nil {
+		s.logger.WithError(err).WithField("id", id).Error("Failed to power on machine")
+		return nil, mapClientError(err)
+	}
+
+	// Convert MAAS machine to MCP context
+	result := models.MaasMachineToMCPContext(machine)
+
+	s.logger.WithFields(logrus.Fields{
+		"id":   id,
+		"name": machine.Hostname,
+	}).Info("Successfully powered on machine")
+
+	return result, nil
+}
+
+// PowerOffMachine powers off a machine
+func (s *MachineService) PowerOffMachine(ctx context.Context, id string) (*models.MachineContext, error) {
+	s.logger.WithField("id", id).Debug("Powering off machine")
+
+	// Validate ID
+	if id == "" {
+		return nil, &ServiceError{
+			Err:        ErrBadRequest,
+			StatusCode: http.StatusBadRequest,
+			Message:    "Machine ID is required",
+		}
+	}
+
+	// Call MAAS client to power off machine
+	machine, err := s.maasClient.PowerOffMachine(id)
+	if err != nil {
+		s.logger.WithError(err).WithField("id", id).Error("Failed to power off machine")
+		return nil, mapClientError(err)
+	}
+
+	// Convert MAAS machine to MCP context
+	result := models.MaasMachineToMCPContext(machine)
+
+	s.logger.WithFields(logrus.Fields{
+		"id":   id,
+		"name": machine.Hostname,
+	}).Info("Successfully powered off machine")
+
+	return result, nil
+}
+
+// Helper functions
+
+// validateFilters validates machine listing filters
+func validateFilters(filters map[string]string) error {
+	// Implement validation logic for filters
+	// For now, accept all filters as valid
+	return nil
+}
+
+// validateConstraints validates machine allocation constraints
+func validateConstraints(constraints map[string]string) error {
+	// Implement validation logic for constraints
+	// For now, accept all constraints as valid
+	return nil
+}
+
+// validateOSConfig validates OS deployment configuration
+func validateOSConfig(osConfig map[string]string) error {
+	// Implement validation logic for OS configuration
+	// For now, accept all configurations as valid
+	return nil
+}
+
+// convertConstraintsToParams converts constraint map to MAAS allocation parameters
+func convertConstraintsToParams(constraints map[string]string) *entity.MachineAllocateParams {
+	params := &entity.MachineAllocateParams{}
+
+	// Map constraints to parameters
+	if hostname, ok := constraints["hostname"]; ok {
+		params.Name = hostname
+	}
+
+	if zone, ok := constraints["zone"]; ok {
+		params.Zone = zone
+	}
+
+	if pool, ok := constraints["pool"]; ok {
+		params.Pool = pool
+	}
+
+	if arch, ok := constraints["architecture"]; ok {
+		params.Arch = arch
+	}
+
+	if tags, ok := constraints["tags"]; ok {
+		// Assuming tags are comma-separated
+		params.Tags = []string{tags}
+	}
+
+	// Add more mappings as needed
+
+	return params
+}
+
+// convertOSConfigToParams converts OS configuration map to MAAS deployment parameters
+func convertOSConfigToParams(osConfig map[string]string) *entity.MachineDeployParams {
+	params := &entity.MachineDeployParams{}
+
+	// Map OS configuration to parameters
+	if distro, ok := osConfig["distro_series"]; ok {
+		params.DistroSeries = distro
+	}
+
+	if userData, ok := osConfig["user_data"]; ok {
+		params.UserData = userData
+	}
+
+	if kernel, ok := osConfig["hwe_kernel"]; ok {
+		params.HWEKernel = kernel
+	}
+
+	// Add more mappings as needed
+
+	return params
+}
+
+// mapClientError maps MAAS client errors to service errors with appropriate HTTP status codes
+func mapClientError(err error) error {
+	// Implement error mapping logic
+	// This is a simplified version; in a real implementation, you would
+	// check for specific error types from the MAAS client
+
+	// For now, return a generic internal server error
+	return &ServiceError{
+		Err:        ErrInternalServer,
+		StatusCode: http.StatusInternalServerError,
+		Message:    fmt.Sprintf("MAAS client error: %v", err),
+	}
+}
