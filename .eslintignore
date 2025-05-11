@@ -1,0 +1,6 @@
+node_modules/
+dist/
+coverage/
+jest.config.cjs
+.eslintrc.cjs
+scripts/check-dependencies.cjs

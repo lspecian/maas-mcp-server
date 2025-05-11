@@ -8,6 +8,7 @@ dev-debug.log
 
 # Dependency directories
 node_modules/
+dist/
 
 # Environment variables
 .env
@@ -27,6 +28,7 @@ node_modules/
 # Task files
 tasks.json
 tasks/
+scripts/ 
 
 # Configuration files with credentials
 config/config.yaml
@@ -38,3 +40,7 @@ ts-wrapper/dist/
 
 .roo
 .cursor
+
+.taskmasterconfig
+.windsurfrules
+.roomodes

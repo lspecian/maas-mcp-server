@@ -1,0 +1,100 @@
+{
+  "machines": [
+    {
+      "system_id": "abc123",
+      "hostname": "test-machine-1",
+      "domain": { "id": 1, "name": "maas" },
+      "architecture": "amd64/generic",
+      "status": 4,
+      "status_name": "Ready",
+      "owner": "admin",
+      "owner_data": { "key": "value" },
+      "ip_addresses": ["192.168.1.100"],
+      "cpu_count": 4,
+      "memory": 8192,
+      "zone": { "id": 1, "name": "default" },
+      "pool": { "id": 1, "name": "default" },
+      "tags": ["compute", "storage"]
+    },
+    {
+      "system_id": "def456",
+      "hostname": "test-machine-2",
+      "domain": { "id": 1, "name": "maas" },
+      "architecture": "amd64/generic",
+      "status": 6,
+      "status_name": "Deployed",
+      "owner": "admin",
+      "owner_data": { "key": "value" },
+      "ip_addresses": ["192.168.1.101"],
+      "cpu_count": 8,
+      "memory": 16384,
+      "zone": { "id": 1, "name": "default" },
+      "pool": { "id": 1, "name": "default" },
+      "tags": ["compute", "database"]
+    },
+    {
+      "system_id": "ghi789",
+      "hostname": "test-machine-3",
+      "domain": { "id": 1, "name": "maas" },
+      "architecture": "arm64/generic",
+      "status": 5,
+      "status_name": "Commissioning",
+      "owner": "admin",
+      "owner_data": { "key": "value" },
+      "ip_addresses": ["192.168.1.102"],
+      "cpu_count": 2,
+      "memory": 4096,
+      "zone": { "id": 2, "name": "zone-2" },
+      "pool": { "id": 2, "name": "testing" },
+      "tags": ["storage"]
+    }
+  ],
+  "subnets": [
+    {
+      "id": 1,
+      "name": "management-subnet",
+      "cidr": "192.168.1.0/24",
+      "vlan": { "id": 1, "name": "default" },
+      "fabric": "fabric-0",
+      "space": "space-0",
+      "gateway_ip": "192.168.1.1",
+      "dns_servers": ["8.8.8.8", "8.8.4.4"]
+    },
+    {
+      "id": 2,
+      "name": "storage-subnet",
+      "cidr": "192.168.2.0/24",
+      "vlan": { "id": 2, "name": "storage" },
+      "fabric": "fabric-0",
+      "space": "space-0",
+      "gateway_ip": "192.168.2.1",
+      "dns_servers": ["8.8.8.8", "8.8.4.4"]
+    }
+  ],
+  "tags": [
+    {
+      "id": 1,
+      "name": "compute",
+      "comment": "Compute nodes",
+      "definition": "//node[@cpu_count > 4]",
+      "kernel_opts": "",
+      "machine_count": 2
+    },
+    {
+      "id": 2,
+      "name": "storage",
+      "comment": "Storage nodes",
+      "definition": "",
+      "kernel_opts": "",
+      "machine_count": 3
+    },
+    {
+      "id": 3,
+      "name": "database",
+      "comment": "Database nodes",
+      "definition": "",
+      "kernel_opts": "",
+      "machine_count": 1
+    }
+  ]
+}
