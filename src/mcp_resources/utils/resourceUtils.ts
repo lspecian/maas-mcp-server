@@ -2,8 +2,8 @@
  * Utility functions for MCP resources
  */
 import { extractParamsFromUri } from '../schemas/uriPatterns.js';
-import { MaasApiError } from '../../types/maas.js';
-import logger, { generateRequestId } from '../../utils/logger.js';
+import { MaasApiError } from '../../types/maas.ts';
+import logger, { generateRequestId } from '../../utils/logger.ts';
 import { ZodError, ZodSchema } from 'zod';
 import auditLogger from '../../utils/auditLogger.js';
 

@@ -3,11 +3,11 @@
  * Implements detail and list resource handlers for MAAS subnets
  */
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../../maas/MaasApiClient.js";
+import { MaasApiClient } from "../../maas/MaasApiClient.ts";
 import {
   DetailResourceHandler,
   ListResourceHandler
-} from "../BaseResourceHandler.js";
+} from "../BaseResourceHandler.ts";
 import {
   MaasSubnet,
   MaasSubnetSchema,
@@ -17,7 +17,7 @@ import {
   SUBNETS_LIST_URI_PATTERN,
   SubnetCollectionQueryParams,
   SubnetCollectionQueryParamsSchema
-} from "../schemas/index.js";
+} from "../schemas/index.ts";
 import { z } from "zod";
 
 /**

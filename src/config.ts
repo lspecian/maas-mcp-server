@@ -98,4 +98,4 @@ const config = configSchema.parse({
  * Export the validated configuration object
  * This is imported by other modules to access configuration values
  */
-export default config;
+module.exports = config;

@@ -1,7 +1,7 @@
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../../maas/MaasApiClient.js";
+import { MaasApiClient } from "../../maas/MaasApiClient.ts";
 import { ZodSchema, z } from 'zod';
-import { BaseResourceHandler } from "../../mcp_resources/BaseResourceHandler.js";
+import { BaseResourceHandler } from "../../mcp_resources/BaseResourceHandler.ts";
 
 // Mock pino before importing logger
 jest.mock('pino', () => {
@@ -20,9 +20,9 @@ jest.mock('pino', () => {
 });
 
 // Mock the logger module
-jest.mock('../../utils/logger.js', () => {
+jest.mock('../../utils/logger.ts', () => {
   // Use the actual generateRequestId function for testing
-  const originalGenerateRequestId = jest.requireActual('../../utils/logger.js').generateRequestId;
+  const originalGenerateRequestId = jest.requireActual('../../utils/logger.ts').generateRequestId;
   
   return {
     __esModule: true,
@@ -43,8 +43,8 @@ jest.mock('../../utils/logger.js', () => {
 });
 
 // Import after mocking
-import * as logger from "../../utils/logger.js";
-import auditLogger from "../../utils/auditLogger.js";
+import * as logger from "../../utils/logger.ts";
+import auditLogger from "../../utils/auditLogger.ts";
 
 // Mock the config module
 jest.mock('../../config.js', () => ({

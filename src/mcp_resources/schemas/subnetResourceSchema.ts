@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { SUBNET_DETAILS_URI_PATTERN, SUBNETS_LIST_URI_PATTERN } from './uriPatterns.js';
+import { SUBNET_DETAILS_URI_PATTERN, SUBNETS_LIST_URI_PATTERN } from './uriPatterns.ts';
 
 /**
- * Re-exports URI patterns related to subnet resources from './uriPatterns.js'.
+ * Re-exports URI patterns related to subnet resources from './uriPatterns.ts'.
  * This is done for convenience and to consolidate subnet-related schema definitions.
  */
 export { SUBNET_DETAILS_URI_PATTERN, SUBNETS_LIST_URI_PATTERN };

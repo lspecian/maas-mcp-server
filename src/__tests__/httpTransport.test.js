@@ -37,7 +37,7 @@ jest.mock('@modelcontextprotocol/sdk', () => {
 }, { virtual: true });
 
 // Mock the logger
-jest.mock('../utils/logger.js', () => {
+jest.mock('../utils/logger.ts', () => {
   return {
     __esModule: true,
     default: jest.fn().mockReturnValue({

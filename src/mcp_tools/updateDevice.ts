@@ -1,99 +1,76 @@
 // src/mcp_tools/updateDevice.ts
-import { z } from 'zod';
-import { MaasApiClient } from '../maas/MaasApiClient.js';
-import { MCPToolDefinition, MCPServer } from '@modelcontextprotocol/sdk'; // Added MCPServer
-import { basePutRequestSchema, putSuccessResponseSchema } from './schemas/writeOps.js';
-import { createRequestLogger, generateRequestId } from '../utils/logger.js';
-import { Logger as PinoLogger } from 'pino';
+const { z } = require('zod');
+const { MaasApiClient } = require('../maas/MaasApiClient');
+const path = require('path');
+const sdkPath = path.join(__dirname, '..', '..', 'node_modules', '@modelcontextprotocol', 'sdk', 'dist', 'cjs');
+const { McpServer } = require(path.join(sdkPath, 'server', 'mcp.js'));
+const { basePutRequestSchema, putSuccessResponseSchema } = require('./schemas/writeOps');
+const { createRequestLogger } = require('../utils/logger');
+const { metaSchema } = require('./schemas/common');
 
-// Define a local type for McpTool
-interface McpTool extends MCPToolDefinition {
-  inputSchema: z.ZodTypeAny;
-  outputSchema: z.ZodTypeAny;
-  handler: (params: any, context: McpContext) => Promise<any>;
-}
+// Define schema for update device tool
+const updateDeviceSchema = z.object({
+  system_id: z.string().describe("System ID of the device to update"),
+  hostname: z.string().optional().describe("New hostname for the device"),
+  domain: z.string().optional().describe("New domain for the device"),
+  zone: z.string().optional().describe("New zone for the device"),
+  description: z.string().optional().describe("New description for the device"),
+  _meta: metaSchema
+});
 
-// Define McpContext
-interface McpContext {
-  log: PinoLogger;
-  maasApiClient?: MaasApiClient;
-}
+// Define schema for update device output
+const updateDeviceOutputSchema = z.object({
+  system_id: z.string().describe("System ID of the updated device"),
+  hostname: z.string().describe("Hostname of the updated device"),
+  domain: z.string().describe("Domain of the updated device"),
+  zone: z.string().describe("Zone of the updated device"),
+  _meta: metaSchema
+});
 
-// Helper function to format errors for MCP results (local implementation)
-function errorToMcpResult(meta: any, error: any, defaultMessage: string = 'An unexpected error occurred.') {
-  const message = error instanceof Error ? error.message : String(error);
-  return {
-    _meta: meta,
-    error: {
-      message: message || defaultMessage,
-      code: (error as any).code || 'UNKNOWN_ERROR',
-    },
-  };
-}
+/**
+ * Register the update device tool with the MCP server
+ * @param server The MCP server instance
+ * @param maasClient The MAAS API client instance
+ */
+function registerUpdateDeviceTool(server, maasClient) {
+  server.registerTool({
+    name: "updateDevice",
+    description: "Update a device in MAAS",
+    inputSchema: updateDeviceSchema,
+    outputSchema: updateDeviceOutputSchema,
+    execute: async (params) => {
+      const logger = createRequestLogger('updateDevice');
+      logger.info({ params }, 'Executing updateDevice tool');
 
-// Define the payload schema for updating a MAAS device.
-// Fields are based on common updatable attributes for a MAAS device.
-// Assuming partial updates are accepted.
-const updateDevicePayloadSchema = z.object({
-  name: z.string().optional().describe("New name for the device."),
-  tags: z.array(z.string()).optional().describe("List of tags to assign to the device. Replaces existing tags."),
-  zone: z.string().optional().describe("The zone to assign the device to."),
-  // Add other updatable fields as per MAAS API documentation for devices
-  // e.g., parent, interfaces, commission, etc.
-}).describe("Payload for updating an existing MAAS device. Fields are optional for partial updates.");
+      try {
+        // Prepare parameters for MAAS API
+        const apiParams = {};
 
-// Define the full request schema for the maas_update_device tool.
-export const updateDeviceRequestSchema = basePutRequestSchema(updateDevicePayloadSchema)
-  .describe("Request schema for updating a MAAS device.");
+        // Add parameters if provided
+        if (params.hostname) apiParams.hostname = params.hostname;
+        if (params.domain) apiParams.domain = params.domain;
+        if (params.zone) apiParams.zone = params.zone;
+        if (params.description) apiParams.description = params.description;
 
-// Define the MCP tool for updating a MAAS device.
-const maasUpdateDeviceTool: McpTool = {
-  name: 'maas_update_device',
-  description: 'Updates an existing MAAS device with the provided parameters.',
-  inputSchema: updateDeviceRequestSchema,
-  outputSchema: putSuccessResponseSchema,
-  schema: { type: 'object', properties: {} }, // Placeholder
-  execute: async () => { throw new Error("execute should not be called directly if handler is used"); },
-  async handler(params: z.infer<typeof updateDeviceRequestSchema>, context: McpContext) {
-    const { id: deviceId, payload } = params;
-    const requestId = params._meta?.progressToken?.toString() || generateRequestId();
-    const log = createRequestLogger(requestId, 'maas_update_device', { deviceId });
-    log.info({ payload }, 'Attempting to update MAAS device.');
+        // Call MAAS API to update the device
+        const response = await maasClient.put(`/devices/${params.system_id}/`, apiParams);
 
-    if (!context.maasApiClient) {
-      log.error('MAAS API client is not available in the context.');
-      return errorToMcpResult(params._meta, 'MAAS API client not configured.');
-    }
+        logger.info({ deviceId: response.system_id }, 'Successfully updated device');
 
-    const apiClient = context.maasApiClient as MaasApiClient;
-
-    try {
-      // MAAS API endpoint for updating a device is typically PUT /MAAS/api/2.0/devices/{device_id}/
-      // This example assumes MAAS accepts a partial update.
-      const maasPayload: Record<string, unknown> = {};
-      for (const key in payload) {
-        if (Object.prototype.hasOwnProperty.call(payload, key) && (payload as any)[key] !== undefined) {
-          (maasPayload as any)[key] = (payload as any)[key];
-        }
+        // Return the response
+        return {
+          system_id: response.system_id,
+          hostname: response.hostname,
+          domain: response.domain.name,
+          zone: response.zone.name,
+          _meta: params._meta || {}
+        };
+      } catch (error) {
+        logger.error({ error, deviceId: params.system_id }, 'Error updating device');
+        throw error;
       }
-
-      log.debug({ deviceId, maasPayload }, 'Calling MAAS API to update device.');
-      await apiClient.put(`/devices/${deviceId}`, maasPayload);
-
-      log.info({ deviceId }, 'Successfully updated MAAS device.');
-      return {
-        _meta: params._meta,
-        message: `Successfully updated device ${deviceId}.`,
-        id: deviceId,
-      };
-    } catch (error) {
-      log.error({ deviceId, error }, 'Error updating MAAS device.');
-      return errorToMcpResult(params._meta, error, 'Failed to update MAAS device.');
     }
-  },
-};
-
-// Function to register the maas_update_device tool.
-export function registerUpdateDeviceTool(server: MCPServer, maasClient: MaasApiClient) {
-  server.addTool(maasUpdateDeviceTool.name, maasUpdateDeviceTool as any);
+  });
 }
+
+module.exports = { registerUpdateDeviceTool };

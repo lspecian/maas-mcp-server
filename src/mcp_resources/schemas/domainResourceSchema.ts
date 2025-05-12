@@ -1,17 +1,11 @@
-import { z } from 'zod';
-import { DOMAIN_DETAILS_URI_PATTERN, DOMAINS_LIST_URI_PATTERN } from './uriPatterns.js';
-
-/**
- * Re-exports URI patterns related to domain resources from './uriPatterns.js'.
- * This is done for convenience and to consolidate domain-related schema definitions.
- */
-export { DOMAIN_DETAILS_URI_PATTERN, DOMAINS_LIST_URI_PATTERN };
+const { z } = require('zod');
+const { DOMAIN_DETAILS_URI_PATTERN, DOMAINS_LIST_URI_PATTERN } = require('./uriPatterns');
 
 /**
  * Schema for MAAS Domain object.
  * Defines the structure and validation rules for domain data returned by the MAAS API.
  */
-export const MaasDomainSchema = z.object({
+const MaasDomainSchema = z.object({
   id: z.number().describe("The unique identifier for the domain"),
   name: z.string().describe("The name of the domain"),
   authoritative: z.boolean().describe("Whether this domain is authoritative"),
@@ -26,11 +20,14 @@ export const MaasDomainSchema = z.object({
  * Schema for validating input parameters to get domain details.
  * This schema defines the parameters required to fetch a specific domain.
  */
-export const GetDomainParamsSchema = z.object({
+const GetDomainParamsSchema = z.object({
   domain_id: z.string()
     .describe("The ID of the domain to retrieve details for"),
 }).describe("Parameters for retrieving a specific domain's details");
 
-// Export the types for use in other files
-export type MaasDomain = z.infer<typeof MaasDomainSchema>;
-export type GetDomainParams = z.infer<typeof GetDomainParamsSchema>;
+module.exports = {
+  DOMAIN_DETAILS_URI_PATTERN,
+  DOMAINS_LIST_URI_PATTERN,
+  MaasDomainSchema,
+  GetDomainParamsSchema
+};

@@ -244,10 +244,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../maas/MaasApiClient.js"; // Adjusted path if necessary
+import { MaasApiClient } from "../maas/MaasApiClient.ts"; // Adjusted path if necessary
 import { z } from "zod";
-import { metaSchema } from "./schemas/common.js"; // Adjusted path if necessary
-import { createRequestLogger } from "../utils/logger.js"; // Adjusted path if necessary
+import { metaSchema } from "./schemas/common.ts"; // Adjusted path if necessary
+import { createRequestLogger } from "../utils/logger.ts"; // Adjusted path if necessary
 &nbsp;
 // Define schema for allocate machine tool
 const allocateMachineSchema = z.object({
@@ -342,14 +342,14 @@ export function registerAllocateMachineTool(server: McpServer, maasClient: MaasA
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
                 at 2025-05-11T21:32:13.029Z
             </div>
-        <script src="../../prettify.js"></script>
+        <script src="../../prettify.ts"></script>
         <script>
             window.onload = function () {
                 prettyPrint();
             };
         </script>
-        <script src="../../sorter.js"></script>
-        <script src="../../block-navigation.js"></script>
+        <script src="../../sorter.ts"></script>
+        <script src="../../block-navigation.ts"></script>
     </body>
 </html>
     

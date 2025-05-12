@@ -9,14 +9,20 @@
  * @module index
  */
 
-import express from 'express';
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/sdk/types.js";
-import config from './config.js';
-import logger, { generateRequestId } from './utils/logger.js';
-import { MaasApiClient } from './maas/MaasApiClient.js';
-import { initializeAuditLogger } from './utils/initAuditLogger.js';
+const express = require('express');
+const path = require('path');
+
+// Import MCP SDK modules using direct paths
+const sdkPath = path.join(__dirname, '..', 'node_modules', '@modelcontextprotocol', 'sdk', 'dist', 'cjs');
+const { McpServer } = require(path.join(sdkPath, 'server', 'mcp.js'));
+const { StreamableHTTPServerTransport } = require(path.join(sdkPath, 'server', 'streamableHttp.js'));
+const { LATEST_PROTOCOL_VERSION } = require(path.join(sdkPath, 'types.js'));
+
+const config = require('./config');
+const logger = require('./utils/logger');
+const { generateRequestId } = logger;
+const { MaasApiClient } = require('./maas/MaasApiClient');
+const { initializeAuditLogger } = require('./utils/initAuditLogger');
 
 /**
  * Initialize the audit logger for tracking API operations
@@ -62,8 +68,8 @@ const server = new McpServer({
  * Import the registration functions for MCP tools and resources
  * These functions will register all available MAAS operations with the MCP server
  */
-import { registerTools } from './mcp_tools/index.js';
-import { registerResources } from './mcp_resources/index.js';
+const { registerTools } = require('./mcp_tools/index');
+const { registerResources } = require('./mcp_resources/index');
 
 /**
  * Register all MCP tools and resources with the server
@@ -126,7 +132,7 @@ app.post('/mcp', async (req, res) => {
 
   // Audit log the MCP request if audit logging is enabled
   if (config.auditLogEnabled) {
-    const auditLogger = await import('./utils/auditLogger.js');
+    const auditLogger = require('./utils/auditLogger');
     
     // Determine if this is a resource access or modification
     const isResourceRequest = req.body?.params?.uri && typeof req.body.params.uri === 'string';
@@ -221,7 +227,7 @@ app.post('/mcp', async (req, res) => {
     
     // Audit log the successful response if audit logging is enabled
     if (config.auditLogEnabled) {
-      const auditLogger = await import('./utils/auditLogger.js');
+      const auditLogger = require('./utils/auditLogger');
       
       // Log success based on request type
       const isResourceRequest = req.body?.params?.uri && typeof req.body.params.uri === 'string';
@@ -251,7 +257,7 @@ app.post('/mcp', async (req, res) => {
     
     // Audit log the error if audit logging is enabled
     if (config.auditLogEnabled) {
-      const auditLogger = await import('./utils/auditLogger.js');
+      const auditLogger = require('./utils/auditLogger');
       
       // Determine request type for error logging
       const isResourceRequest = req.body?.params?.uri && typeof req.body.params.uri === 'string';

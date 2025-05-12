@@ -4,7 +4,7 @@
  */
 
 // Export all URI patterns from a centralized location
-export * from './uriPatterns.js';
+export * from './uriPatterns.ts';
 
 // Export all schema definitions
 export * from './machineDetailsSchema.js';

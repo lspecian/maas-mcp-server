@@ -9,7 +9,7 @@ jest.mock('../../maas/MaasApiClient.js');
 jest.mock('@modelcontextprotocol/sdk/server/mcp.js');
 jest.mock('../../transport/multipart.js');
 jest.mock('../../utils/abortSignalUtils.js');
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   createRequestLogger: jest.fn().mockReturnValue({
     debug: jest.fn(),
     info: jest.fn(),

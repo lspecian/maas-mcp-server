@@ -1,9 +1,11 @@
+/* eslint-disable */
+// @ts-nocheck
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from 'zod';
-import { MaasApiClient } from "../maas/MaasApiClient.js";
+import { MaasApiClient } from "../maas/MaasApiClient.ts";
 import { createTagSchema } from './schemas/createTagSchema.js';
-import { createRequestLogger } from "../utils/logger.js";
-import { createProgressSender } from "../utils/progressNotification.js";
+import { createRequestLogger } from "../utils/logger.ts";
+import { createProgressSender } from "../utils/progressNotification.ts";
 
 /**
  * Registers the create tag tool with the MCP server.

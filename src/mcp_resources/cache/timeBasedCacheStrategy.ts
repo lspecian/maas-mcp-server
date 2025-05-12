@@ -3,7 +3,7 @@
  * Caches items with a TTL (Time To Live) and automatically expires them
  */
 import { CacheEntry, CacheStrategy } from './interfaces.js';
-import logger from '../../utils/logger.js';
+import logger from '../../utils/logger.ts';
 
 /**
  * Implements a time-based cache strategy with a maximum size limit.

@@ -127,7 +127,7 @@ jest.mock('../config.js', () => ({
 }));
 
 // Mock logger
-jest.mock('../utils/logger.js', () => ({
+jest.mock('../utils/logger.ts', () => ({
   __esModule: true,
   default: {
     debug: jest.fn(),
@@ -156,7 +156,7 @@ describe('MaasApiClient', () => {
     fetchMockFn.mockClear();
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    loggerMock = require('../utils/logger.js').default;
+    loggerMock = require('../utils/logger.ts').default;
     loggerMock.debug.mockClear();
     loggerMock.error.mockClear();
     loggerMock.info.mockClear();

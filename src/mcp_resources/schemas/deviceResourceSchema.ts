@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { DEVICE_DETAILS_URI_PATTERN, DEVICES_LIST_URI_PATTERN } from './uriPatterns.js';
+import { DEVICE_DETAILS_URI_PATTERN, DEVICES_LIST_URI_PATTERN } from './uriPatterns.ts';
 
 /**
- * Re-exports URI patterns related to device resources from './uriPatterns.js'.
+ * Re-exports URI patterns related to device resources from './uriPatterns.ts'.
  * This is done for convenience and to consolidate device-related schema definitions.
  */
 export { DEVICE_DETAILS_URI_PATTERN, DEVICES_LIST_URI_PATTERN };

@@ -2,10 +2,10 @@ import { CacheManager } from '../../mcp_resources/cache/cacheManager.js';
 import { TimeBasedCacheStrategy } from '../../mcp_resources/cache/timeBasedCacheStrategy.js';
 import { LRUCacheStrategy } from '../../mcp_resources/cache/lruCacheStrategy.js';
 import config from '../../config.js';
-import logger from '../../utils/logger.js';
+import logger from '../../utils/logger.ts';
 
 // Mock dependencies
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   default: {
     info: jest.fn(),
     warn: jest.fn(),

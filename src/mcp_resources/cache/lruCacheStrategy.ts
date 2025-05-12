@@ -3,7 +3,7 @@
  * Caches items with a TTL and removes the least recently used items when the cache is full
  */
 import { CacheEntry, CacheStrategy } from './interfaces.js';
-import logger from '../../utils/logger.js';
+import logger from '../../utils/logger.ts';
 
 /**
  * Represents a node in the doubly linked list used by the LRU cache.

@@ -75,7 +75,7 @@ describe('Logging Service', () => {
 
   describe('generateRequestId', () => {
     it('should generate unique request IDs', async () => {
-      const { generateRequestId } = await import('../utils/logger.js');
+      const { generateRequestId } = await import('../utils/logger.ts');
       const id1 = generateRequestId();
       const id2 = generateRequestId();
       // Add a small delay to ensure Date.now() might change if tests run too fast
@@ -88,7 +88,7 @@ describe('Logging Service', () => {
     });
 
     it('should generate IDs in an expected alphanumeric format', async () => {
-      const { generateRequestId } = await import('../utils/logger.js');
+      const { generateRequestId } = await import('../utils/logger.ts');
       const id = generateRequestId();
       // Format is roughly: timestampInBase36 + randomStringInBase36
       expect(id).toMatch(/^[a-z0-9]+$/);
@@ -99,7 +99,7 @@ describe('Logging Service', () => {
   describe('createRequestLogger', () => {
     // These tests rely on the default mock of 'pino'
     it('should create a child logger with the provided requestId, method, and params', async () => {
-      const { createRequestLogger } = await import('../utils/logger.js');
+      const { createRequestLogger } = await import('../utils/logger.ts');
       const requestId = 'test-req-id-001';
       const method = 'GET /api/items';
       const params = { userId: 123, filter: 'active' };
@@ -123,7 +123,7 @@ describe('Logging Service', () => {
     });
 
     it('should truncate params to 200 characters if they are too long', async () => {
-      const { createRequestLogger } = await import('../utils/logger.js');
+      const { createRequestLogger } = await import('../utils/logger.ts');
       const requestId = 'test-req-id-002';
       const longString = 'x'.repeat(250);
       const params = { data: longString, key: 'value' }; // JSON.stringify will make it longer
@@ -142,7 +142,7 @@ describe('Logging Service', () => {
     });
 
     it('should handle undefined method and params correctly', async () => {
-      const { createRequestLogger } = await import('../utils/logger.js');
+      const { createRequestLogger } = await import('../utils/logger.ts');
       const requestId = 'test-req-id-003';
 
       const requestLogger = createRequestLogger(requestId, undefined, undefined);
@@ -160,7 +160,7 @@ describe('Logging Service', () => {
     });
 
      it('should handle params that stringify to less than 200 chars without truncation', async () => {
-      const { createRequestLogger } = await import('../utils/logger.js');
+      const { createRequestLogger } = await import('../utils/logger.ts');
       const requestId = 'test-req-id-004';
       const params = { short: "data", value: 123 };
       const stringifiedParams = JSON.stringify(params);
@@ -202,7 +202,7 @@ describe('Logging Service', () => {
       const pinoDevMock = jest.fn(() => mockPinoInstance);
       jest.doMock('pino', () => pinoDevMock);
 
-      await import('../utils/logger.js'); // Re-imports logger.ts, triggering pino()
+      await import('../utils/logger.ts'); // Re-imports logger.ts, triggering pino()
 
       expect(pinoDevMock).toHaveBeenCalledTimes(1);
       expect(pinoDevMock).toHaveBeenCalledWith(
@@ -226,7 +226,7 @@ describe('Logging Service', () => {
       const pinoProdMock = jest.fn(() => mockPinoInstance);
       jest.doMock('pino', () => pinoProdMock);
 
-      await import('../utils/logger.js');
+      await import('../utils/logger.ts');
 
       expect(pinoProdMock).toHaveBeenCalledTimes(1);
       expect(pinoProdMock).toHaveBeenCalledWith(
@@ -278,7 +278,7 @@ describe('Logging Service', () => {
           });
         });
 
-        const { default: prodLogger, createRequestLogger: createProdRequestLogger } = await import('../utils/logger.js');
+        const { default: prodLogger, createRequestLogger: createProdRequestLogger } = await import('../utils/logger.ts');
 
         // Test 1: Main logger output
         prodLogger.info({ customField: 'value1' }, 'Production log message 1');

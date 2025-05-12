@@ -3,11 +3,11 @@
  * Implements detail and list resource handlers for MAAS domains
  */
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../../maas/MaasApiClient.js";
+import { MaasApiClient } from "../../maas/MaasApiClient.ts";
 import {
   DetailResourceHandler,
   ListResourceHandler
-} from "../BaseResourceHandler.js";
+} from "../BaseResourceHandler.ts";
 import {
   MaasDomain,
   MaasDomainSchema,
@@ -17,7 +17,7 @@ import {
   DOMAINS_LIST_URI_PATTERN,
   DomainCollectionQueryParams,
   DomainCollectionQueryParamsSchema
-} from "../schemas/index.js";
+} from "../schemas/index.ts";
 import { z } from "zod";
 
 /**

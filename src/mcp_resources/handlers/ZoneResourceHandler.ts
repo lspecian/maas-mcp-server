@@ -3,11 +3,11 @@
  * Implements detail and list resource handlers for MAAS zones
  */
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../../maas/MaasApiClient.js";
+import { MaasApiClient } from "../../maas/MaasApiClient.ts";
 import {
   DetailResourceHandler,
   ListResourceHandler
-} from "../BaseResourceHandler.js";
+} from "../BaseResourceHandler.ts";
 import {
   MaasZone,
   MaasZoneSchema,
@@ -17,7 +17,7 @@ import {
   ZONES_LIST_URI_PATTERN,
   ZoneCollectionQueryParams,
   ZoneCollectionQueryParamsSchema
-} from "../schemas/index.js";
+} from "../schemas/index.ts";
 import { z } from "zod";
 
 /**

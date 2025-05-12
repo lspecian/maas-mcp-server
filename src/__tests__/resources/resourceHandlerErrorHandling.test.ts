@@ -7,7 +7,7 @@
 
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { MaasApiClient } from '../../maas/MaasApiClient.js';
-import { MaasApiError } from '../../types/maas.js';
+import { MaasApiError } from '../../types/maas.ts';
 import { z } from 'zod';
 import { BaseResourceHandler, DetailResourceHandler, ListResourceHandler } from '../../mcp_resources/BaseResourceHandler.js';
 

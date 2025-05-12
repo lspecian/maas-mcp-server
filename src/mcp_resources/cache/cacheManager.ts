@@ -6,7 +6,7 @@ import { CacheEntry, CacheStrategy, CacheOptions } from './interfaces.js';
 import { TimeBasedCacheStrategy } from './timeBasedCacheStrategy.js';
 import { LRUCacheStrategy } from './lruCacheStrategy.js';
 import config from '../../config.js';
-import logger from '../../utils/logger.js';
+import logger from '../../utils/logger.ts';
 
 /**
  * Manages caching strategies and provides a unified interface for caching operations

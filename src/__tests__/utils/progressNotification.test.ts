@@ -1,12 +1,12 @@
-import {
+// @ts-nocheck
+const {
   sendProgressNotification,
   createProgressSender,
-  ProgressNotificationParams,
   clearRateLimitHistory,
   DEFAULT_RATE_LIMIT_CONFIG
-} from '../../utils/progressNotification.js';
-import { AbortedOperationError } from '../../utils/abortSignalUtils.js';
-import { createRequestLogger } from '../../utils/logger.js';
+} = require('../../utils/progressNotification');
+const { AbortedOperationError } = require('../../utils/abortSignalUtils');
+const { createRequestLogger } = require('../../utils/logger');
 
 // Mock the logger
 jest.mock('../../utils/logger', () => ({

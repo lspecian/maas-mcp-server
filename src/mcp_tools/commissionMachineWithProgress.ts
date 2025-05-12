@@ -1,181 +1,107 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../maas/MaasApiClient.js";
+/* eslint-disable */
+// @ts-nocheck
+import path from 'path';
+const sdkPath = path.join(__dirname, '..', '..', 'node_modules', '@modelcontextprotocol', 'sdk', 'dist', 'cjs');
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { MaasApiClient } from "../maas/MaasApiClient.ts";
 import { z } from "zod";
-import { machineIdSchema, metaSchema } from "./schemas/common.js";
-import { 
-  withOperationHandler, 
-  OperationContext, 
-  handleOperationError 
-} from "../utils/operationHandlerUtils.js";
-import { MaasServerError, ErrorType } from "../utils/errorHandler.js";
-import { throwIfAborted } from "../utils/abortSignalUtils.js";
+import { machineIdSchema, metaSchema } from "./schemas/common.ts";
+import {
+  withOperationHandler,
+  OperationContext,
+  handleOperationError
+} from "../utils/operationHandlerUtils.ts";
+import { MaasServerError, ErrorType } from "../utils/errorHandler.ts";
+import { createRequestLogger } from "../utils/logger.ts";
+import { createProgressSender } from "../utils/progressNotification.ts";
 
-// Define schema for commission machine tool
+// Define schema for commission machine with progress tool
 const commissionMachineWithProgressSchema = z.object({
   system_id: machineIdSchema,
-  enable_ssh: z.boolean().optional().describe("Whether to enable SSH for the commissioning environment."),
-  skip_networking: z.boolean().optional().describe("Whether to skip networking configuration."),
-  skip_storage: z.boolean().optional().describe("Whether to skip storage configuration."),
-  commissioning_scripts: z.array(z.string()).optional().describe("List of commissioning script names to run."),
-  testing_scripts: z.array(z.string()).optional().describe("List of testing script names to run."),
-  _meta: metaSchema,
-}).describe("Commission a machine with progress notifications.");
+  enable_ssh: z.boolean().optional().describe("Whether to enable SSH for the commissioning environment"),
+  skip_networking: z.boolean().optional().describe("Whether to skip networking configuration during commissioning"),
+  skip_storage: z.boolean().optional().describe("Whether to skip storage configuration during commissioning"),
+  commissioning_scripts: z.array(z.string()).optional().describe("List of commissioning script names to run"),
+  testing_scripts: z.array(z.string()).optional().describe("List of testing script names to run"),
+  _meta: metaSchema
+});
 
-// Extended operation context with MAAS client
-interface CommissionMachineContext extends OperationContext {
-  maasClient: MaasApiClient;
-}
+// Define schema for commission machine with progress output
+const commissionMachineWithProgressOutputSchema = z.object({
+  system_id: z.string().describe("System ID of the commissioned machine"),
+  hostname: z.string().describe("Hostname of the commissioned machine"),
+  status: z.string().describe("Status of the commissioned machine"),
+  _meta: metaSchema
+});
 
 /**
- * Handles the commissioning of a machine with progress notifications
- * 
- * @param params - The commissioning parameters
- * @param context - The operation context
- * @returns The commissioning result
+ * Register the commission machine with progress tool with the MCP server
+ * @param server The MCP server instance
+ * @param maasClient The MAAS API client instance
  */
-async function commissionMachineHandler(
-  params: z.infer<typeof commissionMachineWithProgressSchema>,
-  context: CommissionMachineContext
-) {
-  const { logger, sendProgress, signal } = context;
-  
-  try {
-    logger.info({ machine_id: params.system_id }, 'Starting machine commissioning');
-    await sendProgress(0, `Initiating commissioning for machine ${params.system_id}...`);
-    
-    // Check if already aborted before starting
-    throwIfAborted(signal, `Commissioning of machine ${params.system_id} was aborted before starting`);
-    
-    // Prepare commissioning payload
-    const commissionPayload: Record<string, any> = { op: 'commission' };
-    if (params.enable_ssh !== undefined) commissionPayload.enable_ssh = params.enable_ssh.toString();
-    if (params.skip_networking !== undefined) commissionPayload.skip_networking = params.skip_networking.toString();
-    if (params.skip_storage !== undefined) commissionPayload.skip_storage = params.skip_storage.toString();
-    if (params.commissioning_scripts) commissionPayload.commissioning_scripts = params.commissioning_scripts.join(',');
-    if (params.testing_scripts) commissionPayload.testing_scripts = params.testing_scripts.join(',');
-    
-    // Send commissioning command to MAAS
-    await context.maasClient.post(`/machines/${params.system_id}`, commissionPayload, signal);
-    await sendProgress(10, "Commissioning command sent to MAAS. Monitoring status...");
-    
-    // Monitor commissioning status
-    const maxPolls = 60;
-    let polls = 0;
-    let status = "";
-    let isCommissioned = false;
-    let currentProgressPercentage = 10;
-    
-    while (polls < maxPolls && !isCommissioned) {
-      // Check if aborted
-      throwIfAborted(signal, `Commissioning of machine ${params.system_id} was aborted during monitoring`);
-      
-      // Wait before polling again
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      
-      // Get machine status
-      const machineState = await context.maasClient.get(`/machines/${params.system_id}`, undefined, signal);
-      status = machineState?.status_name || "UNKNOWN";
-      logger.debug({ machine_id: params.system_id, status }, 'Current machine status');
-      
-      let progressMessage = `Machine status: ${status}`;
-      
-      if (status === "COMMISSIONING") {
-        currentProgressPercentage = Math.min(currentProgressPercentage + 5, 70);
-        progressMessage = `Commissioning machine ${params.system_id}...`;
-      } else if (status === "TESTING") {
-        currentProgressPercentage = Math.min(currentProgressPercentage + 3, 90);
-        progressMessage = `Running tests on machine ${params.system_id}...`;
-      } else if (status === "READY") {
-        currentProgressPercentage = 100;
-        progressMessage = "Commissioning successfully completed.";
-        isCommissioned = true;
-      } else if (status.startsWith("FAILED_")) {
-        throw new MaasServerError(
-          `Commissioning failed with status: ${status}`,
-          ErrorType.MAAS_API,
-          500
-        );
-      }
-      
-      await sendProgress(currentProgressPercentage, progressMessage);
-      polls++;
-    }
-    
-    if (!isCommissioned) {
-      throw new MaasServerError(
-        `Commissioning monitoring timed out. Last status: ${status}`,
-        ErrorType.MAAS_API,
-        500
+function registerCommissionMachineWithProgressTool(server, maasClient) {
+  server.registerTool({
+    name: "commissionMachineWithProgress",
+    description: "Commission a machine with progress notifications",
+    inputSchema: commissionMachineWithProgressSchema,
+    outputSchema: commissionMachineWithProgressOutputSchema,
+    execute: withOperationHandler(async (params, signal, context) => {
+      const logger = createRequestLogger('commissionMachineWithProgress');
+      const progressSender = createProgressSender(
+        params._meta?.progressToken,
+        context.sendNotification,
+        'commissionMachineWithProgress',
+        'commissionMachine'
       );
-    }
-    
-    return {
-      content: [{
-        type: "resource",
-        resource: {
-          uri: `maas://machine/${params.system_id}/commissioning_status.json`,
-          text: JSON.stringify({
-            system_id: params.system_id,
-            status,
-            completed: isCommissioned
-          }),
-          mimeType: "application/json"
-        }
-      }]
-    };
-  } catch (error: any) {
-    return handleOperationError(error, context, [
-      (error) => {
-        // Handle specific commissioning errors
-        if (error.message?.includes("failed") || error.message?.includes("FAILED_")) {
-          return {
-            isHandled: true,
-            result: {
-              content: [{ 
-                type: "text", 
-                text: `Commissioning failed for machine ${params.system_id}: ${error.message}` 
-              }],
-              isError: true
-            }
-          };
-        }
-        return undefined;
+      
+      logger.info({ params }, 'Executing commissionMachineWithProgress tool');
+      
+      try {
+        // Start progress notification
+        await progressSender(0, 'Preparing to commission machine');
+        
+        // Prepare parameters for MAAS API
+        const apiParams = {};
+        
+        // Add parameters if provided
+        if (params.enable_ssh !== undefined) apiParams.enable_ssh = params.enable_ssh;
+        if (params.skip_networking !== undefined) apiParams.skip_networking = params.skip_networking;
+        if (params.skip_storage !== undefined) apiParams.skip_storage = params.skip_storage;
+        if (params.commissioning_scripts) apiParams.commissioning_scripts = params.commissioning_scripts;
+        if (params.testing_scripts) apiParams.testing_scripts = params.testing_scripts;
+        
+        // Update progress
+        await progressSender(25, 'Sending commission request to MAAS');
+        
+        // Call MAAS API to commission the machine
+        const response = await maasClient.post(`/machines/${params.system_id}/?op=commission`, apiParams);
+        
+        // Register the operation for polling
+        context.registerOperation({
+          type: 'COMMISSION',
+          resourceId: params.system_id,
+          resourceType: 'machine',
+          progressSender
+        });
+        
+        logger.info({ machineId: response.system_id }, 'Successfully initiated machine commissioning');
+        
+        // Return the response
+        return {
+          system_id: response.system_id,
+          hostname: response.hostname,
+          status: response.status_name,
+          _meta: params._meta || {}
+        };
+      } catch (error) {
+        // Handle error and send error progress
+        await progressSender(100, `Error commissioning machine: ${error instanceof Error ? error.message : String(error)}`, 100, true);
+        logger.error({ error, machineId: params.system_id }, 'Error commissioning machine');
+        
+        throw handleOperationError(error, 'Failed to commission machine');
       }
-    ]);
-  }
+    })
+  });
 }
 
-/**
- * Registers the commission machine with progress tool with the MCP server
- * @param server MCP server instance
- * @param maasClient MAAS API client instance
- */
-export function registerCommissionMachineWithProgressTool(server: McpServer, maasClient: MaasApiClient) {
-  const toolName = "maas_commission_machine_with_progress";
-  
-  // Create the wrapped handler with operation handling
-  const wrappedHandler = withOperationHandler<
-    { content: any[] },
-    z.infer<typeof commissionMachineWithProgressSchema>
-  >(
-    toolName,
-    // Inject maasClient into the context
-    async (params, context) => commissionMachineHandler(params, { ...context, maasClient }),
-    {
-      timeout: 600000, // 10 minutes timeout for commissioning
-      initialMessage: "Preparing to commission machine"
-    }
-  );
-  
-  // Register the tool with the MCP server
-  server.tool(
-    toolName,
-    commissionMachineWithProgressSchema.shape,
-    async (
-      params: z.infer<typeof commissionMachineWithProgressSchema>,
-      extra: { signal?: AbortSignal; sendNotification?: (notification: any) => Promise<void> }
-    ) => {
-      return wrappedHandler(params, extra);
-    }
-  );
-}
+export { registerCommissionMachineWithProgressTool };

@@ -37,7 +37,7 @@ jest.mock('../../mcp_resources/schemas/tagResourcesSchema.js', () => {
 });
 
 // Mock logger
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   __esModule: true,
   default: {
     info: jest.fn(),
@@ -47,7 +47,7 @@ jest.mock('../../utils/logger.js', () => ({
 }));
 
 import { MaasApiClient } from '../../maas/MaasApiClient.js';
-import { MaasApiError } from '../../types/maas.js';
+import { MaasApiError } from '../../types/maas.ts';
 import { ResourceTemplate, McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
   MaasTagSchema,
@@ -66,7 +66,7 @@ import {
   registerTagMachinesResource
 } from '../../mcp_resources/tagsResource.js';
 import { ZodError } from 'zod';
-import logger from '../../utils/logger.js';
+import logger from '../../utils/logger.ts';
 
 // Define the handler function types
 type TagsListHandler = (

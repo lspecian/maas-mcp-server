@@ -8,7 +8,7 @@
 
 import { createMockMaasApiClient as createBaseMockClient } from '../../__tests__/mocks/mockMaasApiClient.js';
 import { MaasApiClient } from '../../maas/MaasApiClient.js';
-import { MaasApiError } from '../../types/maas.js';
+import { MaasApiError } from '../../types/maas.ts';
 
 // Import fixtures
 import { machines, readyMachine, deployedMachine } from '../../__tests__/fixtures/machineResponses.js';

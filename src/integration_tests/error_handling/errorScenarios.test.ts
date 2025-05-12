@@ -7,7 +7,7 @@
 
 import { setupTestServer, TestServerEnvironment, createToolCallRequest, createResourceAccessRequest } from '../setup/testServerSetup.js';
 import { createMockMaasApiClient } from '../mocks/mockMaasApiClient.js';
-import { MaasApiError } from '../../types/maas.js';
+import { MaasApiError } from '../../types/maas.ts';
 
 describe('Error Scenario Handling', () => {
   let testEnv: TestServerEnvironment;

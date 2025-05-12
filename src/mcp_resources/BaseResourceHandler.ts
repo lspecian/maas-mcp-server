@@ -3,11 +3,11 @@
  * Provides common functionality for resource fetching, validation, and error handling
  */
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../maas/MaasApiClient.js";
+import { MaasApiClient } from "../maas/MaasApiClient.ts";
 import { ZodSchema } from 'zod';
-import logger from '../utils/logger.js';
-import { generateRequestId } from '../utils/logger.js';
-import { MaasApiError } from '../types/maas.js';
+import logger from '../utils/logger.ts';
+import { generateRequestId } from '../utils/logger.ts';
+import { MaasApiError } from '../types/maas.ts';
 import {
   extractAndValidateParams,
   validateResourceData,

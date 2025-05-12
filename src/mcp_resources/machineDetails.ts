@@ -1,11 +1,11 @@
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../maas/MaasApiClient.js";
+import { MaasApiClient } from "../maas/MaasApiClient.ts";
 import {
   MaasMachineSchema,
   GetMachineParamsSchema
-} from './schemas/machineDetailsSchema.js';
-import logger from '../utils/logger.js';
-import { MaasApiError } from '../types/maas.js';
+} from './schemas/machineDetailsSchema.ts';
+import logger from '../utils/logger.ts';
+import { MaasApiError } from '../types/maas.ts';
 import { ZodError } from 'zod';
 
 /**

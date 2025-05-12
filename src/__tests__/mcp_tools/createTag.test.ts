@@ -5,7 +5,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 // Mock dependencies
 jest.mock('../../maas/MaasApiClient.js');
 jest.mock('@modelcontextprotocol/sdk/server/mcp.js');
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   createRequestLogger: jest.fn().mockReturnValue({
     debug: jest.fn(),
     info: jest.fn(),

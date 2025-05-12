@@ -440,11 +440,11 @@
  * Implements detail and list resource handlers for MAAS subnets
  */
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../../maas/MaasApiClient.js";
+import { MaasApiClient } from "../../maas/MaasApiClient.ts";
 import {
   DetailResourceHandler,
   ListResourceHandler
-} from "../BaseResourceHandler.js";
+} from "../BaseResourceHandler.ts";
 import {
   MaasSubnet,
   MaasSubnetSchema,
@@ -454,7 +454,7 @@ import {
   SUBNETS_LIST_URI_PATTERN,
   SubnetCollectionQueryParams,
   SubnetCollectionQueryParamsSchema
-} from "../schemas/index.js";
+} from "../schemas/index.ts";
 import { z } from "zod";
 &nbsp;
 /**
@@ -630,14 +630,14 @@ export function registerSubnetResources(server: McpServer, maasClient: MaasApiCl
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
                 at 2025-05-11T21:32:13.029Z
             </div>
-        <script src="../../../prettify.js"></script>
+        <script src="../../../prettify.ts"></script>
         <script>
             window.onload = function () {
                 prettyPrint();
             };
         </script>
-        <script src="../../../sorter.js"></script>
-        <script src="../../../block-navigation.js"></script>
+        <script src="../../../sorter.ts"></script>
+        <script src="../../../block-navigation.ts"></script>
     </body>
 </html>
     

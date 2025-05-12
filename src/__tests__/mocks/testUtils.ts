@@ -11,7 +11,7 @@ import { createMockAuditLogger } from './mockAuditLogger.js';
 import { createMockResourceUtils } from './mockResourceUtils.js';
 import * as actualResourceUtils from '../../mcp_resources/utils/resourceUtils.js';
 import auditLogger from '../../utils/auditLogger.js';
-import logger from '../../utils/logger.js';
+import logger from '../../utils/logger.ts';
 import config from '../../config.js';
 
 /**
@@ -195,7 +195,7 @@ export function setupTestDependencies(
     }
   }));
   jest.mock('../../utils/auditLogger.js', () => mockAuditLogger);
-  jest.mock('../../utils/logger.js', () => ({
+  jest.mock('../../utils/logger.ts', () => ({
     debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),

@@ -4,12 +4,12 @@ import {
   validateResourceData,
   handleResourceFetchError,
 } from '../../mcp_resources/utils/resourceUtils.js';
-import { MaasApiError } from '../../types/maas.js';
-import logger, { generateRequestId } from '../../utils/logger.js';
+import { MaasApiError } from '../../types/maas.ts';
+import logger, { generateRequestId } from '../../utils/logger.ts';
 import auditLogger from '../../utils/auditLogger.js';
 
 // Mock logger
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   __esModule: true,
   default: {
     info: jest.fn(),

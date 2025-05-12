@@ -37,11 +37,11 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mc
 import { MaasApiClient } from '../../maas/MaasApiClient.js';
 import { TagDetailsResourceHandler, TagsListResourceHandler, TagMachinesResourceHandler, registerTagResources } from '../../mcp_resources/handlers/TagResourceHandler.js';
 import { MaasTagSchema, TagCollectionQueryParamsSchema, GetTagParamsSchema, MaasMachineSchema } from '../../mcp_resources/schemas/index.js'; // Assuming GetTagParamsSchema for tag_name
-import { MaasApiError as ActualMaasApiError } from '../../types/maas.js';
+import { MaasApiError as ActualMaasApiError } from '../../types/maas.ts';
 import { createMockMaasApiClient, mockMachines } from '../mocks/mockMaasApiClient.js'; // mockMachines can be reused
 import { CacheManager } from '../../mcp_resources/cache/cacheManager.js';
 import auditLogger from '../../utils/auditLogger.js';
-import logger from '../../utils/logger.js';
+import logger from '../../utils/logger.ts';
 import config from '../../config.js';
 import * as resourceUtilsActual from '../../mcp_resources/utils/resourceUtils.js';
 import { z } from 'zod';
@@ -61,7 +61,7 @@ jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => {
 jest.mock('../../maas/MaasApiClient.js');
 jest.mock('../../mcp_resources/cache/cacheManager.js');
 jest.mock('../../utils/auditLogger.js');
-jest.mock('../../utils/logger.js');
+jest.mock('../../utils/logger.ts');
 jest.mock('../../config.js', () => ({
   __esModule: true,
   default: {

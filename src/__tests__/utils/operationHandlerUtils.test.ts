@@ -3,7 +3,7 @@ import {
   withOperationHandler, 
   handleOperationError,
   OperationContext
-} from '../../utils/operationHandlerUtils.js';
+} from '../../utils/operationHandlerUtils.ts';
 import { 
   registerOperation, 
   updateOperation, 
@@ -20,7 +20,7 @@ import {
 import { MaasServerError, ErrorType } from '../../utils/errorHandler.js';
 
 // Mock dependencies
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   createRequestLogger: jest.fn().mockReturnValue({
     debug: jest.fn(),
     info: jest.fn(),

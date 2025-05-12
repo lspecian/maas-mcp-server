@@ -22,11 +22,11 @@ import {
   extractParamsFromUri,
 } from '../../mcp_resources/schemas/uriPatterns.js';
 import { extractAndValidateParams } from '../../mcp_resources/utils/resourceUtils.js';
-import { MaasApiError } from '../../types/maas.js';
+import { MaasApiError } from '../../types/maas.ts';
 import { z } from 'zod';
 
 // Mock the logger module
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   error: jest.fn(),
   debug: jest.fn(),
   info: jest.fn(),

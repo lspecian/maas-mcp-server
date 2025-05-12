@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { MACHINE_DETAILS_URI_PATTERN, MACHINES_LIST_URI_PATTERN } from './uriPatterns.js';
+import { MACHINE_DETAILS_URI_PATTERN, MACHINES_LIST_URI_PATTERN } from './uriPatterns.ts';
 
 /**
- * Re-exports URI patterns related to machine resources from './uriPatterns.js'.
+ * Re-exports URI patterns related to machine resources from './uriPatterns.ts'.
  * This is done for convenience and to consolidate machine-related schema definitions.
  */
 export { MACHINE_DETAILS_URI_PATTERN, MACHINES_LIST_URI_PATTERN };

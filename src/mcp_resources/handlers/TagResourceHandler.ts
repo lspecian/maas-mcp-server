@@ -3,12 +3,12 @@
  * Implements detail, list, and machines resource handlers for MAAS tags
  */
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../../maas/MaasApiClient.js";
+import { MaasApiClient } from "../../maas/MaasApiClient.ts";
 import {
   DetailResourceHandler,
   ListResourceHandler,
   BaseResourceHandler
-} from "../BaseResourceHandler.js";
+} from "../BaseResourceHandler.ts";
 import {
   MaasTag,
   MaasTagSchema,
@@ -21,10 +21,10 @@ import {
   TAG_MACHINES_URI_PATTERN,
   TagCollectionQueryParams,
   TagCollectionQueryParamsSchema
-} from "../schemas/index.js";
-import { MaasMachine, MaasMachineSchema } from "../schemas/machineDetailsSchema.js";
-import logger from "../../utils/logger.js";
-import { MaasApiError } from "../../types/maas.js";
+} from "../schemas/index.ts";
+import { MaasMachine, MaasMachineSchema } from "../schemas/machineDetailsSchema.ts";
+import logger from "../../utils/logger.ts";
+import { MaasApiError } from "../../types/maas.ts";
 import { z } from "zod";
 
 /**

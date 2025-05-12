@@ -389,12 +389,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../maas/MaasApiClient.js";
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.ts";
+import { MaasApiClient } from "../maas/MaasApiClient.ts";
 import { z } from "zod";
-import { tagNameSchema, metaSchema } from "./schemas/common.js";
-import { createRequestLogger } from "../utils/logger.js";
-import { createProgressSender } from "../utils/progressNotification.js";
+import { tagNameSchema, metaSchema } from "./schemas/common.ts";
+import { createRequestLogger } from "../utils/logger.ts";
+import { createProgressSender } from "../utils/progressNotification.ts";
 &nbsp;
 // Schema for creating a tag
 const createTagSchema = z.object({
@@ -561,14 +561,14 @@ server.tool(
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
                 at 2025-05-11T21:28:40.037Z
             </div>
-        <script src="../prettify.js"></script>
+        <script src="../prettify.ts"></script>
         <script>
             window.onload = function () {
                 prettyPrint();
             };
         </script>
-        <script src="../sorter.js"></script>
-        <script src="../block-navigation.js"></script>
+        <script src="../sorter.ts"></script>
+        <script src="../block-navigation.ts"></script>
     </body>
 </html>
     

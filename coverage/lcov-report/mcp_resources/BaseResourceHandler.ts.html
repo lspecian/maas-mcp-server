@@ -1679,11 +1679,11 @@
  * Base class for MAAS MCP resource handlers
  * Provides common functionality for resource fetching, validation, and error handling
  */
-import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../maas/MaasApiClient.js";
+import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.ts";
+import { MaasApiClient } from "../maas/MaasApiClient.ts";
 import { ZodSchema } from 'zod';
-import logger from '../utils/logger.js';
-import { generateRequestId } from '../utils/logger.js';
+import logger from '../utils/logger.ts';
+import { generateRequestId } from '../utils/logger.ts';
 import { MaasApiError } from '../types/maas.js';
 import {
   extractAndValidateParams,
@@ -2490,14 +2490,14 @@ export abstract class ListResourceHandler&lt;T, P&gt; extends BaseResourceHandle
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
                 at 2025-05-11T21:43:02.783Z
             </div>
-        <script src="../prettify.js"></script>
+        <script src="../prettify.ts"></script>
         <script>
             window.onload = function () {
                 prettyPrint();
             };
         </script>
-        <script src="../sorter.js"></script>
-        <script src="../block-navigation.js"></script>
+        <script src="../sorter.ts"></script>
+        <script src="../block-navigation.ts"></script>
     </body>
 </html>
     

@@ -2,10 +2,10 @@
  * Audit logger for MCP resources
  * Provides specialized logging for resource access and modifications to support auditing requirements
  */
-import pino from 'pino';
-import config from '../config.js';
-import logger from './logger.js';
-import { generateRequestId } from './logger.js';
+const pino = require('pino');
+const config = require('../config');
+const logger = require('./logger');
+const { generateRequestId } = require('./logger');
 
 // Create a child logger specifically for audit logs
 const auditLogger = logger.child({

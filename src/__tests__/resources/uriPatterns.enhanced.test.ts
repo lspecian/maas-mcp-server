@@ -21,7 +21,7 @@ import {
   DOMAINS_LIST_URI_PATTERN,
   extractParamsFromUri,
 } from '../../mcp_resources/schemas/uriPatterns.js';
-import { MaasApiError } from '../../types/maas.js';
+import { MaasApiError } from '../../types/maas.ts';
 import { extractAndValidateParams } from '../../mcp_resources/utils/resourceUtils.js';
 import { z } from 'zod';
 
@@ -31,7 +31,7 @@ jest.mock('../../utils/auditLogger.js', () => ({
 }));
 
 // Mock the logger module
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   error: jest.fn(),
   debug: jest.fn(),
   info: jest.fn(),

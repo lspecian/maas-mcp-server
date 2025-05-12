@@ -1,13 +1,13 @@
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../maas/MaasApiClient.js";
+import { MaasApiClient } from "../maas/MaasApiClient.ts";
 import {
   ZONE_DETAILS_URI_PATTERN,
   ZONES_LIST_URI_PATTERN,
   MaasZoneSchema,
   GetZoneParamsSchema
-} from './schemas/zoneResourceSchema.js';
-import logger from '../utils/logger.js';
-import { MaasApiError } from '../types/maas.js';
+} from './schemas/zoneResourceSchema.ts';
+import logger from '../utils/logger.ts';
+import { MaasApiError } from '../types/maas.ts';
 import { ZodError } from 'zod';
 
 /**

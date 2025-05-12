@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { ZONE_DETAILS_URI_PATTERN, ZONES_LIST_URI_PATTERN } from './uriPatterns.js';
+import { ZONE_DETAILS_URI_PATTERN, ZONES_LIST_URI_PATTERN } from './uriPatterns.ts';
 
 /**
- * Re-exports URI patterns related to zone resources from './uriPatterns.js'.
+ * Re-exports URI patterns related to zone resources from './uriPatterns.ts'.
  * This is done for convenience and to consolidate zone-related schema definitions.
  */
 export { ZONE_DETAILS_URI_PATTERN, ZONES_LIST_URI_PATTERN };

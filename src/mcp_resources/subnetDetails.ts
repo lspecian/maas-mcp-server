@@ -1,13 +1,13 @@
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../maas/MaasApiClient.js";
+import { MaasApiClient } from "../maas/MaasApiClient.ts";
 import {
   SUBNET_DETAILS_URI_PATTERN,
   SUBNETS_LIST_URI_PATTERN,
   MaasSubnetSchema,
   GetSubnetParamsSchema
-} from './schemas/subnetResourceSchema.js';
-import logger from '../utils/logger.js';
-import { MaasApiError } from '../types/maas.js';
+} from './schemas/subnetResourceSchema.ts';
+import logger from '../utils/logger.ts';
+import { MaasApiError } from '../types/maas.ts';
 import { ZodError } from 'zod';
 
 /**

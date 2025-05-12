@@ -53,7 +53,7 @@ const auditLoggerSpy = {
 };
 
 // Mock logger and auditLogger
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   __esModule: true,
   default: {
     info: jest.fn(),
@@ -87,7 +87,7 @@ jest.mock('../../utils/auditLogger.js', () => ({
 }));
 
 // Import after mocking
-import logger from '../../utils/logger.js';
+import logger from '../../utils/logger.ts';
 import auditLogger, { setAuditLogOptions } from '../../utils/auditLogger.js';
 
 // Test configuration - adjust these values as needed for your environment

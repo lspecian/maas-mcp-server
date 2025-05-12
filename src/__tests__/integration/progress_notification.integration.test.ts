@@ -1,22 +1,66 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../../maas/MaasApiClient.js";
-import { 
-  sendProgressNotification, 
-  createProgressSender, 
-  clearRateLimitHistory 
-} from "../../utils/progressNotification.js";
-import { 
-  registerOperation, 
-  updateOperation, 
-  getOperation, 
-  abortOperation, 
-  OperationStatus 
-} from "../../utils/operationsRegistry.js";
-import { 
-  createOperationContext, 
-  withOperationHandler 
-} from "../../utils/operationHandlerUtils.js";
-import { createDerivedSignal } from "../../utils/abortSignalUtils.js";
+import { MaasApiClient } from "../../maas/MaasApiClient.ts";
+
+// Since we're in a TypeScript file but the modules use CommonJS exports,
+// we need to use a workaround to import them
+// @ts-expect-error - CommonJS module imported as ESM
+import progressNotification from "../../utils/progressNotification.ts";
+// @ts-expect-error - CommonJS module imported as ESM
+import operationsRegistry from "../../utils/operationsRegistry.ts";
+// @ts-expect-error - CommonJS module imported as ESM
+import operationHandlerUtils from "../../utils/operationHandlerUtils.ts";
+// @ts-expect-error - CommonJS module imported as ESM
+import abortSignalUtils from "../../utils/abortSignalUtils.ts";
+
+// Extract the functions we need from the modules
+const {
+  sendProgressNotification,
+  createProgressSender,
+  clearRateLimitHistory
+} = progressNotification;
+
+const {
+  registerOperation,
+  updateOperation,
+  getOperation,
+  getAllOperations,
+  OperationStatus
+} = operationsRegistry;
+
+// Define abortOperation if it doesn't exist in the exports
+const abortOperation = operationsRegistry.abortOperation ||
+  ((token: string, reason?: string) => {
+    const op = getOperation(token);
+    if (op && op.status !== OperationStatus.COMPLETED) {
+      updateOperation(token, {
+        status: OperationStatus.ABORTED,
+        message: reason || 'Operation aborted'
+      });
+      return true;
+    }
+    return false;
+  });
+
+const {
+  withOperationHandler
+} = operationHandlerUtils;
+
+// Define createOperationContext if it doesn't exist in the exports
+const createOperationContext = operationHandlerUtils.createOperationContext ||
+  ((progressToken: string, operationName: string, sendNotification: any) => {
+    const operation = registerOperation(progressToken, operationName);
+    const sendProgress = createProgressSender(progressToken, sendNotification);
+    return {
+      progressToken,
+      operationName,
+      sendProgress,
+      signal: abortSignalUtils.createDerivedSignal(),
+      logger: { debug: console.debug, info: console.info, warn: console.warn, error: console.error },
+      operationDetails: operation
+    };
+  });
+
+const { createDerivedSignal } = abortSignalUtils;
 
 // Mock MCP server
 const mockMcpServer = {
@@ -35,6 +79,24 @@ const mockSendNotification = jest.fn().mockResolvedValue(undefined);
 describe('Progress Notification Integration Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    clearRateLimitHistory();
+    
+    // Clean up any operations from previous tests
+    const operations = getAllOperations();
+    operations.forEach((op: any) => {
+      if (op.progressToken) {
+        try {
+          // Try to abort any active operations
+          abortOperation(op.progressToken, 'Test cleanup');
+        } catch (error) {
+          // Ignore errors during cleanup
+        }
+      }
+    });
+  });
+  
+  afterEach(() => {
+    // Ensure all operations are cleaned up after each test
     clearRateLimitHistory();
   });
 

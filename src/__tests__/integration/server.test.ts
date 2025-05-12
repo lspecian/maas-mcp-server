@@ -1,14 +1,14 @@
 import request from 'supertest';
 import express, { Express } from 'express';
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"; // .js restored
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"; // .js restored
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.ts"; // .js restored
 import {
   LATEST_PROTOCOL_VERSION,
   InitializeResult,
   // InitializeParams, RequestMessage, ResponseMessage, ErrorObject removed
-} from "@modelcontextprotocol/sdk/types.js";
+} from "@modelcontextprotocol/sdk/types.ts";
 import config from '../../config.js';
-import logger, { generateRequestId } from '../../utils/logger.js';
+import logger, { generateRequestId } from '../../utils/logger.ts';
 // Import the original MaasApiClient to mock it
 import { MaasApiClient as OriginalMaasApiClient } from '../../maas/MaasApiClient.js'; // .js restored
 

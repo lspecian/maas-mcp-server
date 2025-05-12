@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { MCPServer } from '@modelcontextprotocol/sdk';
-import logger from '../utils/logger.js';
+import logger from '../utils/logger.ts';
 
 /**
  * Creates and configures an Express app with an MCP endpoint

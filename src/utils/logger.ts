@@ -1,27 +1,39 @@
-import pino from 'pino';
-import config from '../config.js';
+const pino = require('pino');
+const config = require('../config');
 
 // Create a unique request ID generator
-export const generateRequestId = () => {
+const generateRequestId = () => {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 };
 
 // Configure pino logger
+console.log('Config:', config);
+
+// Create the logger instance with pino
 const logger = pino({
-  level: config.logLevel,
-  transport: config.nodeEnv === 'development'
-    ? { target: 'pino-pretty' }
-    : undefined,
-  base: undefined, // Don't include pid and hostname in every log
+  level: config.logLevel || 'info',
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+      translateTime: 'SYS:standard',
+      ignore: 'pid,hostname'
+    }
+  }
 });
 
 // Create a child logger with request context
-export const createRequestLogger = (requestId: string, method?: string, params?: any) => {
+const createRequestLogger = (operation) => {
+  const requestId = generateRequestId();
   return logger.child({
     requestId,
-    method,
-    params: params ? JSON.stringify(params).substring(0, 200) : undefined,
+    operation
   });
 };
 
-export default logger;
+// Export the logger directly so it has the child method
+module.exports = logger;
+
+// Also export the helper functions
+module.exports.createRequestLogger = createRequestLogger;
+module.exports.generateRequestId = generateRequestId;

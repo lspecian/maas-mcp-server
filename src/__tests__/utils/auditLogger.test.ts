@@ -36,7 +36,7 @@ const mockChildLogger = {
 };
 
 // Mock the logger module
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   __esModule: true,
   default: {
     child: jest.fn().mockReturnValue(mockChildLogger),
@@ -771,7 +771,7 @@ describe('Audit Logger', () => {
   describe('Integration with Logger', () => {
     it('should create a child logger with audit marker', async () => {
       // Get the mocked logger
-      const loggerModule = jest.requireMock('../../utils/logger.js');
+      const loggerModule = jest.requireMock('../../utils/logger.ts');
       
       // Import the module to trigger the child logger creation
       await import('../../utils/auditLogger.js');

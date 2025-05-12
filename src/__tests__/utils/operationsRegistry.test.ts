@@ -13,7 +13,7 @@ import {
   getOperationsRegistry,
   DEFAULT_CLEANUP_CONFIG
 } from '../../utils/operationsRegistry.js';
-import { createRequestLogger } from '../../utils/logger.js';
+import { createRequestLogger } from '../../utils/logger.ts';
 
 // Mock the logger
 jest.mock('../../utils/logger', () => ({

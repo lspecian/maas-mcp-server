@@ -15,7 +15,7 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mc
 import { MaasApiClient } from '../../maas/MaasApiClient.js';
 import { DeviceDetailsResourceHandler, DevicesListResourceHandler, registerDeviceResources } from '../../mcp_resources/handlers/DeviceResourceHandler.js';
 import { MaasDeviceSchema, DeviceCollectionQueryParamsSchema } from '../../mcp_resources/schemas/index.js';
-import { MaasApiError } from '../../types/maas.js';
+import { MaasApiError } from '../../types/maas.ts';
 import { z } from 'zod';
 
 // Import mock factories and test utilities

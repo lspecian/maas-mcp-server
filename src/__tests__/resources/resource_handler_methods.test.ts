@@ -7,7 +7,7 @@ const ACTUAL_MACHINE_DETAILS_URI_PATTERN_FOR_MOCK = 'maas://machine/{system_id}/
 const ACTUAL_MACHINES_LIST_URI_PATTERN_FOR_MOCK = 'maas://machines/list';
 
 // Mock logger at the top to avoid "Cannot find name 'logger'" error
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   __esModule: true,
   default: {
     info: jest.fn(),
@@ -46,12 +46,12 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mc
 import { MaasApiClient } from '../../maas/MaasApiClient.js';
 import { MachineDetailsResourceHandler, MachinesListResourceHandler } from '../../mcp_resources/handlers/MachineResourceHandler.js';
 import { MaasMachineSchema, GetMachineParamsSchema, MachineCollectionQueryParamsSchema } from '../../mcp_resources/schemas/index.js';
-import { MaasApiError } from '../../types/maas.js';
+import { MaasApiError } from '../../types/maas.ts';
 import { createMockMaasApiClient, mockMachine, mockMachines } from '../mocks/mockMaasApiClient.js';
 import { CacheManager } from '../../mcp_resources/cache/cacheManager.js';
 import { setupMockCacheManager } from '../mocks/mockCacheManager.js';
 import auditLogger from '../../utils/auditLogger.js';
-import logger from '../../utils/logger.js';
+import logger from '../../utils/logger.ts';
 import config from '../../config.js';
 import * as resourceUtilsActual from '../../mcp_resources/utils/resourceUtils.js';
 import { z } from 'zod';

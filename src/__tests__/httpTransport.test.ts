@@ -31,7 +31,7 @@ jest.mock('@modelcontextprotocol/sdk', () => {
 });
 
 // Mock the logger
-jest.mock('../utils/logger.js', () => {
+jest.mock('../utils/logger.ts', () => {
   return jest.fn().mockImplementation(() => {
     return {
       info: jest.fn(),

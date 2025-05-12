@@ -21,7 +21,7 @@ const mockLogger = {
   warn: jest.fn(),
   error: jest.fn(),
 };
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   createRequestLogger: jest.fn(() => mockLogger),
 }));
 

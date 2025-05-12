@@ -27,11 +27,11 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mc
 import { MaasApiClient } from '../../maas/MaasApiClient.js';
 import { DomainDetailsResourceHandler, DomainsListResourceHandler, registerDomainResources } from '../../mcp_resources/handlers/DomainResourceHandler.js';
 import { MaasDomainSchema, DomainCollectionQueryParamsSchema, GetDomainParamsSchema } from '../../mcp_resources/schemas/index.js'; // Assuming GetDomainParamsSchema exists
-import { MaasApiError as ActualMaasApiError } from '../../types/maas.js';
+import { MaasApiError as ActualMaasApiError } from '../../types/maas.ts';
 import { createMockMaasApiClient } from '../mocks/mockMaasApiClient.js';
 import { CacheManager } from '../../mcp_resources/cache/cacheManager.js';
 import auditLogger from '../../utils/auditLogger.js';
-import logger from '../../utils/logger.js';
+import logger from '../../utils/logger.ts';
 import config from '../../config.js';
 import * as resourceUtilsActual from '../../mcp_resources/utils/resourceUtils.js';
 import { z } from 'zod';
@@ -47,7 +47,7 @@ jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
 jest.mock('../../maas/MaasApiClient.js');
 jest.mock('../../mcp_resources/cache/cacheManager.js');
 jest.mock('../../utils/auditLogger.js');
-jest.mock('../../utils/logger.js');
+jest.mock('../../utils/logger.ts');
 jest.mock('../../config.js', () => ({
   cacheEnabled: true,
   auditLogEnabled: true,

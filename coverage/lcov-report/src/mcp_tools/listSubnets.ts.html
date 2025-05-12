@@ -199,10 +199,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from 'zod';
-import { MaasApiClient } from "../maas/MaasApiClient.js";
+import { MaasApiClient } from "../maas/MaasApiClient.ts";
 import { listSubnetsSchema } from './schemas/listSubnetsSchema.js';
-import { createRequestLogger } from "../utils/logger.js";
-import { createProgressSender } from "../utils/progressNotification.js";
+import { createRequestLogger } from "../utils/logger.ts";
+import { createProgressSender } from "../utils/progressNotification.ts";
 &nbsp;
 /**
  * Registers the list subnets tool with the MCP server.
@@ -273,14 +273,14 @@ export function registerListSubnetsTool(server: McpServer, maasApiClient: MaasAp
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
                 at 2025-05-11T21:32:13.029Z
             </div>
-        <script src="../../prettify.js"></script>
+        <script src="../../prettify.ts"></script>
         <script>
             window.onload = function () {
                 prettyPrint();
             };
         </script>
-        <script src="../../sorter.js"></script>
-        <script src="../../block-navigation.js"></script>
+        <script src="../../sorter.ts"></script>
+        <script src="../../block-navigation.ts"></script>
     </body>
 </html>
     

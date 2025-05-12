@@ -3,7 +3,7 @@
  * Provides configurable mock implementations of the ResourceUtils functions for testing
  */
 import { ZodSchema, ZodError } from 'zod';
-import { MaasApiError } from '../../types/maas.js';
+import { MaasApiError } from '../../types/maas.ts';
 import * as actualResourceUtils from '../../mcp_resources/utils/resourceUtils.js';
 
 /**

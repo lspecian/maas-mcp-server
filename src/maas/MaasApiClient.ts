@@ -1,18 +1,17 @@
-import { OAuth } from 'oauth';
-import logger from '../utils/logger.js'; // Assuming logger.js is in src/utils
-import config from '../config.js';      // Assuming config.js is in src
-import { randomBytes } from 'crypto';
-import FormData from 'form-data'; // Import the form-data package
-import {
-  MaasApiError,
-  type MaasApiRequestParams,
-  type MaasApiRequestBody,
-  type MaasApiResponse,
-  type MaasApiOptionalResponse,
-  // MaasApiClientConfig is not directly used by the client constructor here
-  // as it reads from a global `config` object.
-  // If the constructor were to take a config object, it would be imported.
-} from '../types/maas.js';
+const { OAuth } = require('oauth');
+const logger = require('../utils/logger'); // Assuming logger.js is in src/utils
+const config = require('../config');      // Assuming config.js is in src
+const { randomBytes } = require('crypto');
+const FormData = require('form-data'); // Import the form-data package
+const {
+  MaasApiError
+} = require('../types/maas');
+
+// TypeScript types (these will be removed during compilation)
+// type MaasApiRequestParams = any;
+// type MaasApiRequestBody = any;
+// type MaasApiResponse = any;
+// type MaasApiOptionalResponse = any;
 
 // Ensure FormData is available. If not using a modern Node.js version,
 // you might need a polyfill like 'formdata-node' and import it.
@@ -42,11 +41,21 @@ export class MaasApiClient {
 
   constructor() {
     logger.debug('Initializing MaasApiClient...');
+    logger.debug('Config:', config);
+    
+    if (!config || !config.maasApiUrl) {
+      throw new Error('MAAS API URL is not configured. Please check your .env file.');
+    }
+    
     this.maasApiUrl = config.maasApiUrl.endsWith('/')
       ? config.maasApiUrl.slice(0, -1)
       : config.maasApiUrl;
     logger.debug({ maasApiUrl: this.maasApiUrl }, 'MAAS API URL configured.');
 
+    if (!config.maasApiKey) {
+      throw new Error('MAAS API Key is not configured. Please check your .env file.');
+    }
+    
     const keyParts = config.maasApiKey.split(':');
     if (keyParts.length !== 3) {
       logger.error({ maasApiKeyPreview: config.maasApiKey.substring(0, 10) + '...' }, "Invalid MAAS API key format during MaasApiClient construction.");

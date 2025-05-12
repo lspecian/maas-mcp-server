@@ -4,11 +4,11 @@ import {
   validateResourceData,
   handleResourceFetchError,
 } from '../../mcp_resources/utils/resourceUtils.js'; // Assuming .js extension based on project setup
-import { MaasApiError } from '../../types/maas.js'; // Assuming .js extension
-import logger from '../../utils/logger.js'; // Assuming .js extension
+import { MaasApiError } from '../../types/maas.ts'; // Assuming .js extension
+import logger from '../../utils/logger.ts'; // Assuming .js extension
 
 // Mock logger
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   __esModule: true, // Use this if logger.js is an ES module
   default: {
     info: jest.fn(),

@@ -1,8 +1,8 @@
 import { LRUCacheStrategy } from '../../mcp_resources/cache/lruCacheStrategy.js';
-import logger from '../../utils/logger.js'; // Corrected import
+import logger from '../../utils/logger.ts'; // Corrected import
 import { CacheEntry } from '../../mcp_resources/cache/interfaces.js';
 
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   logger: {
     info: jest.fn(),
     warn: jest.fn(),

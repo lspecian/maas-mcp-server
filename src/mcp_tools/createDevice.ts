@@ -1,108 +1,86 @@
-import { z } from 'zod';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { MaasApiClient } from '../maas/MaasApiClient.js';
-import { basePostRequestSchema, postSuccessResponseSchema } from './schemas/writeOps.js';
-import { createRequestLogger } from '../utils/logger.js';
-import { metaSchema } from './schemas/common.js';
+const { z } = require('zod');
+const path = require('path');
+const sdkPath = path.join(__dirname, '..', '..', 'node_modules', '@modelcontextprotocol', 'sdk', 'dist', 'cjs');
+const { McpServer } = require(path.join(sdkPath, 'server', 'mcp.js'));
+const { MaasApiClient } = require('../maas/MaasApiClient');
+const { basePostRequestSchema, postSuccessResponseSchema } = require('./schemas/writeOps');
+const { createRequestLogger } = require('../utils/logger');
+const { metaSchema } = require('./schemas/common');
 
 const createDevicePayloadSchema = z.object({
   name: z.string().describe('The name of the device.'),
   parent: z.string().optional().describe('The system_id of the parent machine or device.'),
-  mac_address: z.string().optional().describe('The MAC address of the device.'),
-  tags: z.array(z.string()).optional().describe('List of tags to apply to the device.'),
-  zone: z.string().optional().describe('Name or ID of the zone for the device.'),
-  // Add other MAAS specific fields for device creation based on API docs
-}).describe('Payload for creating a MAAS device');
+  domain: z.string().optional().describe('The domain name for the device.'),
+  zone: z.string().optional().describe('The zone name for the device.'),
+  mac_addresses: z.array(z.string()).min(1).describe('MAC addresses for the device interfaces.'),
+  description: z.string().optional().describe('Optional description for the device.'),
+  _meta: metaSchema
+});
 
-export const createDeviceRequestSchema = basePostRequestSchema(createDevicePayloadSchema);
+// Extend the base post request schema with our specific payload
+const createDeviceRequestSchema = basePostRequestSchema.extend({
+  ...createDevicePayloadSchema.shape
+});
 
-export function registerCreateDeviceTool(server: McpServer, maasClient: MaasApiClient): void {
-  const toolSchema = z.object({
-    ...createDeviceRequestSchema.shape,
-    _meta: metaSchema.optional(),
-  }).describe('Creates a new device in MAAS. Defines parameters for device creation including name, parent, MAC address, tags, and zone.');
+// Extend the post success response schema with device-specific fields
+const createDeviceResponseSchema = postSuccessResponseSchema.extend({
+  device_id: z.string().describe('The system_id of the created device.'),
+  name: z.string().describe('The name of the created device.'),
+  domain: z.string().describe('The domain of the created device.'),
+  zone: z.string().describe('The zone of the created device.')
+});
 
-  server.tool(
-    'maas_create_device',
-    toolSchema.shape,
-    async (
-      params: z.infer<typeof toolSchema>,
-      extra: { id?: string; signal?: AbortSignal; sendNotification?: (notification: any) => Promise<void> }
-    ) => {
-      const { payload } = params;
-      const requestId = extra.id || Date.now().toString(36);
-      const logger = createRequestLogger(requestId, 'maas_create_device', params);
-      logger.info('Attempting to create device...');
-      const { signal, sendNotification } = extra;
-      const progressToken = params._meta?.progressToken;
+/**
+ * Register the create device tool with the MCP server
+ * @param server The MCP server instance
+ * @param maasClient The MAAS API client instance
+ */
+function registerCreateDeviceTool(server, maasClient) {
+  server.registerTool({
+    name: "createDevice",
+    description: "Create a new device in MAAS",
+    inputSchema: createDeviceRequestSchema,
+    outputSchema: createDeviceResponseSchema,
+    execute: async (params) => {
+      const logger = createRequestLogger('createDevice');
+      logger.info({ params }, 'Executing createDevice tool');
 
       try {
-        if (progressToken && sendNotification) {
-          await sendNotification({
-            method: "notifications/progress",
-            params: { progressToken, progress: 0, total: 100, message: "Initiating device creation..." }
-          });
-        }
-
-        const maasPayload: Record<string, any> = { ...payload };
-        Object.keys(maasPayload).forEach(key => {
-          if (maasPayload[key] === undefined) {
-            delete maasPayload[key];
-          }
-        });
-
-        logger.debug({ maasPayload }, 'Sending payload to MAAS API /devices');
-        if (progressToken && sendNotification) {
-          await sendNotification({
-            method: "notifications/progress",
-            params: { progressToken, progress: 30, total: 100, message: "Contacting MAAS API..." }
-          });
-        }
-
-        // Assuming MAAS API endpoint for creating a device is POST /devices
-        const result = await maasClient.post('/devices', maasPayload, signal);
-        
-        if (progressToken && sendNotification) {
-          await sendNotification({
-            method: "notifications/progress",
-            params: { progressToken, progress: 70, total: 100, message: "Device creation API call successful." }
-          });
-        }
-        logger.info({ deviceId: result.system_id || result.id }, 'Device created successfully.'); // Adjust based on actual MAAS response
-        
-        const successResponseData = {
-          id: result.system_id || result.id, // Adjust based on actual MAAS response
-          message: 'Device created successfully.',
+        // Prepare parameters for MAAS API
+        const apiParams = {
+          name: params.name,
+          mac_addresses: params.mac_addresses
         };
-        
-        const validatedSuccessOutput = postSuccessResponseSchema.parse({
-            success: true,
-            data: successResponseData
-        });
 
-        if (progressToken && sendNotification) {
-          await sendNotification({
-            method: "notifications/progress",
-            params: { progressToken, progress: 100, total: 100, message: "Device created successfully." }
-          });
-        }
+        // Add optional parameters if provided
+        if (params.parent) apiParams.parent = params.parent;
+        if (params.domain) apiParams.domain = params.domain;
+        if (params.zone) apiParams.zone = params.zone;
+        if (params.description) apiParams.description = params.description;
+
+        // Call MAAS API to create the device
+        const response = await maasClient.post('/devices/', apiParams);
+
+        logger.info({ deviceId: response.system_id }, 'Successfully created device');
+
+        // Return the response
         return {
-          content: [{ type: "text", text: JSON.stringify(validatedSuccessOutput) }]
+          success: true,
+          created: true,
+          message: `Device '${response.hostname}' created successfully.`,
+          resource_id: response.system_id,
+          device_id: response.system_id,
+          name: response.hostname,
+          domain: response.domain.name,
+          zone: response.zone.name,
+          _meta: params._meta || {}
         };
-
-      } catch (error: any) {
-        logger.error({ error: error.message, stack: error.stack }, 'Failed to create device.');
-        if (progressToken && sendNotification) {
-          await sendNotification({
-            method: "notifications/progress",
-            params: { progressToken, progress: 100, total: 100, message: `Error: ${error.message}` }
-          });
-        }
-        return {
-          content: [{ type: "text", text: `Failed to create device: ${error.message}` }],
-          isError: true
-        };
+      } catch (error) {
+        logger.error({ error }, 'Error creating device');
+        throw error;
       }
     }
-  );
+  });
 }
+
+module.exports = { registerCreateDeviceTool };

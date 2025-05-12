@@ -1,12 +1,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MaasApiClient } from "../../maas/MaasApiClient.js";
-import { registerDeployMachineTool } from "../../mcp_tools/deployMachine.js";
+import { MaasApiClient } from "../../maas/MaasApiClient.ts";
+import { registerDeployMachineTool } from "../../mcp_tools/deployMachine.ts";
 import { z } from "zod";
-import { createRequestLogger } from "../../utils/logger.js";
+import { createRequestLogger } from "../../utils/logger.ts";
 
 // Mock MaasApiClient
-jest.mock("../../maas/MaasApiClient.js");
-jest.mock("../../utils/logger.js", () => ({
+jest.mock("../../maas/MaasApiClient.ts");
+jest.mock("../../utils/logger.ts", () => ({
   createRequestLogger: jest.fn().mockReturnValue({
     info: jest.fn(),
     warn: jest.fn(),

@@ -7,9 +7,9 @@
 
 // 1. Imports
 const { McpServer } = require("@modelcontextprotocol/sdk/server/mcp.js");
-const { MaasApiError } = require("../../maas/MaasApiClient.js");
-const { registerAllTools } = require("../../mcp_tools/index.js");
-const { registerAllResources } = require("../../mcp_resources/index.js");
+const { MaasApiError } = require("../../maas/MaasApiClient.ts");
+const { registerAllTools } = require("../../mcp_tools/index.ts");
+const { registerAllResources } = require("../../mcp_resources/index.ts");
 
 // 2. Mocks
 // Mock the MCP Server

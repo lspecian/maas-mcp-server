@@ -65,7 +65,7 @@ const mockChildLogger = {
   trace: jest.fn(),
 };
 
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.ts', () => ({
   __esModule: true,
   default: {
     child: jest.fn().mockReturnValue(mockChildLogger),
