@@ -15,9 +15,12 @@ import (
 	"github.com/lspecian/maas-mcp-server/internal/logging"
 	"github.com/lspecian/maas-mcp-server/internal/maas"
 	"github.com/lspecian/maas-mcp-server/internal/maasclient"
+	"github.com/lspecian/maas-mcp-server/internal/repository/machine"
 	"github.com/lspecian/maas-mcp-server/internal/server"
 	"github.com/lspecian/maas-mcp-server/internal/service"
+	machineservice "github.com/lspecian/maas-mcp-server/internal/service/machine"
 	"github.com/lspecian/maas-mcp-server/internal/transport"
+	machinetransport "github.com/lspecian/maas-mcp-server/internal/transport/machine"
 )
 
 func main() {
@@ -38,12 +41,6 @@ func main() {
 		logger.WithError(err).Fatal("Failed to create MAAS client")
 	}
 
-	// Initialize services
-	machineService := service.NewMachineService(maasClient, logger)
-	networkService := service.NewNetworkService(maasClient, logger)
-	storageService := service.NewStorageService(maasClient, logger)
-	tagService := service.NewTagService(maasClient, logger)
-
 	// Get the default MAAS instance
 	maasInstance := cfg.GetDefaultMAASInstance()
 
@@ -53,8 +50,23 @@ func main() {
 		logger.WithError(err).Fatal("Failed to create MAAS client wrapper")
 	}
 
+	// Initialize repositories
+	machineRepo := machine.NewMaasRepository(maasClientWrapper, logger)
+
+	// Initialize services
+	machineServiceNew := machineservice.NewService(machineRepo, logger)
+
+	// For backward compatibility, keep the old services
+	machineServiceOld := service.NewMachineService(maasClient, logger)
+	networkService := service.NewNetworkService(maasClient, logger)
+	storageService := service.NewStorageService(maasClient, logger)
+	tagService := service.NewTagService(maasClient, logger)
+
 	// Initialize HTTP handlers
-	machineHandler := transport.NewMachineHandler(machineService, logger)
+	machineHandlerNew := machinetransport.NewHandler(machineServiceNew, logger)
+
+	// For backward compatibility, keep the old handlers
+	machineHandler := transport.NewMachineHandler(machineServiceOld, logger)
 	networkHandler := transport.NewNetworkHandler(networkService, logger)
 	storageHandler := transport.NewStorageHandler(storageService, logger)
 	tagHandler := transport.NewTagHandler(tagService, logger)
@@ -65,7 +77,10 @@ func main() {
 	// Set up Gin router using the server package
 	router := server.NewServer(mcpService, cfg, logger)
 
-	// Register API routes
+	// Register API routes for new clean architecture handlers
+	machineHandlerNew.RegisterRoutes(router)
+
+	// Register API routes for backward compatibility
 	apiGroup := router.Group("/api/v1")
 	machineHandler.RegisterRoutes(apiGroup)
 	networkHandler.RegisterRoutes(apiGroup)
@@ -106,6 +121,11 @@ func main() {
 	// Attempt graceful shutdown
 	if err := srv.Shutdown(ctx); err != nil {
 		logger.WithError(err).Fatal("Server forced to shutdown")
+	}
+
+	// Close repositories
+	if err := machineRepo.Close(); err != nil {
+		logger.WithError(err).Error("Failed to close machine repository")
 	}
 
 	logger.Info("Server exiting")

@@ -1,0 +1,27 @@
+# EditorConfig is a file format that helps maintain consistent coding styles
+# across different editors and IDEs.
+# https://editorconfig.org
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.go]
+indent_style = tab
+indent_size = 4
+
+[Makefile]
+indent_style = tab
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{json,yaml,yml}]
+indent_size = 2
+indent_style = space

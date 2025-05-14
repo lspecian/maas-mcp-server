@@ -19,6 +19,8 @@ type MockMaasClient struct {
 	AllocateMachineFn func(params *entity.MachineAllocateParams) (*models.Machine, error)
 	DeployMachineFn   func(systemID string, params *entity.MachineDeployParams) (*models.Machine, error)
 	ReleaseMachineFn  func(systemIDs []string, comment string) error
+	PowerOnMachineFn  func(systemID string) (*models.Machine, error)
+	PowerOffMachineFn func(systemID string) (*models.Machine, error)
 }
 
 // Ensure MockMaasClient implements MachineClient interface
@@ -47,6 +49,22 @@ func (m *MockMaasClient) DeployMachine(systemID string, params *entity.MachineDe
 // ReleaseMachine implements the MachineClient interface
 func (m *MockMaasClient) ReleaseMachine(systemIDs []string, comment string) error {
 	return m.ReleaseMachineFn(systemIDs, comment)
+}
+
+// PowerOnMachine implements the MachineClient interface
+func (m *MockMaasClient) PowerOnMachine(systemID string) (*models.Machine, error) {
+	if m.PowerOnMachineFn != nil {
+		return m.PowerOnMachineFn(systemID)
+	}
+	return nil, errors.New("PowerOnMachine not implemented")
+}
+
+// PowerOffMachine implements the MachineClient interface
+func (m *MockMaasClient) PowerOffMachine(systemID string) (*models.Machine, error) {
+	if m.PowerOffMachineFn != nil {
+		return m.PowerOffMachineFn(systemID)
+	}
+	return nil, errors.New("PowerOffMachine not implemented")
 }
 
 // Helper function to create a test logger

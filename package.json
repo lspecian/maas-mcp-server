@@ -1,0 +1,23 @@
+{
+  "name": "maas-mcp-server",
+  "version": "1.0.0",
+  "description": "A Model Context Protocol (MCP) server for interacting with MAAS (Metal as a Service)",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test-mcp": "node test-mcp-clean.js"
+  },
+  "keywords": [
+    "maas",
+    "mcp",
+    "server",
+    "metal-as-a-service",
+    "model-context-protocol"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}

@@ -1,0 +1,172 @@
+# Options for analysis running
+run:
+  # Timeout for analysis, e.g. 30s, 5m, default is 1m
+  timeout: 5m
+
+  # Include test files or not, default is true
+  tests: true
+
+  # Default concurrency is a available CPU number
+  concurrency: 4
+
+  # Exit code when at least one issue was found, default is 1
+  issues-exit-code: 1
+
+  # Which dirs to skip: issues from them won't be reported
+  skip-dirs:
+    - node_modules
+    - vendor
+    - third_party
+
+  # Which files to skip: they will be analyzed, but issues from them won't be reported
+  skip-files:
+    - ".*\\.generated\\.go$"
+
+# Output configuration options
+output:
+  # Format: colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
+  format: colored-line-number
+
+  # Print lines of code with issue, default is true
+  print-issued-lines: true
+
+  # Print linter name in the end of issue text, default is true
+  print-linter-name: true
+
+# All available settings of specific linters
+linters-settings:
+  errcheck:
+    # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
+    check-type-assertions: true
+
+  govet:
+    # Report about shadowed variables
+    check-shadowing: true
+
+  gocyclo:
+    # Minimal code complexity to report, 30 by default
+    min-complexity: 15
+
+  dupl:
+    # Tokens count to trigger issue, 150 by default
+    threshold: 100
+
+  goconst:
+    # Minimal length of string constant, 3 by default
+    min-len: 3
+    # Minimal occurrences count to trigger, 3 by default
+    min-occurrences: 3
+
+  misspell:
+    # Correct spellings using locale preferences for US or UK.
+    locale: US
+
+  lll:
+    # Max line length, lines longer will be reported. Default is 120.
+    line-length: 120
+    # Tab width in spaces. Default to 1.
+    tab-width: 4
+
+  unused:
+    # Treat code as a program (not a library) and report unused exported identifiers
+    check-exported: false
+
+  unparam:
+    # Inspect exported functions, default is false
+    check-exported: false
+
+  nakedret:
+    # Make an issue if func has more lines of code than this setting and it has naked returns
+    max-func-lines: 30
+
+  prealloc:
+    # Report preallocation suggestions only on simple loops that have no returns/breaks/continues/gotos in them
+    simple: true
+    range-loops: true # Report preallocation suggestions on range loops
+    for-loops: false # Report preallocation suggestions on for loops
+
+  gocritic:
+    # Enable multiple checks by tags, run `GL_DEBUG=gocritic golangci-lint run` to see all tags and checks
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - deadcode
+    - depguard
+    - dogsled
+    - dupl
+    - errcheck
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - golint
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - lll
+    - misspell
+    - nakedret
+    - rowserrcheck
+    - scopelint
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - whitespace
+
+issues:
+  # Maximum issues count per one linter. Set to 0 to disable
+  max-issues-per-linter: 0
+
+  # Maximum count of issues with the same text
+  max-same-issues: 0
+
+  # Show only new issues: if there are unstaged changes or untracked files,
+  # only those changes are analyzed, else only changes in HEAD~ are analyzed
+  new: false
+
+  # Fix found issues (if it's supported by the linter)
+  fix: false
+
+  # Exclude specific issues by regular expressions
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+
+    # Exclude known linters from partially hard-vendored code
+    - path: vendor/
+      text: "weak cryptographic primitive"
+      linters:
+        - gosec
+
+    # Exclude some staticcheck messages
+    - linters:
+        - staticcheck
+      text: "SA9003:"
+
+    # Exclude lll issues for long lines with go:generate
+    - linters:
+        - lll
+      source: "^//go:generate "

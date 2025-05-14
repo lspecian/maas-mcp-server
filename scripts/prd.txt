@@ -1,106 +1,295 @@
-# Product Requirements Document: Go-Based MCP Server for Canonical MAAS API
+# MAAS MCP Server Improvement Project PRD
 
-## 1. Overview
-This project aims to create a Model Context Protocol (MCP) server using Go that exposes Canonical MAAS (Metal as a Service) API functionality to MCP clients, such as AI agents and automation tools. The server will act as an intelligent intermediary, translating MCP requests into MAAS API actions and formatting MAAS data as context for MCP clients.
+## Overview
 
-## 2. Background
-Canonical MAAS is a platform for automating the provisioning and lifecycle management of physical servers and virtual machines. It provides a REST API (v2.0) that allows programmatic control of infrastructure resources. The Model Context Protocol (MCP) is an emerging standard for communication between generative AI applications and enterprise data sources/tools.
+The MAAS MCP Server is a Model Context Protocol (MCP) server that enables AI assistants to interact with MAAS (Metal as a Service) through a standardized protocol. While the current implementation provides basic functionality, it suffers from architectural issues, configuration management problems, and lacks robust error handling. This project aims to overhaul the server by taking inspiration from the GitHub MCP server (github/github-mcp-server) to create a more reliable, maintainable, and feature-complete solution.
 
-## 3. Key Features
+## Core Features
 
-### 3.1 MCP Tools for MAAS Operations
-- Machine Management:
-  - List machines with filtering capabilities
-  - Get detailed machine information
-  - Get machine power state
-  - Allocate machines based on constraints
-  - Deploy machines with OS and configuration
-  - Release machines back to the pool
-- Network Management:
-  - List and filter subnets
-  - Get subnet details
-  - List VLANs within fabrics
-- Storage Management:
-  - List block devices for machines
-- Tag Management:
-  - List tags
-  - Apply tags to machines
-  - Create new tags
+### 1. Robust MCP Protocol Implementation
+- Complete implementation of the Model Context Protocol specification
+- Support for both tool calls and resource access
+- Proper handling of progress notifications for long-running operations
+- Comprehensive error handling with detailed error messages
 
-### 3.2 Authentication & Security
-- Support for MAAS API authentication (OAuth 1.0a)
-- Configurable MCP server authentication (API Key, Basic Auth)
-- Secure handling of credentials
+### 2. MAAS Integration
+- Full support for MAAS API operations (machine management, network configuration, storage, tags)
+- Efficient caching mechanisms to reduce API calls to MAAS
+- Proper handling of MAAS API errors and translation to MCP-compatible errors
+- Support for multiple MAAS instances
 
-### 3.3 Robust Error Handling
-- Consistent error responses
-- Detailed error information
-- Appropriate HTTP status codes
+### 3. Configuration Management
+- Centralized configuration through `.roo/mcp.json`
+- Dynamic configuration updates without server restart
+- Secure handling of API keys and credentials
+- Environment variable support for containerized deployments
 
-### 3.4 Logging & Monitoring
-- Request/response logging
-- Performance metrics
-- Error tracking
+### 4. Authentication and Security
+- Robust authentication mechanisms
+- Rate limiting to prevent abuse
+- Input validation for all API endpoints
+- Secure handling of sensitive information
 
-## 4. Technical Requirements
+### 5. Monitoring and Observability
+- Comprehensive logging with configurable levels
+- Metrics collection for performance monitoring
+- Health check endpoints
+- Detailed error reporting
 
-### 4.1 Architecture
-- Layered architecture:
-  - Transport/Handler Layer: HTTP request handling with Gin
-  - Service Layer: Business logic for MCP tools
-  - MAAS Client Layer: Abstraction over gomaasclient
-- Separation of concerns for testability and maintainability
+## Technical Architecture
 
-### 4.2 Dependencies
-- Go programming language
-- Gin web framework
-- Canonical's gomaasclient library
-- Configuration management (environment variables or config files)
+### System Components
 
-### 4.3 Configuration
-- MAAS API URL
-- MAAS API Key
-- Listen address/port
-- Authentication settings
-- Logging level
+1. **Go MCP Server Core**
+   - Implements the MCP protocol
+   - Handles request routing and validation
+   - Manages authentication and rate limiting
+   - Provides core business logic
 
-## 5. Implementation Plan
+2. **MAAS Client Module**
+   - Communicates with MAAS API
+   - Handles authentication with MAAS
+   - Translates between MAAS and MCP data models
+   - Implements caching for performance
 
-### 5.1 Project Setup
-- Initialize Go module
-- Set up directory structure
-- Add dependencies
+3. **TypeScript Wrapper (Optional)**
+   - Provides a Node.js interface to the Go server
+   - Handles configuration management
+   - Simplifies deployment in JavaScript environments
 
-### 5.2 MAAS Client Integration
-- Create wrapper around gomaasclient
-- Implement error handling
-- Add methods for core MAAS operations
+4. **Configuration Manager**
+   - Reads configuration from `.roo/mcp.json`
+   - Provides dynamic configuration updates
+   - Validates configuration values
+   - Manages secrets securely
 
-### 5.3 Service Layer
-- Implement business logic for each MCP tool
-- Map between MCP and MAAS data structures
-- Handle parameter validation and transformation
+### Data Models
 
-### 5.4 Transport Layer
-- Set up Gin server and routes
-- Implement request/response handling
-- Add middleware for logging, auth, recovery
+1. **MCP Models**
+   - Tool schemas (input/output)
+   - Resource URI patterns
+   - Error types
+   - Progress notification format
 
-### 5.5 Testing
-- Unit tests for service layer
-- Integration tests with MAAS
-- End-to-end tests simulating MCP clients
+2. **MAAS Models**
+   - Machine representations
+   - Network configurations
+   - Storage definitions
+   - Tag management
 
-## 6. Future Enhancements
-- Expanded toolset for more MAAS operations
-- Asynchronous operations for long-running tasks
-- Caching for frequently accessed data
-- Event streaming for real-time updates
-- Advanced authentication options
+3. **Internal Models**
+   - Configuration structures
+   - Authentication tokens
+   - Cache entries
+   - Metrics data
 
-## 7. Success Criteria
-- All specified MCP tools function correctly
-- Robust error handling and logging
-- Secure authentication
-- Clean, maintainable code structure
-- Comprehensive test coverage
+### APIs and Integrations
+
+1. **MCP API Endpoints**
+   - `/mcp` - Main MCP endpoint for tool calls
+   - `/mcp/stream` - SSE endpoint for streaming responses
+   - `/mcp/resource` - Resource access endpoint
+
+2. **MAAS API Integration**
+   - REST API client for MAAS
+   - WebSocket client for real-time updates
+   - OAuth authentication
+
+3. **Monitoring Integrations**
+   - Health check endpoints
+   - Prometheus metrics export
+   - Logging to standard output/files
+
+### Infrastructure Requirements
+
+1. **Runtime Environment**
+   - Go 1.20+ for server
+   - Node.js 18+ for TypeScript wrapper (if used)
+
+2. **Deployment Options**
+   - Standalone binary
+   - Docker container
+   - Kubernetes deployment
+
+3. **Storage**
+   - Local file system for configuration
+   - In-memory cache with optional persistence
+
+## Development Roadmap
+
+### Phase 1: Core Infrastructure and Architecture
+
+1. **Refactor Go Server Architecture**
+   - Implement clean architecture patterns
+   - Separate concerns (transport, service, repository)
+   - Improve error handling
+   - Enhance logging
+
+2. **Implement MCP Protocol Correctly**
+   - Fix protocol version issues
+   - Implement proper SSE handling
+   - Support progress notifications
+   - Standardize error responses
+
+3. **Centralize Configuration Management**
+   - Move configuration to `.roo/mcp.json`
+   - Implement dynamic configuration loading
+   - Add environment variable support
+   - Create configuration validation
+
+### Phase 2: MAAS Integration Improvements
+
+1. **Enhance MAAS Client**
+   - Implement efficient caching
+   - Add retry mechanisms
+   - Improve error handling
+   - Support multiple MAAS instances
+
+2. **Expand MAAS API Coverage**
+   - Complete machine management operations
+   - Add comprehensive network configuration
+   - Implement storage management
+   - Support tag operations
+
+3. **Implement Resource Access**
+   - Define resource URI patterns
+   - Implement resource handlers
+   - Add caching for resources
+   - Support filtering and pagination
+
+### Phase 3: Testing and Reliability
+
+1. **Comprehensive Test Suite**
+   - Unit tests for all components
+   - Integration tests with MAAS mock
+   - End-to-end tests with real MAAS instance
+   - Performance and load testing
+
+2. **Error Handling and Recovery**
+   - Implement graceful degradation
+   - Add circuit breakers for external dependencies
+   - Improve error messages and context
+   - Implement automatic recovery mechanisms
+
+3. **Documentation and Examples**
+   - API documentation
+   - Configuration guide
+   - Deployment instructions
+   - Example usage scenarios
+
+### Phase 4: Performance and Scalability
+
+1. **Performance Optimization**
+   - Optimize request handling
+   - Improve caching strategies
+   - Reduce memory usage
+   - Minimize latency
+
+2. **Scalability Enhancements**
+   - Support horizontal scaling
+   - Implement distributed caching
+   - Add load balancing support
+   - Optimize resource usage
+
+3. **Monitoring and Observability**
+   - Add detailed metrics
+   - Implement tracing
+   - Enhance logging
+   - Create dashboards
+
+## Logical Dependency Chain
+
+1. **Foundation Components (Must be built first)**
+   - Core server infrastructure
+   - Configuration management
+   - Error handling framework
+   - Logging system
+
+2. **MCP Protocol Implementation**
+   - Basic tool call handling
+   - Error response standardization
+   - Resource access framework
+   - Progress notification support
+
+3. **MAAS Integration Core**
+   - MAAS client with authentication
+   - Basic machine operations
+   - Error translation
+   - Data model conversion
+
+4. **Extended Functionality**
+   - Advanced machine operations
+   - Network configuration
+   - Storage management
+   - Tag operations
+
+5. **Performance and Reliability**
+   - Caching mechanisms
+   - Retry logic
+   - Circuit breakers
+   - Rate limiting
+
+6. **Monitoring and Observability**
+   - Health checks
+   - Metrics collection
+   - Tracing
+   - Alerting
+
+## Risks and Mitigations
+
+### Technical Challenges
+
+1. **Risk**: Complexity of MCP protocol implementation
+   **Mitigation**: Study GitHub MCP server implementation, create detailed design documents, implement incrementally with thorough testing
+
+2. **Risk**: MAAS API changes breaking compatibility
+   **Mitigation**: Version-aware client, comprehensive test suite, abstraction layer between MAAS API and internal models
+
+3. **Risk**: Performance issues with large MAAS deployments
+   **Mitigation**: Efficient caching, pagination, asynchronous processing, performance testing with realistic data volumes
+
+### MVP Definition
+
+1. **Risk**: Scope creep delaying usable version
+   **Mitigation**: Define clear MVP with core functionality only, prioritize features based on user needs, implement in phases
+
+2. **Risk**: Over-engineering the solution
+   **Mitigation**: Start with simple implementations, refactor as needed, focus on reliability over advanced features
+
+3. **Risk**: Backward compatibility issues
+   **Mitigation**: Maintain API compatibility, provide migration paths, document breaking changes
+
+### Resource Constraints
+
+1. **Risk**: Limited development resources
+   **Mitigation**: Prioritize features, leverage existing libraries, focus on high-impact improvements
+
+2. **Risk**: Testing environment limitations
+   **Mitigation**: Create comprehensive mocks, containerized testing environment, CI/CD pipeline
+
+3. **Risk**: Knowledge gaps in MCP protocol
+   **Mitigation**: Study GitHub MCP server, engage with MCP community, create detailed documentation
+
+## Appendix
+
+### GitHub MCP Server Inspiration Points
+
+The GitHub MCP server (github/github-mcp-server) provides several design patterns and implementation approaches that should be incorporated:
+
+1. **Clean Architecture**: Separation of concerns with clear boundaries between layers
+2. **Robust Error Handling**: Detailed error messages with context and standardized formats
+3. **Resource URI Patterns**: Well-defined patterns for accessing resources
+4. **Progress Notifications**: Proper implementation of progress notifications for long-running operations
+5. **Comprehensive Testing**: Thorough test coverage at all levels (unit, integration, end-to-end)
+6. **Documentation**: Clear documentation of APIs, configuration, and usage
+
+### MAAS API Considerations
+
+When integrating with MAAS, consider:
+
+1. **API Versions**: Support for different MAAS API versions
+2. **Authentication**: Proper handling of API keys and OAuth tokens
+3. **Rate Limiting**: Respect MAAS API rate limits
+4. **Error Handling**: Proper translation of MAAS errors to MCP errors
+5. **Asynchronous Operations**: Handling of long-running operations
+6. **Resource Mapping**: Mapping between MAAS resources and MCP resources
