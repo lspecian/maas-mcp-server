@@ -1,0 +1,211 @@
+# Product Requirements Document: Migration from Express.js to FastMCP
+
+## Project Overview
+
+The MAAS MCP Server currently uses Express.js with direct MCP SDK integration. This project aims to migrate the server to use FastMCP, a specialized library for building MCP servers, while maintaining all existing functionality and custom features.
+
+## Current Architecture
+
+The current MAAS MCP Server is built using:
+- Express.js as the HTTP framework
+- Direct integration with the MCP SDK
+- Custom implementations for:
+  - Audit logging
+  - Multi-strategy caching (time-based and LRU)
+  - Progress notification system
+  - Operations registry
+  - MAAS API client with OAuth authentication
+  - Error handling and request tracking
+
+## Target Architecture
+
+The target architecture will use:
+- FastMCP as the primary framework for the MCP server
+- Custom middleware and extensions to maintain existing functionality
+- Preserved MAAS API client and domain-specific logic
+- Simplified codebase with reduced boilerplate
+
+## Migration Requirements
+
+### Core Server Implementation
+
+1. Replace the Express.js server with FastMCP while maintaining the same endpoints:
+   - `/mcp` for MCP protocol requests
+   - `/health` for health checks
+   - `/api/machines` for direct API access
+
+2. Configure FastMCP to use the same protocol version handling:
+   - Support for specific protocol version via environment variables
+   - Support for latest protocol version from SDK
+
+3. Implement proper server lifecycle management:
+   - Graceful startup and shutdown
+   - Error handling and logging
+   - Configuration from environment variables
+
+### Tool Migration
+
+1. Migrate all existing MCP tools to FastMCP's tool registration format:
+   - Maintain the same tool names, descriptions, and schemas
+   - Preserve all business logic and MAAS API interactions
+   - Ensure backward compatibility for all tool parameters
+
+2. Tools to migrate include:
+   - maas_list_machines
+   - maas_list_subnets
+   - maas_create_machine
+   - maas_create_device
+   - maas_create_network
+   - maas_create_tag
+   - maas_update_machine
+   - maas_update_device
+   - maas_update_network
+   - maas_delete_machine
+   - maas_delete_device
+   - maas_delete_network
+   - maas_upload_script
+   - maas_upload_image
+   - maas_deploy_machine_with_progress
+   - maas_commission_machine_with_progress
+
+### Resource Migration
+
+1. Migrate all existing MCP resources to FastMCP's resource registration format:
+   - Maintain the same URI patterns and schemas
+   - Preserve all business logic and MAAS API interactions
+   - Ensure backward compatibility for all resource parameters
+
+2. Resources to migrate include:
+   - machineDetails (URI pattern: `maas://machine/{system_id}/details`)
+   - subnetDetails (URI pattern: `maas://subnet/{subnet_id}/details`)
+   - tagsResource
+   - zoneResource
+
+### Custom Features Migration
+
+1. Audit Logging:
+   - Implement middleware or hooks in FastMCP to maintain audit logging
+   - Preserve all existing audit log fields and formats
+   - Maintain configuration options for audit logging
+
+2. Caching System:
+   - Implement resource caching with FastMCP
+   - Support both time-based and LRU caching strategies
+   - Maintain cache invalidation mechanisms
+   - Preserve cache configuration options
+
+3. Progress Notification System:
+   - Implement progress notification support in FastMCP
+   - Maintain the same notification format and rate limiting
+   - Ensure compatibility with existing clients
+
+4. Operations Registry:
+   - Migrate the operations registry to work with FastMCP
+   - Maintain operation tracking, status management, and cleanup
+   - Preserve AbortController integration
+
+5. Error Handling:
+   - Implement consistent error handling in FastMCP
+   - Maintain the same error formats and codes
+   - Preserve detailed error logging
+
+### Testing and Validation
+
+1. Create comprehensive tests for the FastMCP implementation:
+   - Unit tests for all migrated components
+   - Integration tests for end-to-end functionality
+   - Performance benchmarks comparing Express.js and FastMCP implementations
+
+2. Validate all functionality against the existing implementation:
+   - Tool execution and results
+   - Resource access and caching
+   - Error handling and logging
+   - Progress notifications
+   - Audit logging
+
+3. Ensure backward compatibility:
+   - All existing clients should work without modification
+   - All existing API contracts should be maintained
+
+### Documentation
+
+1. Update all documentation to reflect the new FastMCP implementation:
+   - README.md
+   - API documentation
+   - Configuration documentation
+   - Development guides
+
+2. Document the migration process and lessons learned
+
+## Technical Constraints
+
+1. Maintain compatibility with Node.js 18+
+2. Support the same environment variables for configuration
+3. Maintain the same performance characteristics or improve them
+4. Ensure the same level of security and compliance
+
+## Success Criteria
+
+1. All existing functionality is preserved
+2. Codebase is simplified and more maintainable
+3. Performance is maintained or improved
+4. All tests pass
+5. Documentation is updated
+6. No regression in functionality or performance
+
+## Migration Phases
+
+1. **Phase 1: Setup and Core Server**
+   - Set up FastMCP project structure
+   - Implement basic server with health endpoint
+   - Configure protocol version handling
+
+2. **Phase 2: Tool Migration**
+   - Migrate simple tools first
+   - Migrate complex tools with progress notifications
+   - Implement and test tool middleware
+
+3. **Phase 3: Resource Migration**
+   - Migrate all resources
+   - Implement resource caching
+   - Test resource access and performance
+
+4. **Phase 4: Custom Features**
+   - Implement audit logging
+   - Implement operations registry
+   - Implement progress notifications
+   - Implement error handling
+
+5. **Phase 5: Testing and Validation**
+   - Run comprehensive tests
+   - Benchmark performance
+   - Validate backward compatibility
+
+6. **Phase 6: Documentation and Cleanup**
+   - Update all documentation
+   - Remove deprecated code
+   - Finalize the migration
+
+## Timeline
+
+The migration is expected to take approximately 4-6 weeks, with the following breakdown:
+- Phase 1: 1 week
+- Phase 2: 1-2 weeks
+- Phase 3: 1 week
+- Phase 4: 1-2 weeks
+- Phase 5: 1 week
+- Phase 6: 1 week
+
+## Risks and Mitigation
+
+1. **Risk**: FastMCP may not support all custom features
+   **Mitigation**: Implement custom middleware or extensions as needed
+
+2. **Risk**: Performance may degrade with the new implementation
+   **Mitigation**: Conduct thorough performance testing and optimize as needed
+
+3. **Risk**: Backward compatibility issues
+   **Mitigation**: Comprehensive testing with existing clients
+
+4. **Risk**: Learning curve for developers
+   **Mitigation**: Provide training and documentation for the new implementation

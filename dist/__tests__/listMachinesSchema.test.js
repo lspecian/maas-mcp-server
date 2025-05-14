@@ -1,0 +1,94 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const listMachinesSchema_js_1 = require("../mcp_tools/schemas/listMachinesSchema.js");
+describe('List Machines Schema', () => {
+    test('should accept an empty object (all parameters optional)', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({});
+        expect(result.success).toBe(true);
+    });
+    test('should accept valid hostname patterns', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({
+            hostname: 'web-server-*'
+        });
+        expect(result.success).toBe(true);
+    });
+    test('should accept valid MAC address formats', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({
+            mac_address: '00:11:22:33:44:55'
+        });
+        expect(result.success).toBe(true);
+    });
+    test('should accept array of tag names', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({
+            tag_names: ['web', 'production', 'ubuntu']
+        });
+        expect(result.success).toBe(true);
+    });
+    test('should accept multiple valid parameters', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({
+            hostname: 'web-*',
+            status: 'ready',
+            zone: 'default',
+            limit: 10
+        });
+        expect(result.success).toBe(true);
+    });
+    test('should accept _meta with string progressToken', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({
+            hostname: 'web-*',
+            _meta: {
+                progressToken: 'token-123'
+            }
+        });
+        expect(result.success).toBe(true);
+    });
+    test('should accept _meta with number progressToken', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({
+            hostname: 'web-*',
+            _meta: {
+                progressToken: 12345
+            }
+        });
+        expect(result.success).toBe(true);
+    });
+    test('should accept empty _meta object', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({
+            hostname: 'web-*',
+            _meta: {}
+        });
+        expect(result.success).toBe(true);
+    });
+    test('should reject invalid progressToken type in _meta', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({
+            hostname: 'web-*',
+            _meta: {
+                progressToken: true // should be string or number
+            }
+        });
+        expect(result.success).toBe(false);
+    });
+    test('should reject invalid types for hostname', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({
+            hostname: 123 // should be string
+        });
+        expect(result.success).toBe(false);
+    });
+    test('should reject invalid types for tag_names', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({
+            tag_names: 'web,production' // should be array of strings
+        });
+        expect(result.success).toBe(false);
+    });
+    test('should reject invalid types for limit', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({
+            limit: -5 // should be positive number
+        });
+        expect(result.success).toBe(false);
+    });
+    test('should reject invalid types for offset', () => {
+        const result = listMachinesSchema_js_1.listMachinesSchema.safeParse({
+            offset: -1 // should be non-negative number
+        });
+        expect(result.success).toBe(false);
+    });
+});

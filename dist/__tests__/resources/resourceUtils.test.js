@@ -1,0 +1,198 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const zod_1 = require("zod");
+const resourceUtils_js_1 = require("../../mcp_resources/utils/resourceUtils.js"); // Assuming .js extension based on project setup
+const maas_ts_1 = require("../../types/maas.ts"); // Assuming .js extension
+const logger_ts_1 = __importDefault(require("../../utils/logger.ts")); // Assuming .js extension
+// Mock logger
+jest.mock('../../utils/logger.ts', () => ({
+    __esModule: true, // Use this if logger.js is an ES module
+    default: {
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+        debug: jest.fn(),
+        child: jest.fn().mockReturnValue({
+            info: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+            debug: jest.fn(),
+        }),
+    },
+    generateRequestId: jest.fn().mockReturnValue('test-request-id'),
+}));
+// Mock the audit logger
+jest.mock('../../utils/auditLogger.js', () => ({
+    __esModule: true,
+    default: {
+        logResourceAccess: jest.fn(),
+        logResourceAccessFailure: jest.fn(),
+        logResourceModification: jest.fn(),
+        logResourceModificationFailure: jest.fn(),
+        logCacheOperation: jest.fn(),
+    },
+}));
+// Mock extractParamsFromUri from uriPatterns.js
+// We need to control its return value for testing extractAndValidateParams
+jest.mock('../../mcp_resources/schemas/uriPatterns.js', () => {
+    const actualUriPatterns = jest.requireActual('../../mcp_resources/schemas/uriPatterns.js');
+    return {
+        ...actualUriPatterns, // Keep other exports like actual URI pattern strings
+        extractParamsFromUri: jest.fn(), // Mock this specific function
+    };
+});
+// Import the mocked function to control it in tests
+const uriPatterns_js_1 = require("../../mcp_resources/schemas/uriPatterns.js");
+describe('Resource Utilities', () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+    describe('extractAndValidateParams', () => {
+        const mockPattern = 'test://resource/{id}/item/{itemId}';
+        // Schema with a transformation
+        const mockSchemaWithTransform = zod_1.z.object({
+            id: zod_1.z.string().min(1, "ID cannot be empty"),
+            itemId: zod_1.z.string().regex(/^\d+$/, "Item ID must be a string of digits").transform(Number),
+        });
+        const resourceName = 'TestResource';
+        it('should extract and validate parameters successfully with transformation', () => {
+            uriPatterns_js_1.extractParamsFromUri.mockReturnValue({ id: 'abc', itemId: '123' });
+            const uri = 'test://resource/abc/item/123';
+            // Cast schema to ZodTypeAny to satisfy the generic constraint in tests, as ZodSchema<T> implies T_in = T_out
+            const params = (0, resourceUtils_js_1.extractAndValidateParams)(uri, mockPattern, mockSchemaWithTransform, resourceName);
+            expect(uriPatterns_js_1.extractParamsFromUri).toHaveBeenCalledWith(uri, mockPattern);
+            expect(params).toEqual({ id: 'abc', itemId: 123 }); // Transformed itemId
+        });
+        it('should throw MaasApiError for ZodError during validation (e.g., regex fail)', () => {
+            uriPatterns_js_1.extractParamsFromUri.mockReturnValue({ id: 'abc', itemId: 'invalid-id' }); // itemId does not match regex
+            const uri = 'test://resource/abc/item/invalid-id';
+            expect(() => (0, resourceUtils_js_1.extractAndValidateParams)(uri, mockPattern, mockSchemaWithTransform, resourceName))
+                .toThrowError(new maas_ts_1.MaasApiError(`Invalid parameters for ${resourceName} request`, 400, 'invalid_parameters', expect.any(Object)));
+            expect(logger_ts_1.default.error).toHaveBeenCalledWith(`Invalid parameters for ${resourceName} request`, expect.objectContaining({ issues: expect.any(Array) }));
+        });
+        it('should throw MaasApiError for ZodError during validation (e.g., min length fail)', () => {
+            uriPatterns_js_1.extractParamsFromUri.mockReturnValue({ id: '', itemId: '123' }); // id is empty
+            const uri = 'test://resource//item/123';
+            try {
+                (0, resourceUtils_js_1.extractAndValidateParams)(uri, mockPattern, mockSchemaWithTransform, resourceName);
+            }
+            catch (e) {
+                expect(e).toBeInstanceOf(maas_ts_1.MaasApiError);
+                expect(e.message).toBe(`Invalid parameters for ${resourceName} request`);
+                expect(e.statusCode).toBe(400);
+                expect(e.maasErrorCode).toBe('invalid_parameters');
+                expect(e.details.zodErrors[0].path).toEqual(['id']);
+            }
+        });
+        it('should re-throw MaasApiError if extractParamsFromUri throws it', () => {
+            const originalError = new maas_ts_1.MaasApiError('Extraction failed specifically', 400, 'extraction_error_test');
+            uriPatterns_js_1.extractParamsFromUri.mockImplementation(() => {
+                throw originalError;
+            });
+            const uri = 'test://resource/abc/item/123';
+            expect(() => (0, resourceUtils_js_1.extractAndValidateParams)(uri, mockPattern, mockSchemaWithTransform, resourceName))
+                .toThrow(originalError);
+        });
+        it('should wrap other errors from extractParamsFromUri in MaasApiError', () => {
+            const originalError = new Error('Some other extraction error');
+            uriPatterns_js_1.extractParamsFromUri.mockImplementation(() => {
+                throw originalError;
+            });
+            const uri = 'test://resource/abc/item/123';
+            expect(() => (0, resourceUtils_js_1.extractAndValidateParams)(uri, mockPattern, mockSchemaWithTransform, resourceName))
+                .toThrowError(new maas_ts_1.MaasApiError(`Error processing ${resourceName} request: ${originalError.message}`, 500, 'unexpected_error'));
+            expect(logger_ts_1.default.error).toHaveBeenCalledWith(`Error processing ${resourceName} request: ${originalError.message}`);
+        });
+    });
+    describe('validateResourceData', () => {
+        const mockSchema = zod_1.z.object({
+            name: zod_1.z.string(),
+            value: zod_1.z.number(),
+        });
+        const resourceName = 'SampleData';
+        it('should validate data successfully', () => {
+            const data = { name: 'Test', value: 100 };
+            const validatedData = (0, resourceUtils_js_1.validateResourceData)(data, mockSchema, resourceName);
+            expect(validatedData).toEqual(data);
+        });
+        it('should throw MaasApiError with 422 for ZodError during validation', () => {
+            const invalidData = { name: 'Test', value: 'not-a-number' }; // value should be number
+            expect(() => (0, resourceUtils_js_1.validateResourceData)(invalidData, mockSchema, resourceName))
+                .toThrowError(new maas_ts_1.MaasApiError(`${resourceName} data validation failed: The MAAS API returned data in an unexpected format`, 422, // Unprocessable Entity
+            'validation_error', expect.any(Object)));
+            expect(logger_ts_1.default.error).toHaveBeenCalledWith(`${resourceName} data validation failed`, expect.objectContaining({ issues: expect.any(Array) }));
+        });
+        it('should include resourceId in error message if provided', () => {
+            const invalidData = { name: 'Test', value: 'not-a-number' };
+            const resourceId = 'test-id-123';
+            expect(() => (0, resourceUtils_js_1.validateResourceData)(invalidData, mockSchema, resourceName, resourceId))
+                .toThrowError(new maas_ts_1.MaasApiError(`${resourceName} data validation failed for '${resourceId}': The MAAS API returned data in an unexpected format`, 422, 'validation_error', expect.any(Object)));
+        });
+        it('should re-throw non-ZodErrors', () => {
+            const customError = new Error('A custom non-zod error');
+            const mockFailingSchema = {
+                parse: jest.fn().mockImplementation(() => {
+                    throw customError;
+                }),
+            }; // Use ZodSchema<any> for this specific mock
+            expect(() => (0, resourceUtils_js_1.validateResourceData)({}, mockFailingSchema, resourceName)).toThrow(customError);
+        });
+    });
+    describe('handleResourceFetchError', () => {
+        const resourceName = 'MyResource';
+        const resourceId = 'my-id-1';
+        const context = { operation: 'fetch' };
+        it('should re-throw MaasApiError and log it', () => {
+            const originalError = new maas_ts_1.MaasApiError('Original MAAS Error', 503, 'maas_down');
+            expect(() => (0, resourceUtils_js_1.handleResourceFetchError)(originalError, resourceName, resourceId, context))
+                .toThrow(originalError);
+            expect(logger_ts_1.default.error).toHaveBeenCalledWith(`MAAS API error fetching ${resourceName} for ${resourceId}: ${originalError.message}`, expect.objectContaining({ statusCode: 503, errorCode: 'maas_down', ...context }));
+        });
+        it('should throw specific MaasApiError (404) for resource not found when resourceId is present', () => {
+            const originalError = new maas_ts_1.MaasApiError('Not Found from MAAS', 404, 'maas_not_found');
+            expect(() => (0, resourceUtils_js_1.handleResourceFetchError)(originalError, resourceName, resourceId, context))
+                .toThrowError(new maas_ts_1.MaasApiError(`${resourceName} '${resourceId}' not found`, 404, 'resource_not_found'));
+        });
+        it('should re-throw original 404 MaasApiError if resourceId is not present', () => {
+            const originalError = new maas_ts_1.MaasApiError('Generic Not Found', 404, 'generic_not_found_maas');
+            expect(() => (0, resourceUtils_js_1.handleResourceFetchError)(originalError, resourceName, undefined, context))
+                .toThrow(originalError);
+        });
+        it('should handle AbortError and throw MaasApiError (499)', () => {
+            const abortError = new Error('Request was aborted by user');
+            abortError.name = 'AbortError';
+            expect(() => (0, resourceUtils_js_1.handleResourceFetchError)(abortError, resourceName, resourceId, context))
+                .toThrowError(new maas_ts_1.MaasApiError(`${resourceName} request for ${resourceId} was aborted by the client`, 499, 'request_aborted'));
+            expect(logger_ts_1.default.warn).toHaveBeenCalledWith(`${resourceName} request for ${resourceId} was aborted`, context);
+        });
+        it('should handle ECONNREFUSED network error and throw MaasApiError (503)', () => {
+            const networkError = new Error('Connection refused by server');
+            networkError.cause = { code: 'ECONNREFUSED', errno: -111 };
+            expect(() => (0, resourceUtils_js_1.handleResourceFetchError)(networkError, resourceName, resourceId, context))
+                .toThrowError(new maas_ts_1.MaasApiError('Failed to connect to MAAS API: Network connectivity issue', 503, 'network_error', { originalError: networkError.message }));
+            expect(logger_ts_1.default.error).toHaveBeenCalledWith(`Network error fetching ${resourceName} for ${resourceId}: ${networkError.message}`, expect.objectContaining({ code: 'ECONNREFUSED', ...context }));
+        });
+        it('should handle ENOTFOUND network error and throw MaasApiError (503)', () => {
+            const networkError = new Error('DNS lookup failed for server');
+            networkError.cause = { code: 'ENOTFOUND' };
+            expect(() => (0, resourceUtils_js_1.handleResourceFetchError)(networkError, resourceName, resourceId, context))
+                .toThrowError(new maas_ts_1.MaasApiError('Failed to connect to MAAS API: Network connectivity issue', 503, 'network_error', { originalError: networkError.message }));
+        });
+        it('should handle ETIMEDOUT error and throw MaasApiError (504)', () => {
+            const timeoutError = new Error('MAAS API request timed out');
+            timeoutError.cause = { code: 'ETIMEDOUT' };
+            expect(() => (0, resourceUtils_js_1.handleResourceFetchError)(timeoutError, resourceName, resourceId, context))
+                .toThrowError(new maas_ts_1.MaasApiError(`MAAS API request timed out while fetching ${resourceName} for ${resourceId}`, 504, 'request_timeout', { originalError: timeoutError.message }));
+            expect(logger_ts_1.default.error).toHaveBeenCalledWith(`Timeout error fetching ${resourceName} for ${resourceId}: ${timeoutError.message}`, context);
+        });
+        it('should handle generic errors and throw MaasApiError (500)', () => {
+            const genericError = new Error('Something unexpected went wrong');
+            expect(() => (0, resourceUtils_js_1.handleResourceFetchError)(genericError, resourceName, resourceId, context))
+                .toThrowError(new maas_ts_1.MaasApiError(`Could not fetch ${resourceName} for ${resourceId}: ${genericError.message}`, 500, 'unexpected_error', { originalError: genericError.message }));
+            expect(logger_ts_1.default.error).toHaveBeenCalledWith(`Unexpected error fetching ${resourceName} for ${resourceId}: ${genericError.message}`, expect.objectContaining({ stack: genericError.stack, ...context }));
+        });
+    });
+});
