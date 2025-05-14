@@ -1,9 +1,0 @@
-{
-  "name": "list-machines-script",
-  "version": "1.0.0",
-  "description": "Script to test MAAS MCP Server by listing machines",
-  "type": "module",
-  "dependencies": {
-    "node-fetch": "^3.3.0"
-  }
-}
