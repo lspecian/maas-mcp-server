@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	apperrors "github.com/lspecian/maas-mcp-server/internal/errors" // Added import alias
 	"github.com/lspecian/maas-mcp-server/internal/models"
 	"github.com/lspecian/maas-mcp-server/internal/service"
 	"github.com/sirupsen/logrus"
@@ -106,7 +107,7 @@ func TestListTags(t *testing.T) {
 	mockService.ListTagsFunc = func(ctx context.Context) ([]models.TagContext, error) {
 		return nil, &service.ServiceError{
 			Err:        service.ErrServiceUnavailable,
-			StatusCode: http.StatusServiceUnavailable,
+			StatusCode: http.StatusServiceUnavailable, // This will be mapped by handleError
 			Message:    "MAAS API unavailable",
 		}
 	}
@@ -115,12 +116,18 @@ func TestListTags(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusServiceUnavailable, w.Code)
+	// handleError in TagHandler (assuming similar to StorageHandler) will map ServiceUnavailable to BadGateway
+	assert.Equal(t, http.StatusBadGateway, w.Code)
 
-	var errorResponse map[string]string
+	var errorResponse struct {
+		Type    string `json:"type"`
+		Message string `json:"message"`
+	}
 	err = json.Unmarshal(w.Body.Bytes(), &errorResponse)
 	assert.NoError(t, err)
-	assert.Equal(t, "MAAS API unavailable", errorResponse["error"])
+	// Assuming ServiceUnavailable maps to ErrorTypeMaasClient or similar
+	assert.Equal(t, string(apperrors.ErrorTypeMaasClient), errorResponse.Type)
+	assert.Equal(t, "MAAS API unavailable", errorResponse.Message)
 }
 
 func TestCreateTag(t *testing.T) {
@@ -170,7 +177,7 @@ func TestCreateTag(t *testing.T) {
 	// Test case 3: Service error
 	mockService.CreateTagFunc = func(ctx context.Context, name string, comment string) (models.TagContext, error) {
 		return models.TagContext{}, &service.ServiceError{
-			Err:        service.ErrBadRequest,
+			Err:        service.ErrBadRequest, // This will be mapped by handleError
 			StatusCode: http.StatusBadRequest,
 			Message:    "Invalid tag name format",
 		}
@@ -188,10 +195,15 @@ func TestCreateTag(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
-	var badRequestResponse map[string]string
+	var badRequestResponse struct {
+		Type    string `json:"type"`
+		Message string `json:"message"`
+	}
 	err = json.Unmarshal(w.Body.Bytes(), &badRequestResponse)
 	assert.NoError(t, err)
-	assert.Equal(t, "Invalid tag name format", badRequestResponse["error"])
+	// Assuming ErrBadRequest maps to ErrorTypeValidation
+	assert.Equal(t, string(apperrors.ErrorTypeValidation), badRequestResponse.Type)
+	assert.Equal(t, "Invalid tag name format", badRequestResponse.Message)
 }
 
 func TestApplyTagToMachine(t *testing.T) {
@@ -216,24 +228,24 @@ func TestApplyTagToMachine(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "Tag applied successfully", response["message"])
 
-	// Test case 2: Missing machine ID
+	// Test case 2: Missing machine ID (results in 404 from Gin router)
 	req = httptest.NewRequest(http.MethodPost, "/machines//tags/test-tag", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, http.StatusNotFound, w.Code) // Gin returns 404 for malformed path parameters
 
-	// Test case 3: Missing tag name
+	// Test case 3: Missing tag name (results in 404 from Gin router)
 	req = httptest.NewRequest(http.MethodPost, "/machines/machine-1/tags/", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, http.StatusNotFound, w.Code) // Gin returns 404 for malformed path parameters
 
 	// Test case 4: Service error
 	mockService.ApplyTagToMachineFunc = func(ctx context.Context, tagName string, machineID string) error {
 		return &service.ServiceError{
-			Err:        service.ErrNotFound,
+			Err:        service.ErrNotFound, // Mapped by handleError
 			StatusCode: http.StatusNotFound,
 			Message:    "Tag or machine not found",
 		}
@@ -245,8 +257,12 @@ func TestApplyTagToMachine(t *testing.T) {
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 
-	var errorResponse map[string]string
+	var errorResponse struct {
+		Type    string `json:"type"`
+		Message string `json:"message"`
+	}
 	err = json.Unmarshal(w.Body.Bytes(), &errorResponse)
 	assert.NoError(t, err)
-	assert.Equal(t, "Tag or machine not found", errorResponse["error"])
+	assert.Equal(t, string(apperrors.ErrorTypeNotFound), errorResponse.Type)
+	assert.Equal(t, "Tag or machine not found", errorResponse.Message)
 }

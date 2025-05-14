@@ -62,9 +62,9 @@ func TestGinErrorResponse(t *testing.T) {
 		},
 		{
 			name:               "StandardError",
-			err:                errors.New("standard error"),
+			err:                errors.New("standard error"), // This will be wrapped by NewErrorResponse
 			expectedStatusCode: http.StatusInternalServerError,
-			expectedType:       "unknown_error",
+			expectedType:       string(ErrorTypeInternal), // NewErrorResponse wraps it as Internal
 			expectedMessage:    "standard error",
 		},
 	}
@@ -158,7 +158,7 @@ func TestGinForbidden(t *testing.T) {
 	GinForbidden(c, "Forbidden message", cause)
 
 	assert.Equal(t, http.StatusForbidden, w.Code)
-	assert.Contains(t, w.Body.String(), string(ErrorTypeAuthentication))
+	assert.Contains(t, w.Body.String(), string(ErrorTypeForbidden))
 	assert.Contains(t, w.Body.String(), "Forbidden message")
 }
 
@@ -180,4 +180,54 @@ func TestGinMaasClientError(t *testing.T) {
 	assert.Equal(t, http.StatusBadGateway, w.Code)
 	assert.Contains(t, w.Body.String(), string(ErrorTypeMaasClient))
 	assert.Contains(t, w.Body.String(), "MAAS client error message")
+}
+
+func TestGinRateLimitError(t *testing.T) {
+	c, w := setupGinTest()
+	cause := errors.New("original error")
+	GinRateLimitError(c, "Rate limit error message", cause)
+
+	assert.Equal(t, http.StatusTooManyRequests, w.Code)
+	assert.Contains(t, w.Body.String(), string(ErrorTypeRateLimit))
+	assert.Contains(t, w.Body.String(), "Rate limit error message")
+}
+
+func TestGinTimeoutError(t *testing.T) {
+	c, w := setupGinTest()
+	cause := errors.New("original error")
+	GinTimeoutError(c, "Timeout error message", cause)
+
+	assert.Equal(t, http.StatusGatewayTimeout, w.Code) // Corrected expected status
+	assert.Contains(t, w.Body.String(), string(ErrorTypeTimeout))
+	assert.Contains(t, w.Body.String(), "Timeout error message")
+}
+
+func TestGinConflictError(t *testing.T) {
+	c, w := setupGinTest()
+	cause := errors.New("original error")
+	GinConflictError(c, "Conflict error message", cause)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.Contains(t, w.Body.String(), string(ErrorTypeConflict))
+	assert.Contains(t, w.Body.String(), "Conflict error message")
+}
+
+func TestGinUnsupportedOperationError(t *testing.T) {
+	c, w := setupGinTest()
+	cause := errors.New("original error")
+	GinUnsupportedOperationError(c, "Unsupported operation message", cause)
+
+	assert.Equal(t, http.StatusMethodNotAllowed, w.Code) // Corrected expected status
+	assert.Contains(t, w.Body.String(), string(ErrorTypeUnsupportedOperation))
+	assert.Contains(t, w.Body.String(), "Unsupported operation message")
+}
+
+func TestGinBadGatewayError(t *testing.T) {
+	c, w := setupGinTest()
+	cause := errors.New("original error")
+	GinBadGatewayError(c, "Bad gateway message", cause)
+
+	assert.Equal(t, http.StatusBadGateway, w.Code)
+	assert.Contains(t, w.Body.String(), string(ErrorTypeBadGateway))
+	assert.Contains(t, w.Body.String(), "Bad gateway message")
 }

@@ -2,7 +2,6 @@ package machine
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/canonical/gomaasclient/entity"
 	"github.com/sirupsen/logrus"
@@ -33,214 +32,91 @@ func (r *MaasRepository) Close() error {
 
 // ListMachines retrieves machines based on filters
 func (r *MaasRepository) ListMachines(ctx context.Context, filters map[string]string) ([]models.Machine, error) {
-	// Convert filters to MAAS parameters
-	params := &entity.MachinesParams{}
-
-	if hostname, ok := filters["hostname"]; ok {
-		params.Hostname = []string{hostname}
-	}
-
-	if zone, ok := filters["zone"]; ok {
-		params.Zone = []string{zone}
-	}
-
-	if tags, ok := filters["tags"]; ok {
-		params.Tags = []string{tags}
-	}
-
-	// Call MAAS client
-	machines, err := r.client.ListMachines(params)
+	// Call MAAS client. ClientWrapper.ListMachines now handles mapping filters and pagination (nil for no pagination).
+	// It returns []models.Machine, int (count), error.
+	modelMachines, _, err := r.client.ListMachines(ctx, filters, nil)
 	if err != nil {
-		r.logger.WithError(err).Error("Failed to list machines from MAAS")
+		r.logger.WithError(err).Error("Failed to list machines from MAAS via ClientWrapper")
 		return nil, err
 	}
-
-	// Convert to internal models
-	result := make([]models.Machine, len(machines))
-	for i, m := range machines {
-		result[i] = models.Machine{
-			SystemID:     m.SystemID,
-			Hostname:     m.Hostname,
-			FQDN:         m.FQDN,
-			Status:       fmt.Sprint(m.Status),
-			StatusName:   mapMAASStatus(int(m.Status)),
-			Architecture: m.Architecture,
-			PowerState:   m.PowerState,
-			Zone:         m.Zone.Name,
-			Pool:         m.Pool.Name,
-			Tags:         m.TagNames,
-			CPUCount:     m.CPUCount,
-			Memory:       m.Memory,
-			OSSystem:     m.OSystem,
-			DistroSeries: m.DistroSeries,
-		}
-	}
-
-	return result, nil
+	// The result from ClientWrapper is already []models.Machine, so no further conversion is needed here.
+	return modelMachines, nil
 }
 
 // GetMachine retrieves details for a specific machine
 func (r *MaasRepository) GetMachine(ctx context.Context, systemID string) (*models.Machine, error) {
-	// Call MAAS client
+	// Call MAAS client. ClientWrapper.GetMachine returns *models.Machine.
 	machine, err := r.client.GetMachine(systemID)
 	if err != nil {
-		r.logger.WithError(err).WithField("id", systemID).Error("Failed to get machine from MAAS")
+		r.logger.WithError(err).WithField("id", systemID).Error("Failed to get machine from MAAS via ClientWrapper")
 		return nil, err
 	}
-
-	// Convert to internal model
-	result := &models.Machine{
-		SystemID:     machine.SystemID,
-		Hostname:     machine.Hostname,
-		FQDN:         machine.FQDN,
-		Status:       fmt.Sprint(machine.Status),
-		StatusName:   mapMAASStatus(int(machine.Status)),
-		Architecture: machine.Architecture,
-		PowerState:   machine.PowerState,
-		Zone:         machine.Zone.Name,
-		Pool:         machine.Pool.Name,
-		Tags:         machine.TagNames,
-		CPUCount:     machine.CPUCount,
-		Memory:       machine.Memory,
-		OSSystem:     machine.OSystem,
-		DistroSeries: machine.DistroSeries,
-	}
-
-	return result, nil
+	// The result from ClientWrapper is already *models.Machine.
+	return machine, nil
 }
 
 // AllocateMachine allocates a machine based on constraints
 func (r *MaasRepository) AllocateMachine(ctx context.Context, params *entity.MachineAllocateParams) (*models.Machine, error) {
-	// Call MAAS client
+	// Call MAAS client. ClientWrapper.AllocateMachine returns *models.Machine.
 	machine, err := r.client.AllocateMachine(params)
 	if err != nil {
-		r.logger.WithError(err).Error("Failed to allocate machine from MAAS")
+		r.logger.WithError(err).Error("Failed to allocate machine from MAAS via ClientWrapper")
 		return nil, err
 	}
-
-	// Convert to internal model
-	result := &models.Machine{
-		SystemID:     machine.SystemID,
-		Hostname:     machine.Hostname,
-		FQDN:         machine.FQDN,
-		Status:       fmt.Sprint(machine.Status),
-		StatusName:   mapMAASStatus(int(machine.Status)),
-		Architecture: machine.Architecture,
-		PowerState:   machine.PowerState,
-		Zone:         machine.Zone.Name,
-		Pool:         machine.Pool.Name,
-		Tags:         machine.TagNames,
-		CPUCount:     machine.CPUCount,
-		Memory:       machine.Memory,
-		OSSystem:     machine.OSystem,
-		DistroSeries: machine.DistroSeries,
-	}
-
-	return result, nil
+	// The result from ClientWrapper is already *models.Machine.
+	return machine, nil
 }
 
 // DeployMachine deploys an allocated machine
 func (r *MaasRepository) DeployMachine(ctx context.Context, systemID string, params *entity.MachineDeployParams) (*models.Machine, error) {
-	// Call MAAS client
+	// Call MAAS client. ClientWrapper.DeployMachine returns *models.Machine.
 	machine, err := r.client.DeployMachine(systemID, params)
 	if err != nil {
-		r.logger.WithError(err).WithField("id", systemID).Error("Failed to deploy machine from MAAS")
+		r.logger.WithError(err).WithField("id", systemID).Error("Failed to deploy machine from MAAS via ClientWrapper")
 		return nil, err
 	}
-
-	// Convert to internal model
-	result := &models.Machine{
-		SystemID:     machine.SystemID,
-		Hostname:     machine.Hostname,
-		FQDN:         machine.FQDN,
-		Status:       fmt.Sprint(machine.Status),
-		StatusName:   mapMAASStatus(int(machine.Status)),
-		Architecture: machine.Architecture,
-		PowerState:   machine.PowerState,
-		Zone:         machine.Zone.Name,
-		Pool:         machine.Pool.Name,
-		Tags:         machine.TagNames,
-		CPUCount:     machine.CPUCount,
-		Memory:       machine.Memory,
-		OSSystem:     machine.OSystem,
-		DistroSeries: machine.DistroSeries,
-	}
-
-	return result, nil
+	// The result from ClientWrapper is already *models.Machine.
+	return machine, nil
 }
 
 // ReleaseMachine releases a machine back to the pool
 func (r *MaasRepository) ReleaseMachine(ctx context.Context, systemIDs []string, comment string) error {
 	// Call MAAS client
+	// ClientWrapper.ReleaseMachine signature matches this.
 	err := r.client.ReleaseMachine(systemIDs, comment)
 	if err != nil {
-		r.logger.WithError(err).WithField("ids", systemIDs).Error("Failed to release machine from MAAS")
+		r.logger.WithError(err).WithField("ids", systemIDs).Error("Failed to release machine from MAAS via ClientWrapper")
 		return err
 	}
-
 	return nil
 }
 
 // PowerOnMachine powers on a machine
 func (r *MaasRepository) PowerOnMachine(ctx context.Context, systemID string) (*models.Machine, error) {
-	// Call MAAS client
+	// Call MAAS client. ClientWrapper.PowerOnMachine returns *models.Machine.
 	machine, err := r.client.PowerOnMachine(systemID)
 	if err != nil {
-		r.logger.WithError(err).WithField("id", systemID).Error("Failed to power on machine")
+		r.logger.WithError(err).WithField("id", systemID).Error("Failed to power on machine via ClientWrapper")
 		return nil, err
 	}
-
-	// Convert to internal model
-	result := &models.Machine{
-		SystemID:     machine.SystemID,
-		Hostname:     machine.Hostname,
-		FQDN:         machine.FQDN,
-		Status:       fmt.Sprint(machine.Status),
-		StatusName:   mapMAASStatus(int(machine.Status)),
-		Architecture: machine.Architecture,
-		PowerState:   machine.PowerState,
-		Zone:         machine.Zone.Name,
-		Pool:         machine.Pool.Name,
-		Tags:         machine.TagNames,
-		CPUCount:     machine.CPUCount,
-		Memory:       machine.Memory,
-		OSSystem:     machine.OSystem,
-		DistroSeries: machine.DistroSeries,
-	}
-
-	return result, nil
+	// The result from ClientWrapper is already *models.Machine.
+	return machine, nil
 }
 
 // PowerOffMachine powers off a machine
 func (r *MaasRepository) PowerOffMachine(ctx context.Context, systemID string) (*models.Machine, error) {
-	// Call MAAS client
+	// Call MAAS client. ClientWrapper.PowerOffMachine returns *models.Machine.
 	machine, err := r.client.PowerOffMachine(systemID)
 	if err != nil {
-		r.logger.WithError(err).WithField("id", systemID).Error("Failed to power off machine")
+		r.logger.WithError(err).WithField("id", systemID).Error("Failed to power off machine via ClientWrapper")
 		return nil, err
 	}
-
-	// Convert to internal model
-	result := &models.Machine{
-		SystemID:     machine.SystemID,
-		Hostname:     machine.Hostname,
-		FQDN:         machine.FQDN,
-		Status:       fmt.Sprint(machine.Status),
-		StatusName:   mapMAASStatus(int(machine.Status)),
-		Architecture: machine.Architecture,
-		PowerState:   machine.PowerState,
-		Zone:         machine.Zone.Name,
-		Pool:         machine.Pool.Name,
-		Tags:         machine.TagNames,
-		CPUCount:     machine.CPUCount,
-		Memory:       machine.Memory,
-		OSSystem:     machine.OSystem,
-		DistroSeries: machine.DistroSeries,
-	}
-
-	return result, nil
+	// The result from ClientWrapper is already *models.Machine.
+	return machine, nil
 }
 
+// mapMAASStatus is no longer needed here as StatusName is populated in models.Machine.FromEntity
+/*
 // Helper function to map MAAS status codes to human-readable status names
 func mapMAASStatus(maasStatusCode int) string {
 	// Based on potential MAAS status codes/enums
@@ -279,3 +155,4 @@ func mapMAASStatus(maasStatusCode int) string {
 		return "Unknown"
 	}
 }
+*/

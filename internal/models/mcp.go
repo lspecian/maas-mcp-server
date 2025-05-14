@@ -7,21 +7,22 @@ import (
 
 // MachineContext represents a machine in the MCP context
 type MachineContext struct {
-	ID           string            `json:"id"`
-	Name         string            `json:"name"`
-	Status       string            `json:"status"`
-	Architecture string            `json:"architecture"`
-	PowerState   string            `json:"power_state"`
-	Zone         string            `json:"zone"`
-	Pool         string            `json:"pool"`
-	Tags         []string          `json:"tags"`
-	Networks     []NetworkContext  `json:"networks"`
-	Storage      []StorageContext  `json:"storage"`
-	CPUCount     int               `json:"cpu_count"`
-	Memory       int64             `json:"memory_mb"`
-	OSInfo       OSInfo            `json:"os_info"`
-	LastUpdated  time.Time         `json:"last_updated"`
-	Metadata     map[string]string `json:"metadata,omitempty"`
+	ID                string            `json:"id"`
+	Name              string            `json:"name"`
+	FQDN              string            `json:"fqdn,omitempty"` // Added FQDN
+	Status            string            `json:"status"`
+	Architecture      string            `json:"architecture"`
+	PowerState        string            `json:"power_state"`
+	Zone              string            `json:"zone"`
+	Pool              string            `json:"pool"`
+	Tags              []string          `json:"tags"`
+	NetworkInterfaces []NetworkContext  `json:"network_interfaces,omitempty"` // Changed from Networks
+	BlockDevices      []StorageContext  `json:"block_devices,omitempty"`      // Changed from Storage
+	CPUCount          int               `json:"cpu_count"`
+	Memory            int64             `json:"memory_mb"`
+	OSInfo            OSInfo            `json:"os_info"`
+	LastUpdated       time.Time         `json:"last_updated"`
+	Metadata          map[string]string `json:"metadata,omitempty"`
 }
 
 // Validate checks if the MachineContext has all required fields

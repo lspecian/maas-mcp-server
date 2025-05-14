@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lspecian/maas-mcp-server/internal/config"
 	"github.com/lspecian/maas-mcp-server/internal/logging"
+	"github.com/lspecian/maas-mcp-server/internal/models"
 	"github.com/lspecian/maas-mcp-server/internal/service"
 	"github.com/lspecian/maas-mcp-server/internal/transport"
 	"github.com/lspecian/maas-mcp-server/test/integration/mock"
@@ -33,21 +33,30 @@ func NewTestServer(t *testing.T) *TestServer {
 	gin.SetMode(gin.TestMode)
 
 	// Create a test configuration
-	cfg := &config.Config{}
-	cfg.Server.Host = "localhost"
-	cfg.Server.Port = 8080
-
-	// Initialize MAAS instances map
-	cfg.MAASInstances = make(map[string]config.MAASInstanceConfig)
+	cfg := &models.AppConfig{
+		Server: models.ServerConfig{
+			Host: "localhost",
+			Port: 8080,
+		},
+		MAASInstances: make(map[string]models.MAASInstanceConfig),
+		Auth: models.AuthConfig{
+			Enabled: false,
+			RateLimit: models.RateLimitConfig{
+				Enabled:     true,
+				MaxAttempts: 5,
+				Window:      300,
+			},
+		},
+		Logging: models.LoggingConfig{
+			Level: "error",
+		},
+	}
 
 	// Add a default MAAS instance for testing
-	cfg.MAASInstances["default"] = config.MAASInstanceConfig{
+	cfg.MAASInstances["default"] = models.MAASInstanceConfig{
 		APIURL: "http://localhost:5240/MAAS/api/2.0",
 		APIKey: "test:test:test",
 	}
-
-	cfg.Auth.Enabled = false
-	cfg.Logging.Level = "error"
 
 	// Create a logger
 	logger := logging.NewLogger(cfg.Logging.Level)

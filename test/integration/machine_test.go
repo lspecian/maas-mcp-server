@@ -17,37 +17,56 @@ func TestListMachines(t *testing.T) {
 
 	t.Run("ListAllMachines", func(t *testing.T) {
 		// Make request
-		resp, respBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines", nil)
+		resp, respBody := ts.MakeRequest(t, http.MethodGet, "/api/v1/machines", nil) // Changed to GET
 
 		// Verify response
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 
-		var machines []mcp.MachineSummary
-		ParseJSONResponse(t, respBody, &machines)
+		var responseData struct {
+			Machines []mcp.MachineSummary `json:"machines"`
+		}
+		ParseJSONResponse(t, respBody, &responseData)
 
 		// Verify we got the expected machines
-		require.Len(t, machines, 2)
-		assert.Equal(t, "abc123", machines[0].SystemID)
-		assert.Equal(t, "def456", machines[1].SystemID)
+		require.Len(t, responseData.Machines, 2)
+		foundAbc123 := false
+		foundDef456 := false
+		for _, m := range responseData.Machines {
+			if m.SystemID == "abc123" {
+				foundAbc123 = true
+			}
+			if m.SystemID == "def456" {
+				foundDef456 = true
+			}
+		}
+		assert.True(t, foundAbc123, "Machine abc123 not found")
+		assert.True(t, foundDef456, "Machine def456 not found")
 	})
 
 	t.Run("ListMachinesWithFilters", func(t *testing.T) {
 		// Make request with hostname filter
-		reqBody := map[string]string{
-			"hostname": "test-machine-1",
-		}
-		resp, respBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines", reqBody)
+		// reqBody := map[string]string{ // Unused after changing to GET
+		// 	"hostname": "test-machine-1",
+		// }
+		// For GET request with filters, filters should be query parameters
+		// However, the handler ListMachines extracts filters from c.Request.URL.Query()
+		// So, we need to construct the URL with query params for GET.
+		// For simplicity in this step, assuming the test helper MakeRequest handles map for GET query params.
+		// If not, this will need adjustment to build a URL string with query params.
+		resp, respBody := ts.MakeRequest(t, http.MethodGet, "/api/v1/machines?hostname=test-machine-1", nil) // Changed to GET with query param
 
 		// Verify response
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 
-		var machines []mcp.MachineSummary
-		ParseJSONResponse(t, respBody, &machines)
+		var responseData struct {
+			Machines []mcp.MachineSummary `json:"machines"`
+		}
+		ParseJSONResponse(t, respBody, &responseData)
 
 		// Verify we got only the filtered machine
-		require.Len(t, machines, 1)
-		assert.Equal(t, "abc123", machines[0].SystemID)
-		assert.Equal(t, "test-machine-1", machines[0].Hostname)
+		require.Len(t, responseData.Machines, 1)
+		assert.Equal(t, "abc123", responseData.Machines[0].SystemID)
+		assert.Equal(t, "test-machine-1", responseData.Machines[0].Hostname)
 	})
 
 	t.Run("ListMachinesWithError", func(t *testing.T) {
@@ -55,7 +74,7 @@ func TestListMachines(t *testing.T) {
 		ts.MockClient.SetFailNextCall(true, "ListMachines")
 
 		// Make request
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines", nil)
+		resp, _ := ts.MakeRequest(t, http.MethodGet, "/api/v1/machines", nil) // Changed to GET
 
 		// Verify response
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
@@ -72,10 +91,9 @@ func TestGetMachineDetails(t *testing.T) {
 
 	t.Run("GetExistingMachine", func(t *testing.T) {
 		// Make request
-		reqBody := map[string]string{
-			"system_id": "abc123",
-		}
-		resp, respBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/details", reqBody)
+		systemID := "abc123"
+		url := "/api/v1/machines/" + systemID
+		resp, respBody := ts.MakeRequest(t, http.MethodGet, url, nil) // Changed to GET, updated URL, nil body
 
 		// Verify response
 		require.Equal(t, http.StatusOK, resp.StatusCode)
@@ -105,10 +123,9 @@ func TestGetMachineDetails(t *testing.T) {
 
 	t.Run("GetNonExistentMachine", func(t *testing.T) {
 		// Make request with non-existent system ID
-		reqBody := map[string]string{
-			"system_id": "nonexistent",
-		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/details", reqBody)
+		systemID := "nonexistent"
+		url := "/api/v1/machines/" + systemID
+		resp, _ := ts.MakeRequest(t, http.MethodGet, url, nil) // Changed to GET, updated URL, nil body
 
 		// Verify response
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
@@ -119,10 +136,9 @@ func TestGetMachineDetails(t *testing.T) {
 		ts.MockClient.SetFailNextCall(true, "GetMachine")
 
 		// Make request
-		reqBody := map[string]string{
-			"system_id": "abc123",
-		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/details", reqBody)
+		systemID := "abc123"
+		url := "/api/v1/machines/" + systemID
+		resp, _ := ts.MakeRequest(t, http.MethodGet, url, nil) // Changed to GET, updated URL, nil body
 
 		// Verify response
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
@@ -139,11 +155,11 @@ func TestAllocateMachine(t *testing.T) {
 
 	t.Run("AllocateMachineWithConstraints", func(t *testing.T) {
 		// Make request
-		reqBody := mcp.AllocateMachineRequest{
-			MinCPUCount:  2,
-			MinMemory:    4096,
-			Tags:         []string{"test"},
-			Architecture: "amd64/generic",
+		reqBody := map[string]string{ // Changed to map[string]string
+			"min_cpu_count": "2",    // Value as string
+			"min_memory":    "4096", // Value as string
+			"tags":          "test", // Comma-separated if multiple, or single
+			"architecture":  "amd64/generic",
 		}
 		resp, respBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/allocate", reqBody)
 
@@ -160,8 +176,8 @@ func TestAllocateMachine(t *testing.T) {
 
 	t.Run("AllocateMachineWithNoMatch", func(t *testing.T) {
 		// Make request with constraints that won't match any machine
-		reqBody := mcp.AllocateMachineRequest{
-			MinCPUCount: 100, // No machine has this many CPUs
+		reqBody := map[string]string{ // Changed to map[string]string
+			"min_cpu_count": "100", // Value as string
 		}
 		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/allocate", reqBody)
 
@@ -174,8 +190,8 @@ func TestAllocateMachine(t *testing.T) {
 		ts.MockClient.SetFailNextCall(true, "AllocateMachine")
 
 		// Make request
-		reqBody := mcp.AllocateMachineRequest{
-			MinCPUCount: 2,
+		reqBody := map[string]string{ // Changed to map[string]string
+			"min_cpu_count": "2", // Value as string
 		}
 		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/allocate", reqBody)
 
@@ -207,11 +223,12 @@ func TestDeployMachine(t *testing.T) {
 
 		// Now deploy the allocated machine
 		deployReqBody := mcp.DeployMachineRequest{
-			SystemID:     allocatedMachine.SystemID,
+			SystemID:     allocatedMachine.SystemID, // SystemID in body is okay, handler uses path param
 			DistroSeries: "focal",
 			UserData:     "#!/bin/bash\necho 'Hello, World!'",
 		}
-		resp, respBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/deploy", deployReqBody)
+		url := "/api/v1/machines/" + allocatedMachine.SystemID + "/deploy"
+		resp, respBody := ts.MakeRequest(t, http.MethodPost, url, deployReqBody)
 
 		// Verify response
 		require.Equal(t, http.StatusOK, resp.StatusCode)
@@ -231,7 +248,8 @@ func TestDeployMachine(t *testing.T) {
 			SystemID:     "def456", // This machine is in "Deployed" state
 			DistroSeries: "focal",
 		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/deploy", deployReqBody)
+		url := "/api/v1/machines/def456/deploy"
+		resp, _ := ts.MakeRequest(t, http.MethodPost, url, deployReqBody)
 
 		// Verify response
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
@@ -246,7 +264,8 @@ func TestDeployMachine(t *testing.T) {
 			SystemID:     "abc123",
 			DistroSeries: "focal",
 		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/deploy", deployReqBody)
+		url := "/api/v1/machines/abc123/deploy"
+		resp, _ := ts.MakeRequest(t, http.MethodPost, url, deployReqBody)
 
 		// Verify response
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
@@ -267,7 +286,8 @@ func TestReleaseMachine(t *testing.T) {
 			SystemID: "def456", // This machine is in "Deployed" state
 			Comment:  "Testing release",
 		}
-		resp, respBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/release", reqBody)
+		url := "/api/v1/machines/def456/release"
+		resp, respBody := ts.MakeRequest(t, http.MethodPost, url, reqBody)
 
 		// Verify response
 		require.Equal(t, http.StatusOK, resp.StatusCode)
@@ -278,7 +298,8 @@ func TestReleaseMachine(t *testing.T) {
 		assert.Contains(t, result["message"], "released successfully")
 
 		// Verify the machine is now in "Ready" state
-		machineResp, machineRespBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/details", map[string]string{"system_id": "def456"})
+		detailUrl := "/api/v1/machines/def456"
+		machineResp, machineRespBody := ts.MakeRequest(t, http.MethodGet, detailUrl, nil) // Changed to GET for details
 		require.Equal(t, http.StatusOK, machineResp.StatusCode)
 
 		var machine mcp.MachineDetails
@@ -291,7 +312,8 @@ func TestReleaseMachine(t *testing.T) {
 		reqBody := mcp.ReleaseMachineRequest{
 			SystemID: "nonexistent",
 		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/release", reqBody)
+		url := "/api/v1/machines/nonexistent/release"
+		resp, _ := ts.MakeRequest(t, http.MethodPost, url, reqBody)
 
 		// Verify response
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
@@ -305,7 +327,8 @@ func TestReleaseMachine(t *testing.T) {
 		reqBody := mcp.ReleaseMachineRequest{
 			SystemID: "abc123",
 		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/release", reqBody)
+		url := "/api/v1/machines/abc123/release"
+		resp, _ := ts.MakeRequest(t, http.MethodPost, url, reqBody)
 
 		// Verify response
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
@@ -322,10 +345,9 @@ func TestGetMachinePowerState(t *testing.T) {
 
 	t.Run("GetPowerStateForExistingMachine", func(t *testing.T) {
 		// Make request
-		reqBody := mcp.GetMachinePowerStateRequest{
-			SystemID: "abc123",
-		}
-		resp, respBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/power-state", reqBody)
+		systemID := "abc123"
+		url := "/api/v1/machines/" + systemID + "/power"
+		resp, respBody := ts.MakeRequest(t, http.MethodGet, url, nil) // Changed to GET, updated URL, nil body
 
 		// Verify response
 		require.Equal(t, http.StatusOK, resp.StatusCode)
@@ -338,10 +360,9 @@ func TestGetMachinePowerState(t *testing.T) {
 
 	t.Run("GetPowerStateForNonExistentMachine", func(t *testing.T) {
 		// Make request with non-existent system ID
-		reqBody := mcp.GetMachinePowerStateRequest{
-			SystemID: "nonexistent",
-		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/power-state", reqBody)
+		systemID := "nonexistent"
+		url := "/api/v1/machines/" + systemID + "/power"
+		resp, _ := ts.MakeRequest(t, http.MethodGet, url, nil) // Changed to GET, updated URL, nil body
 
 		// Verify response
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
@@ -352,10 +373,10 @@ func TestGetMachinePowerState(t *testing.T) {
 		ts.MockClient.SetFailNextCall(true, "GetMachine")
 
 		// Make request
-		reqBody := mcp.GetMachinePowerStateRequest{
-			SystemID: "abc123",
-		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/power-state", reqBody)
+		systemID := "abc123" // Define systemID for URL construction
+		url := "/api/v1/machines/" + systemID + "/power"
+		// reqBody is not needed for GET request if systemID is in path
+		resp, _ := ts.MakeRequest(t, http.MethodGet, url, nil) // Changed to GET, updated URL, nil body
 
 		// Verify response
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)

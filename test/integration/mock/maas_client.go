@@ -1,16 +1,21 @@
 package mock
 
 import (
+	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/canonical/gomaasclient/entity"
 	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/models/maas"
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/mock" // Added import
 )
 
 // MockMaasClient is a mock implementation of the MAAS client for testing.
 type MockMaasClient struct {
+	mock.Mock     // Embedded mock.Mock
 	machines      map[string]*models.Machine
 	subnets       map[int]*models.Subnet
 	vlans         map[int][]models.VLAN
@@ -223,10 +228,10 @@ func (m *MockMaasClient) initTestData() {
 	}
 }
 
-// ListMachines retrieves machines based on filters.
-func (m *MockMaasClient) ListMachines(filters map[string]string) ([]models.Machine, error) {
+// ListMachines retrieves machines based on filters with pagination.
+func (m *MockMaasClient) ListMachines(ctx context.Context, filters map[string]string, pagination *maas.PaginationOptions) ([]models.Machine, int, error) {
 	if err := m.checkFailure("ListMachines"); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	m.mutex.RLock()
@@ -244,13 +249,51 @@ func (m *MockMaasClient) ListMachines(filters map[string]string) ([]models.Machi
 		if pool, ok := filters["pool"]; ok && pool != "" && machine.Pool != pool {
 			continue
 		}
+		// Add more filter checks as needed based on your MachineClient interface and MAAS capabilities
 
 		// Deep copy to avoid modifying the original
 		machineCopy := *machine
 		result = append(result, machineCopy)
 	}
 
-	return result, nil
+	// Mock pagination logic (simplified)
+	total := len(result)
+	if pagination != nil && pagination.Limit > 0 {
+		start := pagination.Page * pagination.Limit
+		if start > total {
+			start = total
+		}
+		end := start + pagination.Limit
+		if end > total {
+			end = total
+		}
+		if start < end {
+			result = result[start:end]
+		} else {
+			result = []models.Machine{}
+		}
+	}
+
+	return result, total, nil
+}
+
+// ListMachinesSimple retrieves machines based on filters without pagination.
+func (m *MockMaasClient) ListMachinesSimple(ctx context.Context, filters map[string]string) ([]models.Machine, error) {
+	if err := m.checkFailure("ListMachinesSimple"); err != nil {
+		return nil, err
+	}
+	// For mock, this can just call ListMachines with nil pagination and ignore the count
+	machines, _, err := m.ListMachines(ctx, filters, nil)
+	return machines, err
+}
+
+// GetMachineWithDetails retrieves details for a specific machine with optional detailed information.
+// For mock, this can be similar to GetMachine.
+func (m *MockMaasClient) GetMachineWithDetails(ctx context.Context, systemID string, includeDetails bool) (*models.Machine, error) {
+	if err := m.checkFailure("GetMachineWithDetails"); err != nil {
+		return nil, err
+	}
+	return m.GetMachine(systemID) // Simple passthrough for mock
 }
 
 // GetMachine retrieves details for a specific machine.
@@ -389,60 +432,32 @@ func (m *MockMaasClient) ReleaseMachine(systemIDs []string, comment string) erro
 
 // GetSubnet retrieves subnet details.
 func (m *MockMaasClient) GetSubnet(id int) (*models.Subnet, error) {
-	if err := m.checkFailure("GetSubnet"); err != nil {
-		return nil, err
+	args := m.Called(id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
 	}
-
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-
-	subnet, ok := m.subnets[id]
-	if !ok {
-		return nil, fmt.Errorf("subnet not found: %d", id)
-	}
-
-	// Deep copy to avoid modifying the original
-	subnetCopy := *subnet
-	return &subnetCopy, nil
+	return args.Get(0).(*models.Subnet), args.Error(1)
 }
 
 // ListSubnets retrieves all subnets.
-func (m *MockMaasClient) ListSubnets() ([]models.Subnet, error) {
-	if err := m.checkFailure("ListSubnets"); err != nil {
-		return nil, err
+func (m *MockMaasClient) ListSubnets() ([]models.Subnet, error) { // Reverted signature
+	// Use testify/mock
+	args := m.Called() // No arguments for this interface method
+
+	// Handle nil case for the first return value if an error is returned.
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
 	}
-
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-
-	var result []models.Subnet
-	for _, subnet := range m.subnets {
-		// Deep copy to avoid modifying the original
-		subnetCopy := *subnet
-		result = append(result, subnetCopy)
-	}
-
-	return result, nil
+	return args.Get(0).([]models.Subnet), args.Error(1)
 }
 
 // ListVLANs retrieves all VLANs.
 func (m *MockMaasClient) ListVLANs(fabricID int) ([]models.VLAN, error) {
-	if err := m.checkFailure("ListVLANs"); err != nil {
-		return nil, err
+	args := m.Called(fabricID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
 	}
-
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-
-	vlans, ok := m.vlans[fabricID]
-	if !ok {
-		return []models.VLAN{}, nil
-	}
-
-	// Deep copy to avoid modifying the original
-	result := make([]models.VLAN, len(vlans))
-	copy(result, vlans)
-	return result, nil
+	return args.Get(0).([]models.VLAN), args.Error(1)
 }
 
 // GetMachineBlockDevices retrieves block devices for a specific machine.
@@ -463,6 +478,329 @@ func (m *MockMaasClient) GetMachineBlockDevices(systemID string) ([]models.Block
 	result := make([]models.BlockDevice, len(devices))
 	copy(result, devices)
 	return result, nil
+}
+
+// GetMachineBlockDevice retrieves a specific block device for a machine.
+func (m *MockMaasClient) GetMachineBlockDevice(systemID string, deviceID int) (*models.BlockDevice, error) {
+	if err := m.checkFailure("GetMachineBlockDevice"); err != nil {
+		return nil, err
+	}
+
+	m.mutex.RLock()
+	defer m.mutex.RUnlock()
+
+	devices, ok := m.blockDevices[systemID]
+	if !ok {
+		return nil, fmt.Errorf("no block devices found for machine: %s", systemID)
+	}
+
+	for _, device := range devices {
+		if device.ID == deviceID {
+			// Deep copy to avoid modifying the original
+			deviceCopy := device
+			return &deviceCopy, nil
+		}
+	}
+
+	return nil, fmt.Errorf("block device with ID %d not found for machine %s", deviceID, systemID)
+}
+
+// CreateMachinePartition creates a partition on a block device for a specific machine.
+func (m *MockMaasClient) CreateMachinePartition(systemID string, blockDeviceID int, params map[string]interface{}) (*models.Partition, error) {
+	if err := m.checkFailure("CreateMachinePartition"); err != nil {
+		return nil, err
+	}
+
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	// Check if the machine exists
+	if _, ok := m.machines[systemID]; !ok {
+		return nil, fmt.Errorf("machine not found: %s", systemID)
+	}
+
+	// Check if the block device exists
+	devices, ok := m.blockDevices[systemID]
+	if !ok {
+		return nil, fmt.Errorf("no block devices found for machine: %s", systemID)
+	}
+
+	var device *models.BlockDevice
+	for i, d := range devices {
+		if d.ID == blockDeviceID {
+			device = &devices[i]
+			break
+		}
+	}
+
+	if device == nil {
+		return nil, fmt.Errorf("block device with ID %d not found for machine %s", blockDeviceID, systemID)
+	}
+
+	// Check if size parameter is provided
+	sizeParam, ok := params["size"]
+	if !ok {
+		return nil, fmt.Errorf("size parameter is required")
+	}
+
+	// Convert size to int64
+	var size int64
+	switch s := sizeParam.(type) {
+	case int:
+		size = int64(s)
+	case int64:
+		size = s
+	case float64:
+		size = int64(s)
+	default:
+		return nil, fmt.Errorf("invalid size parameter type")
+	}
+
+	// Check if there's enough space on the device
+	if size > device.AvailableSize {
+		return nil, fmt.Errorf("not enough space on device: available %d, requested %d", device.AvailableSize, size)
+	}
+
+	// Create a new partition
+	partitionID := len(device.Partitions) + 1
+	partition := models.Partition{
+		ID:   partitionID,
+		Size: size,
+		Path: fmt.Sprintf("%s%d", device.Path, partitionID),
+		Type: "primary",
+	}
+
+	// Update the device's available size
+	device.AvailableSize -= size
+	device.UsedSize += size
+	device.Partitions = append(device.Partitions, partition)
+
+	// Return a copy of the partition
+	partitionCopy := partition
+	return &partitionCopy, nil
+}
+
+// UpdateMachinePartition updates a partition on a block device for a specific machine.
+func (m *MockMaasClient) UpdateMachinePartition(systemID string, blockDeviceID, partitionID int, params map[string]interface{}) (*models.Partition, error) {
+	if err := m.checkFailure("UpdateMachinePartition"); err != nil {
+		return nil, err
+	}
+
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	// Check if the machine exists
+	if _, ok := m.machines[systemID]; !ok {
+		return nil, fmt.Errorf("machine not found: %s", systemID)
+	}
+
+	// Check if the block device exists
+	devices, ok := m.blockDevices[systemID]
+	if !ok {
+		return nil, fmt.Errorf("no block devices found for machine: %s", systemID)
+	}
+
+	var device *models.BlockDevice
+	for i, d := range devices {
+		if d.ID == blockDeviceID {
+			device = &devices[i]
+			break
+		}
+	}
+
+	if device == nil {
+		return nil, fmt.Errorf("block device with ID %d not found for machine %s", blockDeviceID, systemID)
+	}
+
+	// Find the partition
+	var partition *models.Partition
+	for i, p := range device.Partitions {
+		if p.ID == partitionID {
+			partition = &device.Partitions[i]
+			break
+		}
+	}
+
+	if partition == nil {
+		return nil, fmt.Errorf("partition with ID %d not found on block device %d", partitionID, blockDeviceID)
+	}
+
+	// Update partition properties based on params
+	if sizeParam, ok := params["size"]; ok {
+		// Convert size to int64
+		var newSize int64
+		switch s := sizeParam.(type) {
+		case int:
+			newSize = int64(s)
+		case int64:
+			newSize = s
+		case float64:
+			newSize = int64(s)
+		default:
+			return nil, fmt.Errorf("invalid size parameter type")
+		}
+
+		// Calculate size difference
+		sizeDiff := newSize - partition.Size
+
+		// Check if there's enough space on the device for resizing
+		if sizeDiff > 0 && sizeDiff > device.AvailableSize {
+			return nil, fmt.Errorf("not enough space on device: available %d, additional needed %d", device.AvailableSize, sizeDiff)
+		}
+
+		// Update device's available size
+		device.AvailableSize -= sizeDiff
+		device.UsedSize += sizeDiff
+
+		// Update partition size
+		partition.Size = newSize
+	}
+
+	// Return a copy of the updated partition
+	partitionCopy := *partition
+	return &partitionCopy, nil
+}
+
+// DeleteMachinePartition deletes a partition from a block device for a specific machine.
+func (m *MockMaasClient) DeleteMachinePartition(systemID string, blockDeviceID, partitionID int) error {
+	if err := m.checkFailure("DeleteMachinePartition"); err != nil {
+		return err
+	}
+
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	// Check if the machine exists
+	if _, ok := m.machines[systemID]; !ok {
+		return fmt.Errorf("machine not found: %s", systemID)
+	}
+
+	// Check if the block device exists
+	devices, ok := m.blockDevices[systemID]
+	if !ok {
+		return fmt.Errorf("no block devices found for machine: %s", systemID)
+	}
+
+	var device *models.BlockDevice
+	for i, d := range devices {
+		if d.ID == blockDeviceID {
+			device = &devices[i]
+			break
+		}
+	}
+
+	if device == nil {
+		return fmt.Errorf("block device with ID %d not found for machine %s", blockDeviceID, systemID)
+	}
+
+	// Find the partition
+	var partitionIndex = -1
+	var partition models.Partition
+	for i, p := range device.Partitions {
+		if p.ID == partitionID {
+			partitionIndex = i
+			partition = p
+			break
+		}
+	}
+
+	if partitionIndex == -1 {
+		return fmt.Errorf("partition with ID %d not found on block device %d", partitionID, blockDeviceID)
+	}
+
+	// Update device's available size
+	device.AvailableSize += partition.Size
+	device.UsedSize -= partition.Size
+
+	// Remove the partition
+	device.Partitions = append(device.Partitions[:partitionIndex], device.Partitions[partitionIndex+1:]...)
+
+	return nil
+}
+
+// FormatMachinePartition formats a partition on a block device for a specific machine.
+func (m *MockMaasClient) FormatMachinePartition(systemID string, blockDeviceID, partitionID int, params map[string]interface{}) (*models.Filesystem, error) {
+	if err := m.checkFailure("FormatMachinePartition"); err != nil {
+		return nil, err
+	}
+
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	// Check if the machine exists
+	if _, ok := m.machines[systemID]; !ok {
+		return nil, fmt.Errorf("machine not found: %s", systemID)
+	}
+
+	// Check if the block device exists
+	devices, ok := m.blockDevices[systemID]
+	if !ok {
+		return nil, fmt.Errorf("no block devices found for machine: %s", systemID)
+	}
+
+	var device *models.BlockDevice
+	for i, d := range devices {
+		if d.ID == blockDeviceID {
+			device = &devices[i]
+			break
+		}
+	}
+
+	if device == nil {
+		return nil, fmt.Errorf("block device with ID %d not found for machine %s", blockDeviceID, systemID)
+	}
+
+	// Find the partition
+	var partition *models.Partition
+	for i, p := range device.Partitions {
+		if p.ID == partitionID {
+			partition = &device.Partitions[i]
+			break
+		}
+	}
+
+	if partition == nil {
+		return nil, fmt.Errorf("partition with ID %d not found on block device %d", partitionID, blockDeviceID)
+	}
+
+	// Check if fstype parameter is provided
+	fsTypeParam, ok := params["fstype"]
+	if !ok {
+		return nil, fmt.Errorf("fstype parameter is required")
+	}
+
+	fsType, ok := fsTypeParam.(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid fstype parameter type")
+	}
+
+	// Create a new filesystem
+	filesystem := &models.Filesystem{
+		ID:     partitionID, // Use partition ID as filesystem ID for simplicity
+		FSType: fsType,
+		UUID:   fmt.Sprintf("uuid-%d-%d-%d", blockDeviceID, partitionID, time.Now().Unix()),
+	}
+
+	// Set mount point if provided
+	if mountPointParam, ok := params["mount_point"]; ok {
+		if mountPoint, ok := mountPointParam.(string); ok {
+			filesystem.MountPoint = mountPoint
+		}
+	}
+
+	// Set mount options if provided
+	if mountOptionsParam, ok := params["mount_options"]; ok {
+		if mountOptions, ok := mountOptionsParam.(string); ok {
+			filesystem.MountOptions = mountOptions
+		}
+	}
+
+	// Update the partition with the filesystem
+	partition.Filesystem = filesystem
+
+	// Return a copy of the filesystem
+	filesystemCopy := *filesystem
+	return &filesystemCopy, nil
 }
 
 // GetMachineInterfaces retrieves network interfaces for a specific machine.
@@ -607,6 +945,63 @@ func (m *MockMaasClient) PowerOnMachine(systemID string) (*models.Machine, error
 	return &machineCopy, nil
 }
 
+// CheckStorageConstraints checks if a machine meets the specified storage constraints.
+// This is a mock implementation.
+func (m *MockMaasClient) CheckStorageConstraints(machine *models.Machine, constraints *models.SimpleStorageConstraint) bool {
+	if err := m.checkFailure("CheckStorageConstraints"); err != nil {
+		m.logger.Warnf("Mock CheckStorageConstraints failed due to induced error: %v", err)
+		return false // Or handle error as appropriate for a boolean return
+	}
+
+	m.logger.Infof("Mock CheckStorageConstraints called for machine %s", machine.SystemID)
+	// Basic mock logic:
+	// If constraints are nil, assume it meets (or doesn't, depending on desired default)
+	if constraints == nil {
+		return true
+	}
+
+	// Example: Check if there's at least one disk of the required size.
+	// This is a very simplified check. A real check would be more complex.
+	if constraints.MinSize > 0 { // MinSize is in bytes
+		foundDisk := false
+		for _, bd := range machine.BlockDevices {
+			if bd.Size >= constraints.MinSize { // Compare int64 directly
+				foundDisk = true
+				break
+			}
+		}
+		if !foundDisk {
+			m.logger.Infof("Mock CheckStorageConstraints: Machine %s does not meet MinSize %d bytes", machine.SystemID, constraints.MinSize)
+			return false
+		}
+	}
+
+	// Example: Check if all required tags are present on the machine
+	if len(constraints.Tags) > 0 {
+		allTagsPresent := true
+		for _, requiredTag := range constraints.Tags {
+			machineHasTag := false
+			for _, machineTag := range machine.Tags {
+				if machineTag == requiredTag {
+					machineHasTag = true
+					break
+				}
+			}
+			if !machineHasTag {
+				allTagsPresent = false
+				m.logger.Infof("Mock CheckStorageConstraints: Machine %s is missing required tag %s", machine.SystemID, requiredTag)
+				break
+			}
+		}
+		if !allTagsPresent {
+			return false
+		}
+	}
+
+	m.logger.Infof("Mock CheckStorageConstraints: Machine %s meets constraints", machine.SystemID)
+	return true
+}
+
 // PowerOffMachine powers off a machine.
 func (m *MockMaasClient) PowerOffMachine(systemID string) (*models.Machine, error) {
 	if err := m.checkFailure("PowerOffMachine"); err != nil {
@@ -628,3 +1023,49 @@ func (m *MockMaasClient) PowerOffMachine(systemID string) (*models.Machine, erro
 	machineCopy := *machine
 	return &machineCopy, nil
 }
+
+// Note: The following placeholder methods were removed as they caused
+// "already declared" errors. They likely exist in other files within the
+// test/integration/mock/ package, such as:
+// - maas_client_storage_constraints.go
+// - maas_client_volume_operations.go
+// - maas_client_raid_operations.go
+//
+// // --- Mock StorageClient Methods (Placeholders) ---
+//
+// // CreateVolumeGroup creates a volume group on a machine.
+// func (m *MockMaasClient) CreateVolumeGroup(systemID string, params models.VolumeGroupParams) (*models.VolumeGroup, error) { ... }
+// // DeleteVolumeGroup deletes a volume group from a machine.
+// func (m *MockMaasClient) DeleteVolumeGroup(systemID string, volumeGroupID int) error { ... }
+// // GetVolumeGroup retrieves a specific volume group from a machine.
+// func (m *MockMaasClient) GetVolumeGroup(systemID string, volumeGroupID int) (*models.VolumeGroup, error) { ... }
+// // ListVolumeGroups lists volume groups on a machine.
+// func (m *MockMaasClient) ListVolumeGroups(systemID string) ([]models.VolumeGroup, error) { ... }
+// // CreateLogicalVolume creates a logical volume within a volume group.
+// func (m *MockMaasClient) CreateLogicalVolume(systemID string, volumeGroupID int, params models.LogicalVolumeParams) (*models.LogicalVolume, error) { ... }
+// // DeleteLogicalVolume deletes a logical volume.
+// func (m *MockMaasClient) DeleteLogicalVolume(systemID string, volumeGroupID, logicalVolumeID int) error { ... }
+// // ResizeLogicalVolume resizes a logical volume.
+// func (m *MockMaasClient) ResizeLogicalVolume(systemID string, volumeGroupID, logicalVolumeID int, newSize int64) (*models.LogicalVolume, error) { ... }
+// // GetLogicalVolume retrieves a specific logical volume.
+// func (m *MockMaasClient) GetLogicalVolume(systemID string, volumeGroupID, logicalVolumeID int) (*models.LogicalVolume, error) { ... }
+// // CreateRAID creates a RAID array on a machine.
+// func (m *MockMaasClient) CreateRAID(systemID string, params models.RAIDParams) (*models.RAID, error) { ... }
+// // DeleteRAID deletes a RAID array from a machine.
+// func (m *MockMaasClient) DeleteRAID(systemID string, raidID int) error { ... }
+// // GetRAID retrieves a specific RAID array from a machine.
+// func (m *MockMaasClient) GetRAID(systemID string, raidID int) (*models.RAID, error) { ... }
+// // ListRAIDs lists RAID arrays on a machine.
+// func (m *MockMaasClient) ListRAIDs(systemID string) ([]models.RAID, error) { ... }
+// // UpdateRAID updates a RAID array on a machine.
+// func (m *MockMaasClient) UpdateRAID(systemID string, raidID int, params models.RAIDUpdateParams) (*models.RAID, error) { ... }
+// // SetStorageConstraints sets the storage constraints for a machine.
+// func (m *MockMaasClient) SetStorageConstraints(systemID string, params models.StorageConstraintParams) error { ... }
+// // GetStorageConstraints retrieves the storage constraints for a machine.
+// func (m *MockMaasClient) GetStorageConstraints(systemID string) (*models.StorageConstraintParams, error) { ... }
+// // ValidateStorageConstraints validates storage constraints against a machine.
+// func (m *MockMaasClient) ValidateStorageConstraints(systemID string, params models.StorageConstraintParams) (bool, []string, error) { ... }
+// // ApplyStorageConstraints applies the given storage constraints to a machine.
+// func (m *MockMaasClient) ApplyStorageConstraints(systemID string, params models.StorageConstraintParams) error { ... }
+// // DeleteStorageConstraints deletes storage constraints for a machine.
+// func (m *MockMaasClient) DeleteStorageConstraints(systemID string) error { ... }

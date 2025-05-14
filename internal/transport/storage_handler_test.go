@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	apperrors "github.com/lspecian/maas-mcp-server/internal/errors" // Added import alias
 	"github.com/lspecian/maas-mcp-server/internal/models"
 	"github.com/lspecian/maas-mcp-server/internal/service"
 	"github.com/sirupsen/logrus"
@@ -19,6 +20,17 @@ import (
 type MockStorageService struct {
 	ListBlockDevicesFunc func(ctx context.Context, machineID string) ([]models.StorageContext, error)
 	GetBlockDeviceFunc   func(ctx context.Context, machineID string, deviceID string) (*models.StorageContext, error)
+	CreatePartitionFunc  func(ctx context.Context, machineID string, deviceID string, params map[string]interface{}) (*models.PartitionContext, error)
+	UpdatePartitionFunc  func(ctx context.Context, machineID string, deviceID string, partitionID string, params map[string]interface{}) (*models.PartitionContext, error)
+	DeletePartitionFunc  func(ctx context.Context, machineID string, deviceID string, partitionID string) error
+	FormatPartitionFunc  func(ctx context.Context, machineID string, deviceID string, partitionID string, params map[string]interface{}) (*models.FilesystemContext, error)
+
+	// RAID operations
+	CreateRAIDFunc func(ctx context.Context, machineID string, params models.RAIDParams) (*models.RAIDContext, error)
+	GetRAIDFunc    func(ctx context.Context, machineID string, raidID string) (*models.RAIDContext, error)
+	ListRAIDsFunc  func(ctx context.Context, machineID string) ([]models.RAIDContext, error)
+	UpdateRAIDFunc func(ctx context.Context, machineID string, raidID string, params models.RAIDUpdateParams) (*models.RAIDContext, error)
+	DeleteRAIDFunc func(ctx context.Context, machineID string, raidID string) error
 }
 
 func (m *MockStorageService) ListBlockDevices(ctx context.Context, machineID string) ([]models.StorageContext, error) {
@@ -33,6 +45,74 @@ func (m *MockStorageService) GetBlockDevice(ctx context.Context, machineID strin
 		return m.GetBlockDeviceFunc(ctx, machineID, deviceID)
 	}
 	return nil, errors.New("GetBlockDeviceFunc not implemented")
+}
+
+func (m *MockStorageService) CreatePartition(ctx context.Context, machineID string, deviceID string, params map[string]interface{}) (*models.PartitionContext, error) {
+	if m.CreatePartitionFunc != nil {
+		return m.CreatePartitionFunc(ctx, machineID, deviceID, params)
+	}
+	return nil, errors.New("CreatePartitionFunc not implemented")
+}
+
+func (m *MockStorageService) UpdatePartition(ctx context.Context, machineID string, deviceID string, partitionID string, params map[string]interface{}) (*models.PartitionContext, error) {
+	if m.UpdatePartitionFunc != nil {
+		return m.UpdatePartitionFunc(ctx, machineID, deviceID, partitionID, params)
+	}
+	return nil, errors.New("UpdatePartitionFunc not implemented")
+}
+
+func (m *MockStorageService) DeletePartition(ctx context.Context, machineID string, deviceID string, partitionID string) error {
+	if m.DeletePartitionFunc != nil {
+		return m.DeletePartitionFunc(ctx, machineID, deviceID, partitionID)
+	}
+	return errors.New("DeletePartitionFunc not implemented")
+}
+
+func (m *MockStorageService) FormatPartition(ctx context.Context, machineID string, deviceID string, partitionID string, params map[string]interface{}) (*models.FilesystemContext, error) {
+	if m.FormatPartitionFunc != nil {
+		return m.FormatPartitionFunc(ctx, machineID, deviceID, partitionID, params)
+	}
+	return nil, errors.New("FormatPartitionFunc not implemented")
+}
+
+// RAID operations implementations
+func (m *MockStorageService) CreateRAID(ctx context.Context, machineID string, params models.RAIDParams) (*models.RAIDContext, error) {
+	if m.CreateRAIDFunc != nil {
+		return m.CreateRAIDFunc(ctx, machineID, params)
+	}
+	return nil, errors.New("CreateRAIDFunc not implemented")
+}
+
+func (m *MockStorageService) GetRAID(ctx context.Context, machineID string, raidID string) (*models.RAIDContext, error) {
+	if m.GetRAIDFunc != nil {
+		return m.GetRAIDFunc(ctx, machineID, raidID)
+	}
+	return nil, errors.New("GetRAIDFunc not implemented")
+}
+
+func (m *MockStorageService) ListRAIDs(ctx context.Context, machineID string) ([]models.RAIDContext, error) {
+	if m.ListRAIDsFunc != nil {
+		return m.ListRAIDsFunc(ctx, machineID)
+	}
+	return nil, errors.New("ListRAIDsFunc not implemented")
+}
+
+func (m *MockStorageService) UpdateRAID(ctx context.Context, machineID string, raidID string, params models.RAIDUpdateParams) (*models.RAIDContext, error) {
+	if m.UpdateRAIDFunc != nil {
+		return m.UpdateRAIDFunc(ctx, machineID, raidID, params)
+	}
+	return nil, errors.New("UpdateRAIDFunc not implemented")
+}
+
+func (m *MockStorageService) DeleteRAID(ctx context.Context, machineID string, raidID string) error {
+	if m.DeleteRAIDFunc != nil {
+		return m.DeleteRAIDFunc(ctx, machineID, raidID)
+	}
+	return errors.New("DeleteRAIDFunc not implemented")
+}
+func (m *MockStorageService) ConfigureStorage(ctx context.Context, machineID string, config models.DesiredStorageConfiguration) error {
+	// Mock implementation - just return nil for now
+	return nil
 }
 
 func setupStorageTest() (*gin.Engine, *MockStorageService) {
@@ -131,8 +211,15 @@ func TestListMachineBlockDevices(t *testing.T) {
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 
-	var errorResponse map[string]string
+	var errorResponse struct {
+		Type    string `json:"type"`
+		Message string `json:"message"`
+		Code    string `json:"code,omitempty"`
+	}
 	err = json.Unmarshal(w.Body.Bytes(), &errorResponse)
 	assert.NoError(t, err)
-	assert.Equal(t, "Machine not found", errorResponse["error"])
+	assert.Equal(t, string(apperrors.ErrorTypeNotFound), errorResponse.Type) // Used aliased package
+	assert.Equal(t, "Machine not found", errorResponse.Message)
+	// Optionally assert Code if it's consistently set for ErrNotFound
+	// assert.Equal(t, string(errors.ErrorCodeResourceNotFound), errorResponse.Code)
 }

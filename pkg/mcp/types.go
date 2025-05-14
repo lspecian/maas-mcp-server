@@ -73,8 +73,8 @@ type GetSubnetDetailsRequest struct {
 
 // MachineSummary is a simplified view of a machine for list responses.
 type MachineSummary struct {
-	SystemID   string   `json:"system_id"`
-	Hostname   string   `json:"hostname"`
+	SystemID   string   `json:"id"`   // Changed from system_id
+	Hostname   string   `json:"name"` // Changed from hostname
 	FQDN       string   `json:"fqdn"`
 	Status     string   `json:"status"` // Map from MAAS status codes/names
 	Zone       string   `json:"zone"`
@@ -85,8 +85,8 @@ type MachineSummary struct {
 
 // MachineDetails includes more comprehensive machine information.
 type MachineDetails struct {
-	SystemID          string            `json:"system_id"`
-	Hostname          string            `json:"hostname"`
+	SystemID          string            `json:"id"`   // Changed from system_id
+	Hostname          string            `json:"name"` // Changed from hostname
 	FQDN              string            `json:"fqdn"`
 	Status            string            `json:"status"`
 	Zone              string            `json:"zone"`
@@ -106,7 +106,7 @@ type MachineDetails struct {
 
 // InterfaceInfo represents network interface details.
 type InterfaceInfo struct {
-	ID         int        `json:"id"`
+	ID         string     `json:"id"` // Changed from int to string
 	Name       string     `json:"name"`
 	Type       string     `json:"type"` // physical, bond, bridge, vlan
 	MACAddress string     `json:"mac_address"`
@@ -124,7 +124,7 @@ type LinkInfo struct {
 
 // BlockDeviceInfo represents storage device details.
 type BlockDeviceInfo struct {
-	ID         int    `json:"id"`
+	ID         string `json:"id"` // Changed from int to string
 	Name       string `json:"name"`
 	Type       string `json:"type"`       // physical, virtual
 	Size       int64  `json:"size_bytes"` // Use int64 for potentially large sizes
@@ -138,7 +138,7 @@ type BlockDeviceInfo struct {
 
 // SubnetDetails represents subnet information.
 type SubnetDetails struct {
-	ID             int           `json:"id"`
+	ID             string        `json:"id"` // Changed from int to string
 	CIDR           string        `json:"cidr"`
 	Name           string        `json:"name"`
 	Fabric         string        `json:"fabric"` // Fabric name

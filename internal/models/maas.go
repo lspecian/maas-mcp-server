@@ -49,8 +49,8 @@ func (m *Machine) FromEntity(entity *entity.Machine) {
 	m.SystemID = entity.SystemID
 	m.Hostname = entity.Hostname
 	m.FQDN = entity.FQDN
-	m.Status = fmt.Sprint(entity.Status)
-	m.StatusName = fmt.Sprint(entity.Status) // Using Status as StatusName
+	m.Status = fmt.Sprint(entity.Status)                       // Store the numeric status as a string
+	m.StatusName = mapMAASStatusFromEntity(int(entity.Status)) // entity.Status is node.Status, cast to int
 	m.Architecture = entity.Architecture
 	m.PowerState = entity.PowerState
 	m.PowerType = entity.PowerType
@@ -402,4 +402,45 @@ func (t *Tag) FromEntity(entity *entity.Tag) {
 	}
 
 	t.ResourceURL = entity.ResourceURI
+}
+
+// mapMAASStatusFromEntity converts MAAS machine status to a human-readable string.
+// This is a helper for the FromEntity method.
+func mapMAASStatusFromEntity(maasStatusCode int) string {
+	// Values are based on common MAAS status codes.
+	// Ref: gomaasclient/entity/machine.go (Status is int)
+	switch maasStatusCode {
+	case 0: // Typically "New" or "Unknown" if 0 is not explicitly New
+		return "New"
+	case 1: // Commissioning
+		return "Commissioning"
+	case 2: // Failed Commissioning
+		return "Failed Commissioning"
+	case 3: // Missing / Lost connection
+		return "Missing/Lost"
+	case 4: // Ready
+		return "Ready"
+	case 5: // Reserved by a user
+		return "Reserved"
+	case 6: // Allocated to a user / Deployed (gomaasclient uses Deployed for 6)
+		return "Allocated" // Or "Deployed" - MAAS UI often shows "Allocated" at this stage
+	case 7: // Deploying
+		return "Deploying"
+	case 8: // Deployed (after OS installation, if distinct from 6)
+		return "Deployed"
+	case 9: // Retiring
+		return "Retiring"
+	case 10: // Failed deployment
+		return "Failed Deployment"
+	case 11: // Releasing
+		return "Releasing"
+	case 12: // Failed releasing
+		return "Failed Releasing"
+	case 13: // Disk erasing
+		return "Disk Erasing"
+	case 14: // Failed disk erasing
+		return "Failed Disk Erasing"
+	default:
+		return fmt.Sprintf("Unknown (%d)", maasStatusCode)
+	}
 }

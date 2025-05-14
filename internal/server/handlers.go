@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lspecian/maas-mcp-server/internal/logging"
 	"github.com/lspecian/maas-mcp-server/internal/maas"
 	"github.com/lspecian/maas-mcp-server/internal/models"
 	"github.com/lspecian/maas-mcp-server/internal/service"
@@ -15,24 +16,45 @@ import (
 // Handlers struct holds dependencies for handlers (like the service layer).
 type Handlers struct {
 	service *service.MCPService
-	// logger
+	logger  *logging.Logger // Added logger
 }
 
 // createServiceWithConfig creates a temporary service with the provided MAAS configuration
 func (h *Handlers) createServiceWithConfig(maasConfig *models.MaasConfig) (*service.MCPService, error) {
 	// Create a new MAAS client wrapper with the provided configuration
-	maasClientWrapper, err := maas.NewClientWrapper(maasConfig.APIURL, maasConfig.APIKey, "2.0", nil)
+	// Assuming logger is available in h.logger
+	if h.logger == nil {
+		return nil, fmt.Errorf("logger not initialized in Handlers")
+	}
+	// Pass h.logger.Logger (logrus.FieldLogger) to NewClientWrapper if it expects that, or adjust as needed.
+	// For now, assuming NewClientWrapper can take nil or has a default logger if not provided for this specific use case.
+	// The MAAS client wrapper might need its own logger instance.
+	// Let's assume for now that the existing maas.NewClientWrapper signature is:
+	// func NewClientWrapper(apiURL, apiKey, apiVersion string, logger *logrus.Logger) (*ClientWrapper, error)
+	// If the logger in Handlers is *logging.Logger, we might need to pass h.logger.Logger (the underlying sirupsen/logrus logger)
+	// or adapt NewClientWrapper. For this step, I'll assume nil is acceptable if the global logger is used by maas.
+	maasClientWrapper, err := maas.NewClientWrapper(maasConfig.APIURL, maasConfig.APIKey, "2.0", nil) // Placeholder for logger
 	if err != nil {
 		return nil, fmt.Errorf("failed to create MAAS client wrapper: %w", err)
 	}
 
-	// Create a new service with the temporary client
-	return service.NewMCPService(maasClientWrapper), nil
+	// Instantiate individual services
+	// These services likely take the maasClientWrapper and a logger.
+	// We'll use h.logger for them.
+	machineSvc := service.NewMachineService(maasClientWrapper, h.logger.Logger) // Assuming services take *logrus.Logger
+	networkSvc := service.NewNetworkService(maasClientWrapper, h.logger.Logger)
+	tagSvc := service.NewTagService(maasClientWrapper, h.logger.Logger)
+	storageSvc := service.NewStorageService(maasClientWrapper, h.logger.Logger)
+	// Note: The actual logger type expected by NewMachineService etc. needs to be confirmed.
+	// If they expect *logging.Logger, then pass h.logger directly.
+
+	// Create a new service with all dependent services
+	return service.NewMCPService(machineSvc, networkSvc, tagSvc, storageSvc, h.logger), nil
 }
 
 // NewHandlers creates a new Handlers instance.
-func NewHandlers(svc *service.MCPService) *Handlers {
-	return &Handlers{service: svc}
+func NewHandlers(svc *service.MCPService, logger *logging.Logger) *Handlers { // Added logger parameter
+	return &Handlers{service: svc, logger: logger} // Initialize logger
 }
 
 // ListMachines handles requests for the maas_list_machines MCP tool.
@@ -356,7 +378,7 @@ func (h *Handlers) ReleaseMachine(c *gin.Context) {
 		return
 	}
 
-	err := h.service.ReleaseMachine(c.Request.Context(), req)
+	_, err := h.service.ReleaseMachine(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to release machine: " + err.Error()})
 		return

@@ -174,6 +174,18 @@ func filterSubnets(subnets []models.Subnet, filters map[string]string) []models.
 			continue
 		}
 
+		// Apply fabric_id filter if provided
+		if fabricIDStr, ok := filters["fabric_id"]; ok && fabricIDStr != "" {
+			fabricID, err := parseInt(fabricIDStr) // Using existing parseInt helper
+			if err == nil {                        // Only filter if fabricIDStr is a valid integer
+				if subnet.FabricID != fabricID {
+					continue
+				}
+			}
+			// If fabricIDStr is not a valid int, we might choose to ignore the filter or return an error.
+			// For now, ignoring malformed fabric_id filter.
+		}
+
 		// Subnet passed all filters
 		result = append(result, subnet)
 	}

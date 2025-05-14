@@ -174,11 +174,11 @@ func TestMaasMachineToMCPContext(t *testing.T) {
 	if ctx.OSInfo.Release != machine.DistroSeries {
 		t.Errorf("Expected OSInfo.Release %s, got %s", machine.DistroSeries, ctx.OSInfo.Release)
 	}
-	if len(ctx.Networks) != len(machine.Interfaces) {
-		t.Errorf("Expected %d networks, got %d", len(machine.Interfaces), len(ctx.Networks))
+	if len(ctx.NetworkInterfaces) != len(machine.Interfaces) { // Changed from ctx.Networks
+		t.Errorf("Expected %d networks, got %d", len(machine.Interfaces), len(ctx.NetworkInterfaces)) // Changed from ctx.Networks
 	}
-	if len(ctx.Storage) != len(machine.BlockDevices) {
-		t.Errorf("Expected %d storage devices, got %d", len(machine.BlockDevices), len(ctx.Storage))
+	if len(ctx.BlockDevices) != len(machine.BlockDevices) { // Changed from ctx.Storage
+		t.Errorf("Expected %d storage devices, got %d", len(machine.BlockDevices), len(ctx.BlockDevices)) // Changed from ctx.Storage
 	}
 }
 

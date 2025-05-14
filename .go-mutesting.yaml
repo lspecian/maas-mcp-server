@@ -1,0 +1,15 @@
+# Configuration file for go-mutesting
+# This file controls which packages and functions are excluded from mutation testing
+
+# Packages to exclude from mutation testing
+package-blacklist:
+  - github.com/stretchr/testify
+  - github.com/pkg/errors
+
+# Functions to exclude from mutation testing
+function-blacklist:
+  - (github.com/maas-mcp-server/internal/models.Machine).String
+  - (github.com/maas-mcp-server/internal/models.Network).String
+
+# Whether to disable the function blacklist
+disable-function-blacklist: false

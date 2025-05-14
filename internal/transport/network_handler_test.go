@@ -121,10 +121,13 @@ func TestListSubnets(t *testing.T) {
 
 	// Test case 2: Service error
 	t.Run("Service Error", func(t *testing.T) {
-		// Reset mock
+		// Reset mock and router for this subtest
+		subtestRouter := gin.New() // Create a new router for this subtest
 		mockService := new(MockNetworkService)
-		handler := NewNetworkHandler(mockService, logrus.New())
-		api := router.Group("/api/v1")
+		logger := logrus.New()
+		logger.SetLevel(logrus.FatalLevel)
+		handler := NewNetworkHandler(mockService, logger)
+		api := subtestRouter.Group("/api/v1") // Use the new router
 		handler.RegisterRoutes(api)
 
 		// Setup mock
@@ -138,7 +141,7 @@ func TestListSubnets(t *testing.T) {
 		// Create request
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", "/api/v1/networks/subnets", nil)
-		router.ServeHTTP(w, req)
+		subtestRouter.ServeHTTP(w, req) // Use the new router
 
 		// Assert response
 		assert.Equal(t, http.StatusServiceUnavailable, w.Code)
@@ -201,10 +204,13 @@ func TestGetSubnetDetails(t *testing.T) {
 
 	// Test case 3: Subnet not found
 	t.Run("Not Found", func(t *testing.T) {
-		// Reset mock
+		// Reset mock and router for this subtest
+		subtestRouter := gin.New() // Create a new router for this subtest
 		mockService := new(MockNetworkService)
-		handler := NewNetworkHandler(mockService, logrus.New())
-		api := router.Group("/api/v1")
+		logger := logrus.New()
+		logger.SetLevel(logrus.FatalLevel)
+		handler := NewNetworkHandler(mockService, logger)
+		api := subtestRouter.Group("/api/v1") // Use the new router
 		handler.RegisterRoutes(api)
 
 		// Setup mock
@@ -218,7 +224,7 @@ func TestGetSubnetDetails(t *testing.T) {
 		// Create request
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", "/api/v1/networks/subnets/999", nil)
-		router.ServeHTTP(w, req)
+		subtestRouter.ServeHTTP(w, req) // Use the new router
 
 		// Assert response
 		assert.Equal(t, http.StatusNotFound, w.Code)
@@ -291,10 +297,13 @@ func TestListVLANs(t *testing.T) {
 
 	// Test case 3: Service error
 	t.Run("Service Error", func(t *testing.T) {
-		// Reset mock
+		// Reset mock and router for this subtest
+		subtestRouter := gin.New() // Create a new router for this subtest
 		mockService := new(MockNetworkService)
-		handler := NewNetworkHandler(mockService, logrus.New())
-		api := router.Group("/api/v1")
+		logger := logrus.New()
+		logger.SetLevel(logrus.FatalLevel)
+		handler := NewNetworkHandler(mockService, logger)
+		api := subtestRouter.Group("/api/v1") // Use the new router
 		handler.RegisterRoutes(api)
 
 		// Setup mock
@@ -304,7 +313,7 @@ func TestListVLANs(t *testing.T) {
 		// Create request
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", "/api/v1/networks/vlans?fabric_id=2", nil)
-		router.ServeHTTP(w, req)
+		subtestRouter.ServeHTTP(w, req) // Use the new router
 
 		// Assert response
 		assert.Equal(t, http.StatusInternalServerError, w.Code)

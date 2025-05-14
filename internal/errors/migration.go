@@ -31,31 +31,31 @@ func ToServiceError(appErr *AppError) *service.ServiceError {
 	case ErrorTypeNotFound:
 		serviceErr = &service.ServiceError{
 			Err:        service.ErrNotFound,
-			StatusCode: HTTPStatusCodeForError(appErr),
+			StatusCode: appErr.HTTPStatusCode(),
 			Message:    appErr.Message,
 		}
 	case ErrorTypeValidation:
 		serviceErr = &service.ServiceError{
 			Err:        service.ErrBadRequest,
-			StatusCode: HTTPStatusCodeForError(appErr),
+			StatusCode: appErr.HTTPStatusCode(),
 			Message:    appErr.Message,
 		}
 	case ErrorTypeAuthentication:
 		serviceErr = &service.ServiceError{
 			Err:        service.ErrForbidden,
-			StatusCode: HTTPStatusCodeForError(appErr),
+			StatusCode: appErr.HTTPStatusCode(),
 			Message:    appErr.Message,
 		}
 	case ErrorTypeMaasClient:
 		serviceErr = &service.ServiceError{
 			Err:        service.ErrServiceUnavailable,
-			StatusCode: HTTPStatusCodeForError(appErr),
+			StatusCode: appErr.HTTPStatusCode(),
 			Message:    appErr.Message,
 		}
 	default:
 		serviceErr = &service.ServiceError{
 			Err:        service.ErrInternalServer,
-			StatusCode: HTTPStatusCodeForError(appErr),
+			StatusCode: appErr.HTTPStatusCode(),
 			Message:    appErr.Message,
 		}
 	}

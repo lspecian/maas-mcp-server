@@ -41,6 +41,7 @@ func (h *TagHandler) RegisterRoutes(router *gin.RouterGroup) {
 
 	// Register machine-specific tag routes
 	router.POST("/machines/:id/tags/:tag", h.ApplyTagToMachine)
+	router.DELETE("/machines/:id/tags/:tag", h.RemoveTagFromMachine) // Added DELETE route
 }
 
 // ListTags handles GET /tags requests
@@ -111,6 +112,36 @@ func (h *TagHandler) ApplyTagToMachine(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Tag applied successfully",
+	})
+}
+
+// RemoveTagFromMachine handles DELETE /machines/:id/tags/:tag requests
+func (h *TagHandler) RemoveTagFromMachine(c *gin.Context) {
+	machineID := c.Param("id")
+	if machineID == "" {
+		errors.GinBadRequest(c, "Machine ID is required", nil)
+		return
+	}
+
+	tagName := c.Param("tag")
+	if tagName == "" {
+		errors.GinBadRequest(c, "Tag name is required", nil)
+		return
+	}
+
+	h.logger.WithFields(logrus.Fields{
+		"machine_id": machineID,
+		"tag_name":   tagName,
+	}).Debug("Handling RemoveTagFromMachine request")
+
+	err := h.tagService.RemoveTagFromMachine(c.Request.Context(), tagName, machineID)
+	if err != nil {
+		h.handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Tag removed successfully",
 	})
 }
 

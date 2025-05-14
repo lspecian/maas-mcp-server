@@ -9,12 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/lspecian/maas-mcp-server/internal/config"
 	"github.com/lspecian/maas-mcp-server/internal/logging"
 	"github.com/lspecian/maas-mcp-server/internal/maas"
-	"github.com/lspecian/maas-mcp-server/internal/maasclient"
 	"github.com/lspecian/maas-mcp-server/internal/repository/machine"
 	"github.com/lspecian/maas-mcp-server/internal/server"
 	"github.com/lspecian/maas-mcp-server/internal/service"
@@ -31,15 +28,33 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Initialize logger
-	logger := logging.NewLogger(cfg.Logging.Level)
+	// Initialize enhanced logger
+	logConfig := logging.LoggerConfig{
+		Level:      cfg.Logging.Level,
+		Format:     logging.LogFormat(cfg.Logging.Format),
+		FilePath:   cfg.Logging.FilePath,
+		MaxAge:     time.Duration(cfg.Logging.MaxAge) * 24 * time.Hour,
+		RotateTime: time.Duration(cfg.Logging.RotateTime) * time.Hour,
+		Fields: map[string]interface{}{
+			"service": "maas-mcp-server",
+		},
+	}
+
+	enhancedLogger, err := logging.NewEnhancedLogger(logConfig)
+	if err != nil {
+		fmt.Printf("Failed to create enhanced logger: %v\n", err)
+		os.Exit(1)
+	}
+
+	// For backward compatibility, create a logrus logger
+	logger := enhancedLogger.Logger
 	logger.Info("Starting MCP server")
 
-	// Create MAAS client
-	maasClient, err := maasclient.NewMaasClient(cfg, logger)
-	if err != nil {
-		logger.WithError(err).Fatal("Failed to create MAAS client")
-	}
+	// Create MAAS client (maasClient is unused, replaced by maasClientWrapper)
+	// maasClient, err := maasclient.NewMaasClient(cfg, logger)
+	// if err != nil {
+	// 	logger.WithError(err).Fatal("Failed to create MAAS client")
+	// }
 
 	// Get the default MAAS instance
 	maasInstance := cfg.GetDefaultMAASInstance()
@@ -57,10 +72,12 @@ func main() {
 	machineServiceNew := machineservice.NewService(machineRepo, logger)
 
 	// For backward compatibility, keep the old services
-	machineServiceOld := service.NewMachineService(maasClient, logger)
-	networkService := service.NewNetworkService(maasClient, logger)
-	storageService := service.NewStorageService(maasClient, logger)
-	tagService := service.NewTagService(maasClient, logger)
+	// These should use maasClientWrapper as it's being refactored for interface compliance
+	machineServiceOld := service.NewMachineService(maasClientWrapper, logger)
+	networkService := service.NewNetworkService(maasClientWrapper, logger)
+	storageService := service.NewStorageService(maasClientWrapper, logger)
+	volumeGroupService := service.NewVolumeGroupService(maasClientWrapper, logger)
+	tagService := service.NewTagService(maasClientWrapper, logger)
 
 	// Initialize HTTP handlers
 	machineHandlerNew := machinetransport.NewHandler(machineServiceNew, logger)
@@ -69,13 +86,14 @@ func main() {
 	machineHandler := transport.NewMachineHandler(machineServiceOld, logger)
 	networkHandler := transport.NewNetworkHandler(networkService, logger)
 	storageHandler := transport.NewStorageHandler(storageService, logger)
+	volumeGroupHandler := transport.NewVolumeGroupHandler(volumeGroupService, logger)
 	tagHandler := transport.NewTagHandler(tagService, logger)
 
 	// Initialize MCP service
-	mcpService := service.NewMCPService(maasClientWrapper)
+	mcpService := service.NewMCPService(machineServiceOld, networkService, tagService, storageService, enhancedLogger)
 
 	// Set up Gin router using the server package
-	router := server.NewServer(mcpService, cfg, logger)
+	router := server.NewServerWithService(mcpService, cfg, logger)
 
 	// Register API routes for new clean architecture handlers
 	machineHandlerNew.RegisterRoutes(router)
@@ -85,9 +103,8 @@ func main() {
 	machineHandler.RegisterRoutes(apiGroup)
 	networkHandler.RegisterRoutes(apiGroup)
 	storageHandler.RegisterRoutes(apiGroup)
+	volumeGroupHandler.RegisterRoutes(apiGroup)
 	tagHandler.RegisterRoutes(apiGroup)
-
-	// Health check endpoint is already registered in server.NewServer
 
 	// Start server
 	srv := &http.Server{
@@ -97,13 +114,13 @@ func main() {
 
 	// Start server in a goroutine
 	go func() {
-		logger.WithFields(logrus.Fields{
+		enhancedLogger.WithFields(map[string]interface{}{
 			"host": cfg.Server.Host,
 			"port": cfg.Server.Port,
 		}).Info("HTTP server listening")
 
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.WithError(err).Fatal("Failed to start server")
+			enhancedLogger.WithField("error", err.Error()).Fatal("Failed to start server")
 		}
 	}()
 
@@ -112,7 +129,7 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	logger.Info("Shutting down server...")
+	enhancedLogger.Info("Shutting down server...")
 
 	// Create a deadline for graceful shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -120,13 +137,18 @@ func main() {
 
 	// Attempt graceful shutdown
 	if err := srv.Shutdown(ctx); err != nil {
-		logger.WithError(err).Fatal("Server forced to shutdown")
+		enhancedLogger.WithField("error", err.Error()).Fatal("Server forced to shutdown")
 	}
 
 	// Close repositories
 	if err := machineRepo.Close(); err != nil {
-		logger.WithError(err).Error("Failed to close machine repository")
+		enhancedLogger.WithField("error", err.Error()).Error("Failed to close machine repository")
 	}
 
-	logger.Info("Server exiting")
+	// Close logger
+	if err := enhancedLogger.Close(); err != nil {
+		fmt.Printf("Failed to close logger: %v\n", err)
+	}
+
+	enhancedLogger.Info("Server exiting")
 }

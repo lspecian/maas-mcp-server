@@ -3,74 +3,95 @@ package maasclient
 import (
 	"testing"
 
-	"github.com/lspecian/maas-mcp-server/internal/config"
+	"github.com/lspecian/maas-mcp-server/internal/models"
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
-// TestNewMaasClient tests the creation of a new MAAS client
 func TestNewMaasClient(t *testing.T) {
-	// Setup
-	cfg := &config.Config{}
-	cfg.MAASInstances = make(map[string]config.MAASInstanceConfig)
-	cfg.MAASInstances["default"] = config.MAASInstanceConfig{
-		APIURL: "http://maas.example.com/MAAS/api/2.0",
+	// Create a test configuration
+	cfg := &models.AppConfig{
+		MAASInstances: make(map[string]models.MAASInstanceConfig),
+	}
+	cfg.MAASInstances["default"] = models.MAASInstanceConfig{
+		APIURL: "http://test.maas",
 		APIKey: "consumer:token:secret",
 	}
+
 	logger := logrus.New()
+	logger.SetLevel(logrus.DebugLevel)
 
-	// Test valid configuration
+	// Test creating a new client
 	client, err := NewMaasClient(cfg, logger)
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
+	assert.NoError(t, err)
+	assert.NotNil(t, client)
+	assert.Equal(t, cfg, client.config)
+	assert.Equal(t, logger, client.logger)
+	assert.NotNil(t, client.client)
+}
+
+func TestNewMaasClientInvalidAPIKey(t *testing.T) {
+	// Create a test configuration with invalid API key
+	cfg := &models.AppConfig{
+		MAASInstances: make(map[string]models.MAASInstanceConfig),
 	}
-	if client == nil {
-		t.Error("Expected client to not be nil")
-	}
-	if client.config != cfg {
-		t.Error("Expected client config to match input config")
-	}
-	if client.logger != logger {
-		t.Error("Expected client logger to match input logger")
-	}
-	if client.client == nil {
-		t.Error("Expected client.client to not be nil")
+	cfg.MAASInstances["default"] = models.MAASInstanceConfig{
+		APIURL: "http://test.maas",
+		APIKey: "invalid-key", // Not in the format consumer:token:secret
 	}
 
-	// Test invalid API key format
-	cfg.MAASInstances["default"] = config.MAASInstanceConfig{
-		APIURL: "http://maas.example.com/MAAS/api/2.0",
-		APIKey: "invalid-format",
+	logger := logrus.New()
+	logger.SetLevel(logrus.DebugLevel)
+
+	// Test creating a new client with invalid API key
+	client, err := NewMaasClient(cfg, logger)
+	assert.Error(t, err)
+	assert.Nil(t, client)
+	assert.Contains(t, err.Error(), "invalid MAAS API key format")
+}
+
+func TestNewMaasClientForInstance(t *testing.T) {
+	// Create a test configuration with multiple instances
+	cfg := &models.AppConfig{
+		MAASInstances: make(map[string]models.MAASInstanceConfig),
 	}
-	client, err = NewMaasClient(cfg, logger)
-	if err == nil {
-		t.Error("Expected error for invalid API key format, got nil")
+	cfg.MAASInstances["default"] = models.MAASInstanceConfig{
+		APIURL: "http://default.maas",
+		APIKey: "consumer:token:secret",
 	}
-	if client != nil {
-		t.Error("Expected client to be nil for invalid API key")
-	}
-	if err != nil && err.Error() != "invalid MAAS API key format" {
-		t.Errorf("Expected error message 'invalid MAAS API key format', got '%s'", err.Error())
+	cfg.MAASInstances["test"] = models.MAASInstanceConfig{
+		APIURL: "http://test.maas",
+		APIKey: "consumer:token:secret",
 	}
 
-	// Test specific instance
-	cfg.MAASInstances["test"] = config.MAASInstanceConfig{
-		APIURL: "http://test.maas.example.com/MAAS/api/2.0",
-		APIKey: "test:token:secret",
+	logger := logrus.New()
+	logger.SetLevel(logrus.DebugLevel)
+
+	// Test creating a client for a specific instance
+	client, err := NewMaasClientForInstance(cfg, "test", logger)
+	assert.NoError(t, err)
+	assert.NotNil(t, client)
+	assert.Equal(t, cfg, client.config)
+	assert.Equal(t, logger, client.logger)
+	assert.NotNil(t, client.client)
+}
+
+func TestNewMaasClientForInstanceNotFound(t *testing.T) {
+	// Create a test configuration
+	cfg := &models.AppConfig{
+		MAASInstances: make(map[string]models.MAASInstanceConfig),
 	}
-	client, err = NewMaasClientForInstance(cfg, "test", logger)
-	if err != nil {
-		t.Errorf("Expected no error for specific instance, got %v", err)
-	}
-	if client == nil {
-		t.Error("Expected client to not be nil for specific instance")
+	cfg.MAASInstances["default"] = models.MAASInstanceConfig{
+		APIURL: "http://default.maas",
+		APIKey: "consumer:token:secret",
 	}
 
-	// Test non-existent instance
-	client, err = NewMaasClientForInstance(cfg, "nonexistent", logger)
-	if err == nil {
-		t.Error("Expected error for non-existent instance, got nil")
-	}
-	if client != nil {
-		t.Error("Expected client to be nil for non-existent instance")
-	}
+	logger := logrus.New()
+	logger.SetLevel(logrus.DebugLevel)
+
+	// Test creating a client for a non-existent instance
+	client, err := NewMaasClientForInstance(cfg, "nonexistent", logger)
+	assert.Error(t, err)
+	assert.Nil(t, client)
+	assert.Contains(t, err.Error(), "not found in configuration")
 }

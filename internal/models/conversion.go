@@ -10,37 +10,42 @@ func MaasMachineToMCPContext(machine *Machine) *MachineContext {
 	ctx := &MachineContext{
 		ID:           machine.SystemID,
 		Name:         machine.Hostname,
+		FQDN:         machine.FQDN, // Added FQDN
 		Status:       machine.Status,
 		Architecture: machine.Architecture,
 		PowerState:   machine.PowerState,
 		Zone:         machine.Zone,
 		Pool:         machine.Pool,
-		Tags:         machine.Tags,
+		Tags:         machine.Tags, // Assuming machine.Tags is []string
 		CPUCount:     machine.CPUCount,
 		Memory:       machine.Memory,
-		LastUpdated:  time.Now(),
+		LastUpdated:  time.Now(), // Placeholder, consider using actual update time if available
 		Metadata:     machine.Metadata,
 	}
 
 	// Convert OS info
 	ctx.OSInfo = OSInfo{
 		System:       machine.OSSystem,
-		Distribution: machine.OSSystem,
+		Distribution: machine.OSSystem, // Or machine.DistroSeries if more appropriate
 		Release:      machine.DistroSeries,
 	}
 
 	// Convert network interfaces
-	ctx.Networks = make([]NetworkContext, 0, len(machine.Interfaces))
+	ctx.NetworkInterfaces = make([]NetworkContext, 0, len(machine.Interfaces)) // Changed to NetworkInterfaces
 	for _, iface := range machine.Interfaces {
 		netCtx := MaasNetworkInterfaceToMCPContext(&iface)
-		ctx.Networks = append(ctx.Networks, *netCtx)
+		if netCtx != nil {
+			ctx.NetworkInterfaces = append(ctx.NetworkInterfaces, *netCtx) // Changed to NetworkInterfaces
+		}
 	}
 
 	// Convert block devices
-	ctx.Storage = make([]StorageContext, 0, len(machine.BlockDevices))
+	ctx.BlockDevices = make([]StorageContext, 0, len(machine.BlockDevices)) // Changed to BlockDevices
 	for _, device := range machine.BlockDevices {
 		storageCtx := MaasBlockDeviceToMCPContext(&device)
-		ctx.Storage = append(ctx.Storage, *storageCtx)
+		if storageCtx != nil {
+			ctx.BlockDevices = append(ctx.BlockDevices, *storageCtx) // Changed to BlockDevices
+		}
 	}
 
 	return ctx
@@ -175,6 +180,7 @@ func MCPContextToMaasMachine(ctx *MachineContext) *Machine {
 	machine := &Machine{
 		SystemID:     ctx.ID,
 		Hostname:     ctx.Name,
+		FQDN:         ctx.FQDN, // Added FQDN
 		Status:       ctx.Status,
 		Architecture: ctx.Architecture,
 		PowerState:   ctx.PowerState,
@@ -189,17 +195,21 @@ func MCPContextToMaasMachine(ctx *MachineContext) *Machine {
 	}
 
 	// Convert network interfaces
-	machine.Interfaces = make([]NetworkInterface, 0, len(ctx.Networks))
-	for _, netCtx := range ctx.Networks {
+	machine.Interfaces = make([]NetworkInterface, 0, len(ctx.NetworkInterfaces)) // Changed to NetworkInterfaces
+	for _, netCtx := range ctx.NetworkInterfaces {                               // Changed to NetworkInterfaces
 		iface := MCPContextToMaasNetworkInterface(&netCtx)
-		machine.Interfaces = append(machine.Interfaces, *iface)
+		if iface != nil {
+			machine.Interfaces = append(machine.Interfaces, *iface)
+		}
 	}
 
 	// Convert storage devices
-	machine.BlockDevices = make([]BlockDevice, 0, len(ctx.Storage))
-	for _, storageCtx := range ctx.Storage {
+	machine.BlockDevices = make([]BlockDevice, 0, len(ctx.BlockDevices)) // Changed to BlockDevices
+	for _, storageCtx := range ctx.BlockDevices {                        // Changed to BlockDevices
 		device := MCPContextToMaasBlockDevice(&storageCtx)
-		machine.BlockDevices = append(machine.BlockDevices, *device)
+		if device != nil {
+			machine.BlockDevices = append(machine.BlockDevices, *device)
+		}
 	}
 
 	return machine

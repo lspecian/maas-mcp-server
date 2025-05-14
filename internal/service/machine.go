@@ -2,45 +2,16 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/canonical/gomaasclient/entity"
 	"github.com/sirupsen/logrus"
 
 	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/models/maas"
 )
-
-// Common error types for service operations
-var (
-	ErrNotFound           = errors.New("resource not found")
-	ErrBadRequest         = errors.New("invalid request parameters")
-	ErrInternalServer     = errors.New("internal server error")
-	ErrServiceUnavailable = errors.New("service unavailable")
-	ErrConflict           = errors.New("resource conflict")
-	ErrForbidden          = errors.New("operation not permitted")
-)
-
-// ServiceError represents an error with HTTP status code mapping
-type ServiceError struct {
-	Err        error
-	StatusCode int
-	Message    string
-}
-
-// Error implements the error interface
-func (e *ServiceError) Error() string {
-	if e.Message != "" {
-		return e.Message
-	}
-	return e.Err.Error()
-}
-
-// Unwrap returns the wrapped error
-func (e *ServiceError) Unwrap() error {
-	return e.Err
-}
 
 // MachineService handles machine management operations
 type MachineService struct {
@@ -56,11 +27,109 @@ func NewMachineService(client MachineClient, logger *logrus.Logger) *MachineServ
 	}
 }
 
-// ListMachines retrieves a list of machines with optional filtering
+// ListMachinesPaginated retrieves a list of machines with optional filtering and pagination.
+func (s *MachineService) ListMachinesPaginated(ctx context.Context, filters map[string]string, pagination *models.PaginationOptions) (*models.PaginatedMachines, error) {
+	s.logger.WithFields(logrus.Fields{
+		"filters":    filters,
+		"pagination": pagination,
+	}).Debug("Listing machines with pagination")
+
+	if err := validateFilters(filters); err != nil {
+		return nil, &ServiceError{
+			Err:        ErrBadRequest,
+			StatusCode: http.StatusBadRequest,
+			Message:    fmt.Sprintf("Invalid filters: %v", err),
+		}
+	}
+
+	var maasPagination *maas.PaginationOptions
+	if pagination != nil {
+		maasPagination = &maas.PaginationOptions{
+			Limit:  pagination.Limit,
+			Offset: pagination.Offset,
+			Page:   pagination.Page,
+		}
+	}
+
+	// Call MAAS client to list machines (this client method handles pagination)
+	machines, totalCount, err := s.maasClient.ListMachines(ctx, filters, maasPagination)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to list machines from MAAS")
+		return nil, mapClientError(err)
+	}
+
+	machineContexts := make([]models.MachineContext, 0, len(machines))
+	for _, m := range machines {
+		// Apply storage constraint filtering if constraints are present in filters
+		// This filtering is done in-service after fetching the paginated list from MAAS.
+		var storageConstraints *models.SimpleStorageConstraint
+		if minSizeStr, ok := filters["min_disk_size"]; ok {
+			if storageConstraints == nil {
+				storageConstraints = &models.SimpleStorageConstraint{}
+			}
+			minSize, _ := parseInt64(minSizeStr)
+			storageConstraints.MinSize = minSize
+		}
+		if diskType, ok := filters["disk_type"]; ok {
+			if storageConstraints == nil {
+				storageConstraints = &models.SimpleStorageConstraint{}
+			}
+			storageConstraints.DiskType = diskType
+		}
+		if minDiskCountStr, ok := filters["min_disk_count"]; ok {
+			if storageConstraints == nil {
+				storageConstraints = &models.SimpleStorageConstraint{}
+			}
+			minDiskCount, _ := parseInt(minDiskCountStr)
+			storageConstraints.Count = minDiskCount
+		}
+
+		if storageConstraints != nil {
+			if !s.maasClient.CheckStorageConstraints(&m, storageConstraints) {
+				continue
+			}
+		}
+		machineContext := models.MaasMachineToMCPContext(&m)
+		machineContexts = append(machineContexts, *machineContext)
+	}
+
+	// Note: totalCount from MAAS is before in-service filtering.
+	// The returned PaginatedMachines.Machines will be the filtered list for the current page.
+	// PaginatedMachines.TotalCount will reflect the MAAS total for pagination calculation.
+	result := &models.PaginatedMachines{
+		Machines:   machineContexts,
+		TotalCount: totalCount,
+	}
+
+	if pagination != nil {
+		result.Limit = pagination.Limit
+		result.Offset = pagination.Offset
+		result.Page = pagination.Page
+		if pagination.Limit > 0 {
+			result.PageCount = (totalCount + pagination.Limit - 1) / pagination.Limit
+		} else if totalCount > 0 {
+			result.PageCount = 1
+		} else {
+			result.PageCount = 0
+		}
+	} else if totalCount > 0 {
+		result.PageCount = 1
+		result.Limit = totalCount
+	}
+
+	s.logger.WithFields(logrus.Fields{
+		"returned_count":   len(machineContexts),
+		"maas_total_count": totalCount,
+	}).Debug("Successfully retrieved paginated machines")
+
+	return result, nil
+}
+
+// ListMachines retrieves a list of machines with optional filtering (conforms to MachineServiceInterface).
 func (s *MachineService) ListMachines(ctx context.Context, filters map[string]string) ([]models.MachineContext, error) {
 	s.logger.WithFields(logrus.Fields{
 		"filters": filters,
-	}).Debug("Listing machines")
+	}).Debug("Listing machines (for MachineServiceInterface)")
 
 	// Validate filters if needed
 	if err := validateFilters(filters); err != nil {
@@ -72,26 +141,61 @@ func (s *MachineService) ListMachines(ctx context.Context, filters map[string]st
 	}
 
 	// Call MAAS client to list machines
-	machines, err := s.maasClient.ListMachines(filters)
+	machines, err := s.maasClient.ListMachinesSimple(ctx, filters)
 	if err != nil {
-		s.logger.WithError(err).Error("Failed to list machines from MAAS")
+		s.logger.WithError(err).Error("Failed to list machines from MAAS client (simple)")
 		return nil, mapClientError(err)
 	}
 
-	// Convert MAAS machines to MCP context
-	result := make([]models.MachineContext, len(machines))
-	for i, m := range machines {
+	// Convert MAAS machines to MCP context and apply in-memory storage constraint filtering
+	machineContexts := make([]models.MachineContext, 0, len(machines))
+	for _, m := range machines {
+		// Placeholder: Parse storage constraints from filters
+		// This logic was previously in the paginated ListMachines and is kept here for consistency
+		// if MAAS API doesn't directly support these filters for ListMachinesSimple.
+		var storageConstraints *models.SimpleStorageConstraint
+		if minSizeStr, ok := filters["min_disk_size"]; ok {
+			if storageConstraints == nil {
+				storageConstraints = &models.SimpleStorageConstraint{}
+			}
+			minSize, _ := parseInt64(minSizeStr)
+			storageConstraints.MinSize = minSize
+		}
+		if diskType, ok := filters["disk_type"]; ok {
+			if storageConstraints == nil {
+				storageConstraints = &models.SimpleStorageConstraint{}
+			}
+			storageConstraints.DiskType = diskType
+		}
+		if minDiskCountStr, ok := filters["min_disk_count"]; ok {
+			if storageConstraints == nil {
+				storageConstraints = &models.SimpleStorageConstraint{}
+			}
+			minDiskCount, _ := parseInt(minDiskCountStr)
+			storageConstraints.Count = minDiskCount
+		}
+
+		// If storage constraints are defined, check if the machine meets them
+		if storageConstraints != nil {
+			// Assuming CheckStorageConstraints can work with models.Machine from ListMachinesSimple.
+			if !s.maasClient.CheckStorageConstraints(&m, storageConstraints) {
+				continue // Skip this machine if it doesn't meet constraints
+			}
+		}
+
 		machineContext := models.MaasMachineToMCPContext(&m)
-		result[i] = *machineContext
+		machineContexts = append(machineContexts, *machineContext)
 	}
 
-	s.logger.WithField("count", len(result)).Debug("Successfully retrieved machines")
-	return result, nil
+	s.logger.WithField("count", len(machineContexts)).Debug("Successfully retrieved machines for interface")
+	return machineContexts, nil
 }
 
 // GetMachine retrieves a specific machine by ID
 func (s *MachineService) GetMachine(ctx context.Context, id string) (*models.MachineContext, error) {
-	s.logger.WithField("id", id).Debug("Getting machine by ID")
+	s.logger.WithFields(logrus.Fields{
+		"id": id,
+	}).Debug("Getting machine by ID (details always included by default in this service method)")
 
 	// Validate ID
 	if id == "" {
@@ -102,8 +206,8 @@ func (s *MachineService) GetMachine(ctx context.Context, id string) (*models.Mac
 		}
 	}
 
-	// Call MAAS client to get machine
-	machine, err := s.maasClient.GetMachine(id)
+	// Call MAAS client to get machine, always including details from the service layer's perspective
+	machine, err := s.maasClient.GetMachineWithDetails(ctx, id, true)
 	if err != nil {
 		s.logger.WithError(err).WithField("id", id).Error("Failed to get machine from MAAS")
 		return nil, mapClientError(err)
@@ -113,6 +217,43 @@ func (s *MachineService) GetMachine(ctx context.Context, id string) (*models.Mac
 	result := models.MaasMachineToMCPContext(machine)
 
 	s.logger.WithField("id", id).Debug("Successfully retrieved machine")
+	return result, nil
+}
+
+// DiscoverMachines initiates machine discovery in MAAS
+func (s *MachineService) DiscoverMachines(ctx context.Context, options *models.MachineDiscoveryOptions) (*models.MachineDiscoveryResult, error) {
+	s.logger.WithFields(logrus.Fields{
+		"options": options,
+	}).Info("Initiating machine discovery")
+
+	// In a real implementation, this would call the MAAS API to initiate machine discovery
+	// For now, we'll simulate the discovery process by listing existing machines
+
+	// Get existing machines before discovery
+	beforeMachines, err := s.maasClient.ListMachinesSimple(ctx, nil)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to list machines before discovery")
+		return nil, mapClientError(err)
+	}
+
+	// In a real implementation, this would trigger the actual discovery process
+	// For now, we'll just return the existing machines as "discovered"
+
+	// Create discovery result
+	result := &models.MachineDiscoveryResult{
+		DiscoveredCount: len(beforeMachines),
+		Status:          "completed",
+	}
+
+	// Convert MAAS machines to MCP context for the result
+	discoveredMachines := make([]models.MachineContext, len(beforeMachines))
+	for i, m := range beforeMachines {
+		machineContext := models.MaasMachineToMCPContext(&m)
+		discoveredMachines[i] = *machineContext
+	}
+	result.DiscoveredMachines = discoveredMachines
+
+	s.logger.WithField("discoveredCount", result.DiscoveredCount).Info("Machine discovery completed")
 	return result, nil
 }
 
@@ -389,16 +530,16 @@ func convertOSConfigToParams(osConfig map[string]string) *entity.MachineDeployPa
 	return params
 }
 
-// mapClientError maps MAAS client errors to service errors with appropriate HTTP status codes
-func mapClientError(err error) error {
-	// Implement error mapping logic
-	// This is a simplified version; in a real implementation, you would
-	// check for specific error types from the MAAS client
+// parseInt64 is a helper function to parse a string to int64
+func parseInt64(s string) (int64, error) {
+	return strconv.ParseInt(s, 10, 64)
+}
 
-	// For now, return a generic internal server error
-	return &ServiceError{
-		Err:        ErrInternalServer,
-		StatusCode: http.StatusInternalServerError,
-		Message:    fmt.Sprintf("MAAS client error: %v", err),
+// parseInt is a helper function to parse a string to int
+func parseInt(s string) (int, error) {
+	val, err := strconv.ParseInt(s, 10, 32)
+	if err != nil {
+		return 0, err
 	}
+	return int(val), nil
 }

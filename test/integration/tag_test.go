@@ -20,20 +20,25 @@ func TestListTags(t *testing.T) {
 		// Verify response
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 
-		var tags []struct {
-			Name        string `json:"name"`
-			Description string `json:"description,omitempty"`
-			Comment     string `json:"comment,omitempty"`
-			Definition  string `json:"definition,omitempty"`
+		var responseData struct {
+			Tags []struct {
+				Name        string `json:"name"`
+				Description string `json:"description,omitempty"`
+				Comment     string `json:"comment,omitempty"`
+				Definition  string `json:"definition,omitempty"`
+				// Add Color and Category if they are part of TagContext and expected in response
+				Color    string `json:"color,omitempty"`
+				Category string `json:"category,omitempty"`
+			} `json:"tags"`
 		}
-		ParseJSONResponse(t, respBody, &tags)
+		ParseJSONResponse(t, respBody, &responseData)
 
 		// Verify we got the expected tags
-		require.Len(t, tags, 3)
+		require.Len(t, responseData.Tags, 3)
 
 		// Check for expected tag names
 		tagNames := make(map[string]bool)
-		for _, tag := range tags {
+		for _, tag := range responseData.Tags {
 			tagNames[tag.Name] = true
 		}
 		assert.True(t, tagNames["test"])
@@ -75,7 +80,7 @@ func TestCreateTag(t *testing.T) {
 		resp, respBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/tags", reqBody)
 
 		// Verify response
-		require.Equal(t, http.StatusOK, resp.StatusCode)
+		require.Equal(t, http.StatusCreated, resp.StatusCode) // Changed to 201 Created
 
 		var tag struct {
 			Name        string `json:"name"`
@@ -93,20 +98,24 @@ func TestCreateTag(t *testing.T) {
 		listResp, listRespBody := ts.MakeRequest(t, http.MethodGet, "/api/v1/tags", nil)
 		require.Equal(t, http.StatusOK, listResp.StatusCode)
 
-		var tags []struct {
-			Name        string `json:"name"`
-			Description string `json:"description,omitempty"`
-			Comment     string `json:"comment,omitempty"`
-			Definition  string `json:"definition,omitempty"`
+		var listResponseData struct {
+			Tags []struct {
+				Name        string `json:"name"`
+				Description string `json:"description,omitempty"`
+				Comment     string `json:"comment,omitempty"`
+				Definition  string `json:"definition,omitempty"`
+				Color       string `json:"color,omitempty"`
+				Category    string `json:"category,omitempty"`
+			} `json:"tags"`
 		}
-		ParseJSONResponse(t, listRespBody, &tags)
+		ParseJSONResponse(t, listRespBody, &listResponseData)
 
 		// Verify we now have 4 tags (the 3 initial ones plus our new one)
-		require.Len(t, tags, 4)
+		require.Len(t, listResponseData.Tags, 4)
 
 		// Check for our new tag
 		found := false
-		for _, t := range tags {
+		for _, t := range listResponseData.Tags {
 			if t.Name == "new-tag" {
 				found = true
 				break
@@ -170,28 +179,26 @@ func TestApplyTagToMachine(t *testing.T) {
 			Comment: "Tag for testing apply",
 		}
 		createResp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/tags", newTagReqBody)
-		require.Equal(t, http.StatusOK, createResp.StatusCode)
+		require.Equal(t, http.StatusCreated, createResp.StatusCode) // Changed to 201 Created
 
 		// Now apply the tag to a machine
-		reqBody := struct {
-			TagName  string `json:"tag_name"`
-			SystemID string `json:"system_id"`
-		}{
-			TagName:  "apply-test-tag",
-			SystemID: "abc123",
-		}
-		resp, respBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/tags/apply", reqBody)
+		// Route is POST /machines/:id/tags/:tag
+		machineID := "abc123"
+		tagName := "apply-test-tag"
+		url := "/api/v1/machines/" + machineID + "/tags/" + tagName
+		// No request body needed for this endpoint as params are in path
+		resp, respBody := ts.MakeRequest(t, http.MethodPost, url, nil)
 
 		// Verify response
-		require.Equal(t, http.StatusOK, resp.StatusCode)
+		require.Equal(t, http.StatusOK, resp.StatusCode) // Handler returns 200 for successful apply
 
 		var result map[string]string
 		ParseJSONResponse(t, respBody, &result)
 		assert.Contains(t, result["message"], "successfully")
 
 		// Verify the tag was actually applied by getting machine details
-		machineResp, machineRespBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/details",
-			map[string]string{"system_id": "abc123"})
+		detailUrl := "/api/v1/machines/abc123" // GET request for details
+		machineResp, machineRespBody := ts.MakeRequest(t, http.MethodGet, detailUrl, nil)
 		require.Equal(t, http.StatusOK, machineResp.StatusCode)
 
 		var machine struct {
@@ -213,32 +220,24 @@ func TestApplyTagToMachine(t *testing.T) {
 
 	t.Run("ApplyNonExistentTag", func(t *testing.T) {
 		// Make request with non-existent tag
-		reqBody := struct {
-			TagName  string `json:"tag_name"`
-			SystemID string `json:"system_id"`
-		}{
-			TagName:  "nonexistent-tag",
-			SystemID: "abc123",
-		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/tags/apply", reqBody)
+		machineID := "abc123"
+		tagName := "nonexistent-tag"
+		url := "/api/v1/machines/" + machineID + "/tags/" + tagName
+		resp, _ := ts.MakeRequest(t, http.MethodPost, url, nil)
 
 		// Verify response
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode) // Current behavior with generic mock error
 	})
 
 	t.Run("ApplyTagToNonExistentMachine", func(t *testing.T) {
 		// Make request with non-existent machine
-		reqBody := struct {
-			TagName  string `json:"tag_name"`
-			SystemID string `json:"system_id"`
-		}{
-			TagName:  "test",
-			SystemID: "nonexistent",
-		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/tags/apply", reqBody)
+		machineID := "nonexistent"
+		tagName := "test"
+		url := "/api/v1/machines/" + machineID + "/tags/" + tagName
+		resp, _ := ts.MakeRequest(t, http.MethodPost, url, nil)
 
 		// Verify response
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode) // Current behavior with generic mock error
 	})
 
 	t.Run("ApplyTagWithError", func(t *testing.T) {
@@ -246,17 +245,13 @@ func TestApplyTagToMachine(t *testing.T) {
 		ts.MockClient.SetFailNextCall(true, "ApplyTagToMachine")
 
 		// Make request
-		reqBody := struct {
-			TagName  string `json:"tag_name"`
-			SystemID string `json:"system_id"`
-		}{
-			TagName:  "test",
-			SystemID: "abc123",
-		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/tags/apply", reqBody)
+		machineID := "abc123"
+		tagName := "test"
+		url := "/api/v1/machines/" + machineID + "/tags/" + tagName
+		resp, _ := ts.MakeRequest(t, http.MethodPost, url, nil)
 
 		// Verify response
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode) // Current behavior with generic mock error
 
 		// Reset mock
 		ts.MockClient.SetFailNextCall(false, "")
@@ -270,25 +265,25 @@ func TestRemoveTagFromMachine(t *testing.T) {
 
 	t.Run("RemoveTagFromMachine", func(t *testing.T) {
 		// First apply a tag to a machine to ensure it's there
-		applyReqBody := struct {
-			TagName  string `json:"tag_name"`
-			SystemID string `json:"system_id"`
-		}{
-			TagName:  "test",
-			SystemID: "abc123",
-		}
-		applyResp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/tags/apply", applyReqBody)
+		// applyReqBody := struct { // This variable is unused
+		// 	TagName  string `json:"tag_name"`
+		// 	SystemID string `json:"system_id"`
+		// }{
+		// 	TagName:  "test",
+		// 	SystemID: "abc123",
+		// }
+		// Apply tag using the correct path: POST /api/v1/machines/:id/tags/:tag
+		applyURL := "/api/v1/machines/abc123/tags/test"
+		applyResp, _ := ts.MakeRequest(t, http.MethodPost, applyURL, nil) // No body needed for this apply route
 		require.Equal(t, http.StatusOK, applyResp.StatusCode)
 
 		// Now remove the tag
-		reqBody := struct {
-			TagName  string `json:"tag_name"`
-			SystemID string `json:"system_id"`
-		}{
-			TagName:  "test",
-			SystemID: "abc123",
-		}
-		resp, respBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/tags/remove", reqBody)
+		// Route is DELETE /api/v1/machines/:id/tags/:tag
+		removeMachineID := "abc123"
+		removeTagName := "test"
+		removeURL := "/api/v1/machines/" + removeMachineID + "/tags/" + removeTagName
+		// No request body needed for DELETE
+		resp, respBody := ts.MakeRequest(t, http.MethodDelete, removeURL, nil)
 
 		// Verify response
 		require.Equal(t, http.StatusOK, resp.StatusCode)
@@ -298,8 +293,8 @@ func TestRemoveTagFromMachine(t *testing.T) {
 		assert.Contains(t, result["message"], "successfully")
 
 		// Verify the tag was actually removed by getting machine details
-		machineResp, machineRespBody := ts.MakeRequest(t, http.MethodPost, "/api/v1/machines/details",
-			map[string]string{"system_id": "abc123"})
+		detailUrl := "/api/v1/machines/abc123" // GET request for details
+		machineResp, machineRespBody := ts.MakeRequest(t, http.MethodGet, detailUrl, nil)
 		require.Equal(t, http.StatusOK, machineResp.StatusCode)
 
 		var machine struct {
@@ -316,32 +311,24 @@ func TestRemoveTagFromMachine(t *testing.T) {
 
 	t.Run("RemoveNonExistentTag", func(t *testing.T) {
 		// Make request with non-existent tag
-		reqBody := struct {
-			TagName  string `json:"tag_name"`
-			SystemID string `json:"system_id"`
-		}{
-			TagName:  "nonexistent-tag",
-			SystemID: "abc123",
-		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/tags/remove", reqBody)
+		machineID := "abc123"
+		tagName := "nonexistent-tag"
+		url := "/api/v1/machines/" + machineID + "/tags/" + tagName
+		resp, _ := ts.MakeRequest(t, http.MethodDelete, url, nil)
 
 		// Verify response
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode) // Current behavior
 	})
 
 	t.Run("RemoveTagFromNonExistentMachine", func(t *testing.T) {
 		// Make request with non-existent machine
-		reqBody := struct {
-			TagName  string `json:"tag_name"`
-			SystemID string `json:"system_id"`
-		}{
-			TagName:  "test",
-			SystemID: "nonexistent",
-		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/tags/remove", reqBody)
+		machineID := "nonexistent"
+		tagName := "test"
+		url := "/api/v1/machines/" + machineID + "/tags/" + tagName
+		resp, _ := ts.MakeRequest(t, http.MethodDelete, url, nil)
 
 		// Verify response
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode) // Current behavior
 	})
 
 	t.Run("RemoveTagWithError", func(t *testing.T) {
@@ -349,17 +336,14 @@ func TestRemoveTagFromMachine(t *testing.T) {
 		ts.MockClient.SetFailNextCall(true, "RemoveTagFromMachine")
 
 		// Make request
-		reqBody := struct {
-			TagName  string `json:"tag_name"`
-			SystemID string `json:"system_id"`
-		}{
-			TagName:  "test",
-			SystemID: "abc123",
-		}
-		resp, _ := ts.MakeRequest(t, http.MethodPost, "/api/v1/tags/remove", reqBody)
+		machineID := "abc123"
+		tagName := "test"
+		url := "/api/v1/machines/" + machineID + "/tags/" + tagName
+		resp, _ := ts.MakeRequest(t, http.MethodDelete, url, nil)
 
 		// Verify response
-		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		// If RemoveTagFromMachine mock fails, service should return an error, mapped by handler.
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode) // Current behavior
 
 		// Reset mock
 		ts.MockClient.SetFailNextCall(false, "")
