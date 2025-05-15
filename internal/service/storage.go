@@ -20,7 +20,6 @@ type StorageClient interface {
 
 	// Partition operations
 	CreateMachinePartition(systemID string, blockDeviceID int, params modelsmaas.PartitionCreateParams) (*models.Partition, error)
--------
 	UpdateMachinePartition(systemID string, blockDeviceID, partitionID int, params map[string]interface{}) (*models.Partition, error)
 	DeleteMachinePartition(systemID string, blockDeviceID, partitionID int) error
 	FormatMachinePartition(systemID string, blockDeviceID, partitionID int, params map[string]interface{}) (*models.Filesystem, error)
@@ -200,8 +199,34 @@ func (s *StorageService) CreatePartition(ctx context.Context, machineID string, 
 		}
 	}
 
+	// Convert map[string]interface{} to modelsmaas.PartitionCreateParams
+	createParams := modelsmaas.PartitionCreateParams{}
+
+	// Extract size parameter
+	if sizeVal, ok := params["size"]; ok {
+		switch v := sizeVal.(type) {
+		case int64:
+			createParams.Size = v
+		case int:
+			createParams.Size = int64(v)
+		case float64:
+			createParams.Size = int64(v)
+		case string:
+			if size, err := strconv.ParseInt(v, 10, 64); err == nil {
+				createParams.Size = size
+			}
+		}
+	}
+
+	// Extract fstype parameter if present
+	if fsTypeVal, ok := params["fstype"]; ok {
+		if fsType, ok := fsTypeVal.(string); ok {
+			createParams.FSType = fsType
+		}
+	}
+
 	// Call MAAS client to create the partition
-	partition, err := s.maasClient.CreateMachinePartition(machineID, deviceIDInt, params)
+	partition, err := s.maasClient.CreateMachinePartition(machineID, deviceIDInt, createParams)
 	if err != nil {
 		s.logger.WithError(err).WithFields(logrus.Fields{
 			"machine_id": machineID,

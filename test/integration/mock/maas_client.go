@@ -9,6 +9,7 @@ import (
 	"github.com/canonical/gomaasclient/entity"
 	"github.com/lspecian/maas-mcp-server/internal/models"
 	"github.com/lspecian/maas-mcp-server/internal/models/maas"
+	modelsmaas "github.com/lspecian/maas-mcp-server/internal/models/maas"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/mock" // Added import
 )
@@ -506,7 +507,7 @@ func (m *MockMaasClient) GetMachineBlockDevice(systemID string, deviceID int) (*
 }
 
 // CreateMachinePartition creates a partition on a block device for a specific machine.
-func (m *MockMaasClient) CreateMachinePartition(systemID string, blockDeviceID int, params map[string]interface{}) (*models.Partition, error) {
+func (m *MockMaasClient) CreateMachinePartition(systemID string, blockDeviceID int, params modelsmaas.PartitionCreateParams) (*models.Partition, error) {
 	if err := m.checkFailure("CreateMachinePartition"); err != nil {
 		return nil, err
 	}
@@ -537,42 +538,30 @@ func (m *MockMaasClient) CreateMachinePartition(systemID string, blockDeviceID i
 		return nil, fmt.Errorf("block device with ID %d not found for machine %s", blockDeviceID, systemID)
 	}
 
-	// Check if size parameter is provided
-	sizeParam, ok := params["size"]
-	if !ok {
-		return nil, fmt.Errorf("size parameter is required")
-	}
-
-	// Convert size to int64
-	var size int64
-	switch s := sizeParam.(type) {
-	case int:
-		size = int64(s)
-	case int64:
-		size = s
-	case float64:
-		size = int64(s)
-	default:
-		return nil, fmt.Errorf("invalid size parameter type")
-	}
-
 	// Check if there's enough space on the device
-	if size > device.AvailableSize {
-		return nil, fmt.Errorf("not enough space on device: available %d, requested %d", device.AvailableSize, size)
+	if params.Size > device.AvailableSize {
+		return nil, fmt.Errorf("not enough space on device: available %d, requested %d", device.AvailableSize, params.Size)
 	}
 
 	// Create a new partition
 	partitionID := len(device.Partitions) + 1
 	partition := models.Partition{
 		ID:   partitionID,
-		Size: size,
+		Size: params.Size,
 		Path: fmt.Sprintf("%s%d", device.Path, partitionID),
 		Type: "primary",
 	}
 
+	// Add filesystem if specified
+	if params.FSType != "" {
+		partition.Filesystem = &models.Filesystem{
+			FSType: params.FSType,
+		}
+	}
+
 	// Update the device's available size
-	device.AvailableSize -= size
-	device.UsedSize += size
+	device.AvailableSize -= params.Size
+	device.UsedSize += params.Size
 	device.Partitions = append(device.Partitions, partition)
 
 	// Return a copy of the partition

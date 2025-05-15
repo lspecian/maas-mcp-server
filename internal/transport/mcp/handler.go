@@ -378,8 +378,12 @@ func (h *Handler) handleDiscovery(c *gin.Context, request *MCPRequest) {
 
 	// Set ID
 	serverInfo.ID = request.ID.(string)
-// HandleHealthCheck handles requests for the server's health status
 
+	// Return server info
+	c.JSON(http.StatusOK, serverInfo)
+}
+
+// HandleHealthCheck handles requests for the server's health status
 func (h *Handler) HandleHealthCheck(c *gin.Context) {
 	// In a real implementation, this would check the status of dependencies (e.g., MAAS connection)
 	// For now, return a simple success response
@@ -397,8 +401,4 @@ func (h *Handler) HandleMetrics(c *gin.Context) {
 		"message": "Metrics endpoint (placeholder)",
 		// TODO: Add actual metrics data
 	})
-}
-
-	// Return server info
-	c.JSON(http.StatusOK, serverInfo)
 }

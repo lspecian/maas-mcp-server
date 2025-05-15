@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+
+# Node.js
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Build artifacts
+mcp-server
+mcp-server-clean
+mcp-test-results.json
+vscode-mcp-test-results.json
+vscode-specific-mcp-test-results.json
+list-machines-test-results.json
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Editor directories and files
+.idea
+.vscode
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.*
+
+# Test files
+test-*.js
+test-*.go
+test/
+
+# Documentation
+*.md
+!README.md
+
+# Other
+.DS_Store
+.roo
+.cursor
+.windsurfrules
+.taskmasterconfig
+.roomodes

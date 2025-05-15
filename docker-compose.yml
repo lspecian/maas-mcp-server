@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  maas-mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: maas-mcp-server:latest
+    container_name: maas-mcp-server
+    ports:
+      - "8082:8082"
+    environment:
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8082
+      - LOG_LEVEL=info
+      - AUTH_ENABLED=false
+      - MAAS_API_URL=${MAAS_API_URL:-http://your-maas-server:5240/MAAS}
+      - MAAS_API_KEY=${MAAS_API_KEY:-consumer:token:secret}
+    volumes:
+      - ./config:/app/config
+    restart: unless-stopped
+    command: # Empty to use the default CMD from Dockerfile

@@ -8,6 +8,7 @@ import (
 	"github.com/lspecian/maas-mcp-server/internal/maasclient"
 	"github.com/lspecian/maas-mcp-server/internal/models"
 	"github.com/lspecian/maas-mcp-server/internal/models/maas"
+	modelsmaas "github.com/lspecian/maas-mcp-server/internal/models/maas"
 )
 
 // MaasClientWrapper adapts the MaasClient to the service interfaces
@@ -112,7 +113,7 @@ func (w *MaasClientWrapper) GetMachineBlockDevice(systemID string, deviceID int)
 }
 
 // CreateMachinePartition implements the StorageClient interface
-func (w *MaasClientWrapper) CreateMachinePartition(systemID string, blockDeviceID int, params map[string]interface{}) (*models.Partition, error) {
+func (w *MaasClientWrapper) CreateMachinePartition(systemID string, blockDeviceID int, params modelsmaas.PartitionCreateParams) (*models.Partition, error) {
 	// This is a stub implementation since the underlying client doesn't support this operation yet
 	// In a real implementation, this would call the client's method
 	return nil, fmt.Errorf("operation not implemented in the underlying client")

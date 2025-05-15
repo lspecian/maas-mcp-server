@@ -33,8 +33,20 @@ config/config.yaml
 .roo/mcp.json
 
 # Binaries and compiled code
-mcp-server
+bin/*
+!bin/README.md
 ts-wrapper/dist/
+
+# Test results
+test/results/*
+!test/results/README.md
+
+# Keep directories but ignore contents
+logs/*
+!logs/.gitkeep
 
 .roo
 .cursor
+.windsurfrules
+.taskmasterconfig
+.roomodes

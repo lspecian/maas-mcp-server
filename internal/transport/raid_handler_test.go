@@ -32,11 +32,6 @@ func TestListRAIDs(t *testing.T) {
 		expectedBody   string
 	}{
 		{
-func (m *MockStorageService) ConfigureStorage(ctx context.Context, machineID string, config models.DesiredStorageConfiguration) error {
-	// Mock implementation - just return nil for now
-	return nil
-}
-
 			name:      "Success",
 			machineID: "abc123",
 			mockRAIDs: []models.RAIDContext{

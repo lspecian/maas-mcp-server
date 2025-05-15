@@ -81,12 +81,45 @@ func (s *Server) handleDiscovery(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// JSONRPCID represents a JSON-RPC ID that can be either a string or a number
+type JSONRPCID string
+
+// String returns the string representation of the ID
+func (id JSONRPCID) String() string {
+	return string(id)
+}
+
+// MarshalJSON implements the json.Marshaler interface
+func (id JSONRPCID) MarshalJSON() ([]byte, error) {
+	return json.Marshal(id.String())
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface
+func (id *JSONRPCID) UnmarshalJSON(data []byte) error {
+	// Try to unmarshal as string
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		*id = JSONRPCID(s)
+		return nil
+	}
+
+	// Try to unmarshal as number
+	var n json.Number
+	if err := json.Unmarshal(data, &n); err == nil {
+		*id = JSONRPCID(n.String())
+		return nil
+	}
+
+	// Return error if neither works
+	return fmt.Errorf("ID must be a string or a number")
+}
+
 // JSONRPCRequest represents a JSON-RPC request
 type JSONRPCRequest struct {
 	JSONRPC string          `json:"jsonrpc"`
 	Method  string          `json:"method"`
 	Params  json.RawMessage `json:"params"`
-	ID      string          `json:"id"`
+	ID      JSONRPCID       `json:"id"`
 }
 
 // JSONRPCResponse represents a JSON-RPC response
@@ -94,7 +127,7 @@ type JSONRPCResponse struct {
 	JSONRPC string          `json:"jsonrpc"`
 	Result  json.RawMessage `json:"result,omitempty"`
 	Error   *JSONRPCError   `json:"error,omitempty"`
-	ID      string          `json:"id"`
+	ID      JSONRPCID       `json:"id"`
 }
 
 // JSONRPCError represents a JSON-RPC error
@@ -116,7 +149,7 @@ func (s *Server) handleJSONRPC(c *gin.Context) {
 				Message: "Parse error",
 				Data:    err.Error(),
 			},
-			ID: "",
+			ID: JSONRPCID(""),
 		})
 		return
 	}

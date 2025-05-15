@@ -51,6 +51,21 @@ if [ "$GO_MAJOR" -lt 1 ] || ([ "$GO_MAJOR" -eq 1 ] && [ "$GO_MINOR" -lt 22 ]); t
   fi
 fi
 
+# Validate MCP configuration
+validate_mcp_config() {
+  print_message "Validating MCP configuration..." "${YELLOW}"
+  if [ -f "scripts/validate-mcp-config.js" ]; then
+    node scripts/validate-mcp-config.js
+    if [ $? -ne 0 ]; then
+      print_error "MCP configuration validation failed!"
+      exit 1
+    fi
+    print_success "MCP configuration validated successfully!"
+  else
+    print_warning "MCP configuration validator not found. Skipping validation."
+  fi
+}
+
 # Build the server
 build_server() {
   print_message "Building MAAS MCP Server..." "${YELLOW}"
@@ -73,8 +88,22 @@ run_server() {
 
 # Run the MCP server
 run_mcp_server() {
+  # Validate MCP configuration before running
+  validate_mcp_config
+  
   print_message "Running MCP Server..." "${YELLOW}"
   ./mcp-server-clean
+}
+
+# Run the MCP server in stdio mode
+run_mcp_stdio() {
+  # Validate MCP configuration before running
+  validate_mcp_config
+  
+  print_message "Running MCP Server in stdio mode..." "${YELLOW}"
+  
+  # Start the MCP server directly with stdio
+  ./mcp-server-clean stdio
 }
 
 # Run tests
@@ -104,6 +133,8 @@ show_help() {
   echo "  build-mcp     Build the MCP server with clean architecture"
   echo "  run           Build and run the server"
   echo "  run-mcp       Build and run the MCP server with clean architecture"
+  echo "  run-mcp-stdio Build and run the MCP server in stdio mode"
+  echo "  validate      Validate MCP configuration"
   echo "  test          Run tests"
   echo "  lint          Run linter"
   echo "  help          Show this help message"
@@ -125,6 +156,13 @@ case "$1" in
   run-mcp)
     build_mcp_server
     run_mcp_server
+    ;;
+  run-mcp-stdio)
+    build_mcp_server
+    run_mcp_stdio
+    ;;
+  validate)
+    validate_mcp_config
     ;;
   test)
     run_tests

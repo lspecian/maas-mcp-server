@@ -6,11 +6,13 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	apperrors "github.com/lspecian/maas-mcp-server/internal/errors" // Added import alias
 	"github.com/lspecian/maas-mcp-server/internal/models"
+	modelsmaas "github.com/lspecian/maas-mcp-server/internal/models/maas"
 	"github.com/lspecian/maas-mcp-server/internal/service"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -20,7 +22,7 @@ import (
 type MockStorageService struct {
 	ListBlockDevicesFunc func(ctx context.Context, machineID string) ([]models.StorageContext, error)
 	GetBlockDeviceFunc   func(ctx context.Context, machineID string, deviceID string) (*models.StorageContext, error)
-	CreatePartitionFunc  func(ctx context.Context, machineID string, deviceID string, params map[string]interface{}) (*models.PartitionContext, error)
+	CreatePartitionFunc  func(ctx context.Context, machineID string, deviceID string, params modelsmaas.PartitionCreateParams) (*models.PartitionContext, error)
 	UpdatePartitionFunc  func(ctx context.Context, machineID string, deviceID string, partitionID string, params map[string]interface{}) (*models.PartitionContext, error)
 	DeletePartitionFunc  func(ctx context.Context, machineID string, deviceID string, partitionID string) error
 	FormatPartitionFunc  func(ctx context.Context, machineID string, deviceID string, partitionID string, params map[string]interface{}) (*models.FilesystemContext, error)
@@ -49,7 +51,33 @@ func (m *MockStorageService) GetBlockDevice(ctx context.Context, machineID strin
 
 func (m *MockStorageService) CreatePartition(ctx context.Context, machineID string, deviceID string, params map[string]interface{}) (*models.PartitionContext, error) {
 	if m.CreatePartitionFunc != nil {
-		return m.CreatePartitionFunc(ctx, machineID, deviceID, params)
+		// Convert map[string]interface{} to modelsmaas.PartitionCreateParams
+		createParams := modelsmaas.PartitionCreateParams{}
+
+		// Extract size parameter
+		if sizeVal, ok := params["size"]; ok {
+			switch v := sizeVal.(type) {
+			case int64:
+				createParams.Size = v
+			case int:
+				createParams.Size = int64(v)
+			case float64:
+				createParams.Size = int64(v)
+			case string:
+				if size, err := strconv.ParseInt(v, 10, 64); err == nil {
+					createParams.Size = size
+				}
+			}
+		}
+
+		// Extract fstype parameter if present
+		if fsTypeVal, ok := params["fstype"]; ok {
+			if fsType, ok := fsTypeVal.(string); ok {
+				createParams.FSType = fsType
+			}
+		}
+
+		return m.CreatePartitionFunc(ctx, machineID, deviceID, createParams)
 	}
 	return nil, errors.New("CreatePartitionFunc not implemented")
 }

@@ -17,6 +17,9 @@ import (
 )
 
 func main() {
+	// Check if stdio mode is requested
+	useStdio := len(os.Args) > 1 && os.Args[1] == "stdio"
+
 	// Load configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {
@@ -142,24 +145,46 @@ func main() {
 		logger.WithError(err).Fatal("Failed to register maas_machine resource")
 	}
 
-	// Create MCP server
-	server := mcp.NewServer(registry, logger)
+	// Register list_machines tool (alias for maas_list_machines)
+	err = registry.RegisterTool(mcp.ToolInfo{
+		Name:        "list_machines",
+		Description: "List MAAS machines with optional filtering",
+		InputSchema: listMachinesSchema,
+		Handler:     machineTools.ListMachines,
+	})
+	if err != nil {
+		logger.WithError(err).Fatal("Failed to register list_machines tool")
+	}
 
-	// Start server in a goroutine
-	go func() {
-		addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
-		logger.WithField("addr", addr).Info("Starting MCP server")
-		if err := server.Run(addr); err != nil {
-			logger.WithError(err).Fatal("Failed to start server")
+	// Create and run the appropriate server based on the mode
+	if useStdio {
+		// Create stdio server
+		stdioServer := mcp.NewStdioServer(registry, logger)
+
+		// Run stdio server
+		if err := stdioServer.Run(); err != nil {
+			logger.WithError(err).Fatal("Failed to run stdio server")
 		}
-	}()
+	} else {
+		// Create HTTP server
+		httpServer := mcp.NewServer(registry, logger)
 
-	// Wait for interrupt signal
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
+		// Start HTTP server in a goroutine
+		go func() {
+			addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
+			logger.WithField("addr", addr).Info("Starting HTTP MCP server")
+			if err := httpServer.Run(addr); err != nil {
+				logger.WithError(err).Fatal("Failed to start HTTP server")
+			}
+		}()
 
-	logger.Info("Shutting down server...")
+		// Wait for interrupt signal
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		<-quit
+
+		logger.Info("Shutting down server...")
+	}
 
 	// Close repositories
 	if err := machineRepo.Close(); err != nil {

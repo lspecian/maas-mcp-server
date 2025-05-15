@@ -83,7 +83,8 @@ func main() {
 	machineHandlerNew := machinetransport.NewHandler(machineServiceNew, logger)
 
 	// For backward compatibility, keep the old handlers
-	machineHandler := transport.NewMachineHandler(machineServiceOld, logger)
+	// Comment out the old machine handler to avoid route conflicts
+	// machineHandler := transport.NewMachineHandler(machineServiceOld, logger)
 	networkHandler := transport.NewNetworkHandler(networkService, logger)
 	storageHandler := transport.NewStorageHandler(storageService, logger)
 	volumeGroupHandler := transport.NewVolumeGroupHandler(volumeGroupService, logger)
@@ -100,7 +101,8 @@ func main() {
 
 	// Register API routes for backward compatibility
 	apiGroup := router.Group("/api/v1")
-	machineHandler.RegisterRoutes(apiGroup)
+	// Comment out the old machine handler to avoid route conflicts
+	// machineHandler.RegisterRoutes(apiGroup)
 	networkHandler.RegisterRoutes(apiGroup)
 	storageHandler.RegisterRoutes(apiGroup)
 	volumeGroupHandler.RegisterRoutes(apiGroup)
