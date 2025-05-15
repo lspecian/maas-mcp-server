@@ -2,7 +2,6 @@
   "name": "maas-mcp-server",
   "version": "0.1.0",
   "description": "MCP server for Canonical MAAS API",
-  "type": "commonjs",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -11,14 +10,13 @@
     "mcp": "cross-env NODE_ENV=production LOG_LEVEL=error ts-node src/index.ts",
     "mcp:dev": "cross-env NODE_ENV=production LOG_LEVEL=error ts-node-dev --respawn --transpile-only src/index.ts",
     "mcp:inspector": "cross-env NODE_ENV=production LOG_LEVEL=error SILENT=true ts-node-dev --quiet --respawn --transpile-only src/index.ts",
-    "inspector": "npx @modelcontextprotocol/inspector --transport=http --url=http://localhost:3002/mcp",
+    "inspector": "mcp-inspector",
     "test": "jest --config jest.config.cjs",
     "test:integration": "jest --config src/integration_tests/jest.integration.config.js",
     "test:all": "npm run test && npm run test:integration",
     "test:report": "jest --config src/integration_tests/jest.integration.config.js --reporters=jest-junit",
     "check-deps": "node scripts/check-dependencies.cjs",
-    "lint": "eslint . --ext .ts",
-    "inspector": "mcp-inspector"
+    "lint": "eslint . --ext .ts"
   },
   "repository": {
     "type": "git",
@@ -66,6 +64,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "fastmcp": "^1.27.6",
     "form-data": "^4.0.0",
     "formdata-node": "^6.0.3",
     "helmet": "^7.1.0",

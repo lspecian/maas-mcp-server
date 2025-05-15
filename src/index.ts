@@ -9,20 +9,15 @@
  * @module index
  */
 
-const express = require('express');
 const path = require('path');
+const { FastMCP } = require('fastmcp');
 
-// Import MCP SDK modules using direct paths
-const sdkPath = path.join(__dirname, '..', 'node_modules', '@modelcontextprotocol', 'sdk', 'dist', 'cjs');
-const { McpServer } = require(path.join(sdkPath, 'server', 'mcp.js'));
-const { StreamableHTTPServerTransport } = require(path.join(sdkPath, 'server', 'streamableHttp.js'));
-const { LATEST_PROTOCOL_VERSION } = require(path.join(sdkPath, 'types.js'));
-
+// Import configuration and utilities
 const config = require('./config');
 const logger = require('./utils/logger');
 const { generateRequestId } = logger;
-const { MaasApiClient } = require('./maas/MaasApiClient');
 const { initializeAuditLogger } = require('./utils/initAuditLogger');
+const { MaasApiClient } = require('./maas/MaasApiClient');
 
 /**
  * Initialize the audit logger for tracking API operations
@@ -39,28 +34,24 @@ initializeAuditLogger();
 const maasApiClient = new MaasApiClient();
 
 /**
- * Initialize the MCP Server
+ * Initialize the FastMCP Server
  *
  * This creates the main MCP server instance that will handle all client requests.
- * It's configured with server information, protocol version, and capabilities.
+ * It's configured with server information and capabilities.
  * The server exposes MAAS functionality through MCP tools and resources.
  */
-const server = new McpServer({
+const server = new FastMCP({
   name: "MAAS-API-MCP-Server",
   version: "1.0.0",
-  protocolVersion: LATEST_PROTOCOL_VERSION,
-  serverInfo: {
-    name: "Canonical MAAS API Bridge for MCP",
-    version: "0.1.0",
-    instructions: "This MCP server provides access to Canonical MAAS API functionality. Use the available tools to manage machines, tags, and other MAAS resources."
+  instructions: "This MCP server provides access to Canonical MAAS API functionality. Use the available tools to manage machines, tags, and other MAAS resources.",
+  ping: {
+    // Configure ping behavior
+    intervalMs: 10000, // 10 seconds
+    logLevel: "debug",
   },
-  capabilities: {
-    resources: {
-      listChanged: false, // Resource list doesn't change during server lifetime
-    },
-    tools: {
-      listChanged: false, // Tool list doesn't change during server lifetime
-    },
+  roots: {
+    // Enable roots support
+    enabled: true,
   },
 });
 
@@ -76,90 +67,73 @@ const { registerMcpResources } = require('./mcp_resources/index');
  * - Tools: Active operations like creating tags, deploying machines, etc.
  * - Resources: Data access points like machine details, subnet information, etc.
  */
-registerTools(server, maasApiClient);
-registerMcpResources(server, maasApiClient);
+/**
+ * Create an adapter for the MCP server to work with the existing code
+ * This adapter converts FastMCP methods to the expected McpServer methods
+ */
+const serverAdapter = {
+  // Original server instance
+  _server: server,
+  
+  // Tool adapter - converts server.tool() to server.addTool()
+  tool: function(name: string, description: string, inputSchema: any, callback: any) {
+    this._server.addTool({
+      name: name,
+      description: description,
+      parameters: inputSchema,
+      execute: callback
+    });
+  },
+  
+  // Resource adapter - converts server.resource() to server.addResourceTemplate()
+  resource: function(name: string, resourceTemplate: any) {
+    this._server.addResourceTemplate({
+      name: name,
+      uriTemplate: resourceTemplate.uriPattern,
+      mimeType: "application/json",
+      arguments: [],
+      async load(params: any) {
+        return await resourceTemplate.handler(resourceTemplate.uriPattern, params, null);
+      }
+    });
+  }
+};
+
+// Register tools and resources using the adapter
+registerTools(serverAdapter, maasApiClient);
+registerMcpResources(serverAdapter, maasApiClient);
 
 /**
- * Create the Express application to handle HTTP requests
- * This app will serve as the web server for the MCP server
+ * Add a health check tool
+ * This allows clients to check if the server is running properly
  */
-const app = express();
-
-/**
- * Configure middleware for request processing
- * - JSON body parser with 10MB limit for handling large request payloads
- */
-app.use(express.json({ limit: '10mb' }));
-
-/**
- * Health check endpoint
- *
- * This endpoint allows monitoring systems to verify that the server is running.
- * It returns a simple JSON response with status "ok" and a 200 status code.
- */
-app.get('/health', (req: any, res: any) => {
-  res.status(200).json({ status: 'ok' });
+server.addTool({
+  name: "health-check",
+  description: "Check if the server is running properly",
+  execute: async () => {
+    return JSON.stringify({ status: 'ok' });
+  },
 });
 
 /**
- * MCP endpoint
- *
- * This is the main endpoint that handles all MCP protocol requests.
- * It processes incoming requests, routes them to the appropriate handlers,
- * and returns the results according to the MCP protocol specification.
- *
- * The endpoint also handles:
- * - Request logging
- * - Audit logging
- * - Error handling
- * - Client information extraction
- * - Transport lifecycle management
+ * Set up audit logging for the server
+ * This logs all tool executions and resource accesses
  */
-app.post('/mcp', async (req: any, res: any) => {
-  const requestId = generateRequestId();
-  // Use a more specific logger name if possible, or ensure logger is configured to show context
-  const requestLogger = logger.child({ requestId, mcpMethod: req.body?.method });
-
-  // Extract client information
-  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  const userId = req.headers['x-user-id'] || 'anonymous';
-
-  requestLogger.info({
-    params: req.body?.params ? JSON.stringify(req.body.params).substring(0, 200) : undefined,
-    clientIp,
-    userId
-  }, 'Received MCP request');
-
-  // Audit log the MCP request if audit logging is enabled
-  if (config.auditLogEnabled) {
-    const auditLogger = require('./utils/auditLogger');
+if (config.auditLogEnabled) {
+  const auditLogger = require('./utils/auditLogger');
+  const { generateRequestId } = logger;
+  
+  // Listen for connect events to set up session-specific logging
+  server.on('connect', (event: any) => {
+    const session = event.session;
     
-    // Determine if this is a resource access or modification
-    const isResourceRequest = req.body?.params?.uri && typeof req.body.params.uri === 'string';
-    const isToolRequest = req.body?.method === 'executeTool' && req.body?.params?.name;
-    
-    if (isResourceRequest) {
-      // This is a resource request
-      const uri = new URL(req.body.params.uri);
-      const resourceType = uri.pathname.split('/')[1] || 'unknown';
-      const resourceId = uri.pathname.split('/')[2];
-      
-      auditLogger.logResourceAccess(
-        resourceType,
-        resourceId,
-        'access',
-        requestId,
-        userId as string,
-        clientIp as string,
-        {
-          uri: req.body.params.uri,
-          method: req.body.method
-        }
-      );
-    } else if (isToolRequest) {
-      // This is a tool request
-      const toolName = req.body.params.name;
-      const toolArgs = req.body.params.arguments;
+    // Log tool executions
+    session.on('toolExecute', (event: any) => {
+      const requestId = generateRequestId();
+      const toolName = event.name;
+      const toolArgs = event.arguments;
+      const userId = 'anonymous'; // In a real implementation, you would get this from authentication
+      const clientIp = '127.0.0.1'; // In a real implementation, you would get this from the request
       
       // Determine if this is a modification operation based on tool name
       const modificationTools = ['allocateMachine', 'deployMachine', 'createTag', 'updateMachine', 'deleteMachine'];
@@ -173,8 +147,8 @@ app.post('/mcp', async (req: any, res: any) => {
           requestId,
           undefined, // beforeState
           undefined, // afterState
-          userId as string,
-          clientIp as string,
+          userId,
+          clientIp,
           {
             toolName,
             arguments: toolArgs ? JSON.stringify(toolArgs).substring(0, 200) : undefined
@@ -186,183 +160,70 @@ app.post('/mcp', async (req: any, res: any) => {
           toolName,
           'execute',
           requestId,
-          userId as string,
-          clientIp as string,
+          userId,
+          clientIp,
           {
             toolName,
             arguments: toolArgs ? JSON.stringify(toolArgs).substring(0, 200) : undefined
           }
         );
       }
-    }
-  }
-
-  /**
-   * Create a transport instance to handle the MCP protocol
-   *
-   * The StreamableHTTPServerTransport handles the low-level details of
-   * the MCP protocol over HTTP, including request parsing, response formatting,
-   * and streaming for long-running operations.
-   */
-  const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: undefined // Stateless operation - we don't maintain session state
-  });
-  
-  // Assign the server instance to the transport
-  // Note: This is a workaround for the current SDK design
-  (transport as any).mcpServer = server;
-
-  try {
-    /**
-     * Process the MCP request
-     *
-     * This delegates the request handling to the transport, which will:
-     * 1. Parse the request according to the MCP protocol
-     * 2. Route it to the appropriate handler in the MCP server
-     * 3. Format the response according to the protocol
-     * 4. Send the response back to the client
-     */
-    await transport.handleRequest(req, res, req.body);
-    requestLogger.info('MCP request handled successfully');
-    
-    // Audit log the successful response if audit logging is enabled
-    if (config.auditLogEnabled) {
-      const auditLogger = require('./utils/auditLogger');
-      
-      // Log success based on request type
-      const isResourceRequest = req.body?.params?.uri && typeof req.body.params.uri === 'string';
-      const isToolRequest = req.body?.method === 'executeTool' && req.body?.params?.name;
-      
-      if (isToolRequest) {
-        const toolName = req.body.params.name;
-        const modificationTools = ['allocateMachine', 'deployMachine', 'createTag', 'updateMachine', 'deleteMachine'];
-        const isModification = modificationTools.some(tool => toolName.includes(tool));
-        
-        if (isModification) {
-          auditLogger.logResourceModification(
-            'tool',
-            toolName,
-            'execute_success',
-            requestId,
-            undefined, // beforeState
-            undefined, // afterState
-            userId as string,
-            clientIp as string
-          );
-        }
-      }
-    }
-  } catch (error: any) {
-    requestLogger.error({ err: error, errMsg: error.message, errStack: error.stack?.substring(0, 500) }, 'Error handling MCP request');
-    
-    // Audit log the error if audit logging is enabled
-    if (config.auditLogEnabled) {
-      const auditLogger = require('./utils/auditLogger');
-      
-      // Determine request type for error logging
-      const isResourceRequest = req.body?.params?.uri && typeof req.body.params.uri === 'string';
-      const isToolRequest = req.body?.method === 'executeTool' && req.body?.params?.name;
-      
-      if (isResourceRequest) {
-        // This is a resource request
-        const uri = new URL(req.body.params.uri);
-        const resourceType = uri.pathname.split('/')[1] || 'unknown';
-        const resourceId = uri.pathname.split('/')[2];
-        
-        auditLogger.logResourceAccessFailure(
-          resourceType,
-          resourceId,
-          'access_failure',
-          requestId,
-          error,
-          userId as string,
-          clientIp as string,
-          {
-            uri: req.body.params.uri,
-            method: req.body.method
-          }
-        );
-      } else if (isToolRequest) {
-        // This is a tool request
-        const toolName = req.body.params.name;
-        const modificationTools = ['allocateMachine', 'deployMachine', 'createTag', 'updateMachine', 'deleteMachine'];
-        const isModification = modificationTools.some(tool => toolName.includes(tool));
-        
-        if (isModification) {
-          auditLogger.logResourceModificationFailure(
-            'tool',
-            toolName,
-            'execute_failure',
-            requestId,
-            error,
-            undefined, // beforeState
-            userId as string,
-            clientIp as string,
-            {
-              toolName,
-              arguments: req.body.params.arguments ? JSON.stringify(req.body.params.arguments).substring(0, 200) : undefined
-            }
-          );
-        } else {
-          auditLogger.logResourceAccessFailure(
-            'tool',
-            toolName,
-            'execute_failure',
-            requestId,
-            error,
-            userId as string,
-            clientIp as string,
-            {
-              toolName,
-              arguments: req.body.params.arguments ? JSON.stringify(req.body.params.arguments).substring(0, 200) : undefined
-            }
-          );
-        }
-      }
-    }
-    /**
-     * Send a fallback error response if headers haven't been sent yet
-     *
-     * This ensures that clients always receive a proper JSON-RPC error response
-     * even if the error occurred before the transport could send a response.
-     */
-    if (!res.headersSent) {
-      res.status(500).json({
-        jsonrpc: '2.0',
-        error: {
-          code: -32000, // Standard JSON-RPC Internal error
-          message: 'Internal server error during MCP request processing.',
-        },
-        id: req.body?.id || null
-      });
-    }
-  } finally {
-    /**
-     * Ensure proper cleanup of transport resources
-     *
-     * This guarantees that the transport is closed and resources are released
-     * in all scenarios, including:
-     * - Normal request completion
-     * - Error during processing
-     * - Client disconnection
-     */
-    res.on('finish', () => transport.close());
-    res.on('close', () => {
-      if (!res.writableEnded) { // If 'finish' wasn't called (e.g. client disconnected)
-          transport.close();
-      }
     });
-  }
-});
+    
+    // Log resource accesses
+    session.on('resourceAccess', (event: any) => {
+      const requestId = generateRequestId();
+      const uri = new URL(event.uri);
+      const resourceType = uri.pathname.split('/')[1] || 'unknown';
+      const resourceId = uri.pathname.split('/')[2];
+      const userId = 'anonymous'; // In a real implementation, you would get this from authentication
+      const clientIp = '127.0.0.1'; // In a real implementation, you would get this from the request
+      
+      auditLogger.logResourceAccess(
+        resourceType,
+        resourceId,
+        'access',
+        requestId,
+        userId,
+        clientIp,
+        {
+          uri: event.uri
+        }
+      );
+    });
+    
+    // Log errors
+    session.on('error', (event: any) => {
+      const requestId = generateRequestId();
+      const error = event.error;
+      const userId = 'anonymous'; // In a real implementation, you would get this from authentication
+      const clientIp = '127.0.0.1'; // In a real implementation, you would get this from the request
+      
+      logger.error({
+        err: error,
+        errMsg: error.message,
+        errStack: error.stack?.substring(0, 500),
+        requestId
+      }, 'Error handling MCP request');
+      
+      // Additional error logging could be added here
+    });
+  });
+}
 
 /**
- * Start the HTTP server
- *
- * This starts the Express application listening on the configured port.
- * Once started, the server will accept MCP requests and process them.
+ * Start the server with HTTP streaming transport
+ * This allows clients to connect to the server over HTTP
  */
-const port = config.mcpPort;
-app.listen(port, () => {
-  logger.info(`MCP Server for MAAS API listening on http://localhost:${port}/mcp`);
-  logger.info(`Audit logging ${config.auditLogEnabled ? 'enabled' : 'disabled'}`);
+// Use the configured port from the environment
+const port = config.mcpPort; // Use the port specified in MCP_PORT (3002)
+server.start({
+  transportType: "httpStream",
+  httpStream: {
+    endpoint: "/mcp",
+    port: port,
+  },
 });
+
+logger.info(`MCP Server for MAAS API listening on http://localhost:${port}/mcp`);
+logger.info(`Audit logging ${config.auditLogEnabled ? 'enabled' : 'disabled'}`);
