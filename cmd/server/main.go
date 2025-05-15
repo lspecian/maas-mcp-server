@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -18,9 +19,19 @@ import (
 	machineservice "github.com/lspecian/maas-mcp-server/internal/service/machine"
 	"github.com/lspecian/maas-mcp-server/internal/transport"
 	machinetransport "github.com/lspecian/maas-mcp-server/internal/transport/machine"
+	"github.com/lspecian/maas-mcp-server/internal/version"
 )
 
 func main() {
+	// Handle version flag
+	showVersion := flag.Bool("version", false, "Show version information")
+	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("MAAS MCP Server version %s\n", version.Version)
+		os.Exit(0)
+	}
+
 	// Load configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {

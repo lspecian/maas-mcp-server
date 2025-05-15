@@ -1,0 +1,62 @@
+Title: maas-mcp-server (Go Version) — MCP Compliance and Tool Exposure
+
+Objective
+Finalize the Go-based MCP server located in the golang-revert branch, ensuring it is fully compliant with the Model Context Protocol and can be used by Roo, Cline, and other tools via stdin/stdout transport.
+
+Requirements
+ID	Feature	Description	Priority
+P0	MCP Protocol	Support initialize, initialized, tools/list, tools/call	Critical
+P0	Tool: listMachines	Fetch machine data from MAAS API and return it	Critical
+P1	Tool: getMachine	Get machine by ID	Important
+P1	Error Handling	Return proper JSON-RPC error codes (-32600, -32601, etc.)
+P1	Logging	Log all requests/responses in structured JSON to stderr
+P2	Unit Tests	For MCP handling and MAAS integration	Nice to Have
+P2	tools.json	Static manifest generation (optional)
+
+Development Notes
+All communication is over stdin/stdout as JSON-RPC 2.0
+
+Each tool should be a struct/function with:
+- Input type (validated)
+- Output structure
+- Use a ToolRegistry to register handlers
+- Use Go channels or goroutines to safely handle requests
+- listMachines should call MAAS using API key + endpoint from env
+
+Testing
+You should be able to run:
+
+bash
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | ./maas-mcp-server
+
+Expected output:
+
+json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": [
+    {
+      "name": "listMachines",
+      "description": "...",
+      "parameters": {
+        "type": "object",
+        "properties": { ... }
+      }
+    }
+  ]
+}
+
+Then:
+
+bash
+echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"listMachines","input":{}}}' | ./maas-mcp-server
+
+Expected: a list of machines from MAAS API.
+
+Final Deliverables
+✅ Fully working main.go
+✅ At least 2 MCP tools implemented
+✅ Makefile to build and test
+✅ README.md with example usage and input/output payloads
+✅ (Optional) Release binary via GitHub Releases

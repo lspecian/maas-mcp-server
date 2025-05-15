@@ -1,214 +1,568 @@
-# MCP-MAAS Server
+# MAAS MCP Server
 
-A Model Context Protocol (MCP) server for interacting with MAAS (Metal as a Service).
+A Model Context Protocol (MCP) server for interacting with MAAS (Metal as a Service) through a standardized JSON-RPC 2.0 interface.
 
-[![Go](https://github.com/yourusername/maas-mcp-server/actions/workflows/go.yml/badge.svg)](https://github.com/yourusername/maas-mcp-server/actions/workflows/go.yml)
+[![Go](https://github.com/lspecian/maas-mcp-server/actions/workflows/go.yml/badge.svg)](https://github.com/lspecian/maas-mcp-server/actions/workflows/go.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lspecian/maas-mcp-server)](https://goreportcard.com/report/github.com/lspecian/maas-mcp-server)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## Overview
+## Introduction
 
-This project provides an MCP server that allows AI assistants to interact with MAAS (Metal as a Service) through a standardized protocol. It implements the Model Context Protocol specification to enable seamless integration with AI assistants for infrastructure management.
+The MAAS MCP Server implements the [Model Context Protocol](https://modelcontextprotocol.io/) specification to enable AI assistants to interact with MAAS (Metal as a Service) infrastructure. It provides a standardized interface for machine management, network configuration, storage management, and more through a JSON-RPC 2.0 API.
 
-### Key Features
+This server can operate in two transport modes:
+1. **HTTP/HTTPS** - For web-based interactions and SSE (Server-Sent Events) streaming
+2. **stdin/stdout** - For direct integration with AI assistants and CLI tools
 
-- **Machine Management**: List, allocate, deploy, and release machines
-- **Power Management**: Control machine power states (on, off, reboot)
-- **Network Configuration**: Manage networks, subnets, and interfaces
-- **Storage Management**: Configure storage devices and partitions
-- **Tag Management**: Create, list, and apply tags to resources
-- **Progress Notifications**: Real-time updates for long-running operations
-- **Resource Access**: URI-based access to MAAS resources
-
-## Architecture
-
-This project follows clean architecture principles to ensure separation of concerns, testability, and maintainability:
-
-- **Repository Layer**: Responsible for data access and external API integration
-- **Service Layer**: Contains business logic and orchestration
-- **Transport Layer**: Handles HTTP requests and responses
-- **MCP Layer**: Implements the Model Context Protocol
-
-For more details on the clean architecture implementation, see [pkg/mcp/README.md](pkg/mcp/README.md).
-
-### Project Structure
-
-```
-.
-├── cmd/                  # Application entry points
-│   └── server/           # Main server executable
-├── config/               # Configuration files
-├── internal/             # Private application code
-│   ├── auth/             # Authentication middleware
-│   ├── config/           # Configuration handling
-│   ├── errors/           # Error definitions and handling
-│   ├── logging/          # Logging infrastructure
-│   ├── maas/             # MAAS client wrapper
-│   ├── maasclient/       # MAAS client implementation
-│   ├── models/           # Domain models
-│   ├── repository/       # Repository layer
-│   ├── server/           # HTTP server implementation
-│   ├── service/          # Business logic
-│   └── transport/        # HTTP handlers
-├── pkg/                  # Public libraries
-│   └── mcp/              # MCP protocol implementation
-├── test/                 # Integration tests
-│   └── integration/      # Integration test suites
-└── ts-wrapper/           # TypeScript wrapper
-```
-
-## Setup
+## Installation
 
 ### Prerequisites
 
 - Go 1.22 or later
-- Node.js 18 or later
 - MAAS server with API access
-- golangci-lint (for development)
+- MAAS API key in the format "consumer:token:secret"
 
-### Installation
+### From Source
 
 1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/maas-mcp-server.git
+   ```bash
+   git clone https://github.com/lspecian/maas-mcp-server.git
    cd maas-mcp-server
    ```
 
-2. Install development tools:
-   ```
-   ./build.sh install-tools
-   ```
-
-3. Build the server:
-   ```
+2. Build the server:
+   ```bash
    ./build.sh build
    ```
 
-4. Install TypeScript wrapper dependencies:
-   ```
-   cd ts-wrapper
-   npm install
-   npm run build
-   cd ..
-   ```
-
-### Configuration
-
-1. Copy the example configuration files:
-   ```
+3. Configure the server:
+   ```bash
    cp config/config.yaml.example config/config.yaml
    cp .env.example .env
    ```
 
-2. Edit `config/config.yaml` and update:
-   - MAAS API URL
-   - MAAS API key (in format "consumer:token:secret")
-   - Server host/port
-   - Authentication settings
-   - Logging configuration
-
-3. Edit `.env` and update:
+4. Edit `config/config.yaml` and update:
    - MAAS API URL
    - MAAS API key
-   - Any AI service API keys if needed
+   - Server host/port
+   - Logging configuration
 
-### Running the Server
+### Using Docker
 
-1. Start the server:
-   ```
-   ./build.sh run
-   ```
-
-2. Or start the clean architecture version:
-   ```
-   ./build.sh run-mcp
+1. Build the Docker image:
+   ```bash
+   ./build-docker.sh
    ```
 
-The server will be available at http://localhost:8081/mcp.
-
-## Development
-
-### Development Commands
-
-The project includes a build script with common development commands:
-
-- `./build.sh build`: Build the server
-- `./build.sh build-mcp`: Build the clean architecture version
-- `./build.sh run`: Build and run the server
-- `./build.sh run-mcp`: Build and run the clean architecture version
-- `./build.sh test`: Run tests
-- `./build.sh lint`: Run linters
-- `./build.sh help`: Show help
-
-### Code Style
-
-This project uses:
-- golangci-lint for Go code linting
-- EditorConfig for consistent code formatting
-- Go modules for dependency management
-
-### Testing
-
-- Unit tests: `./build.sh test`
-- Integration tests: `cd test/integration && go test -v ./...`
-- Test script: `./test-mcp-clean.js`
+2. Run the container:
+   ```bash
+   docker run -p 8081:8081 -v $(pwd)/config:/app/config maas-mcp-server
+   ```
 
 ## Usage
 
-### Listing Machines
+### Starting the Server
 
-You can list machines using the `maas_list_machines` MCP tool:
+#### HTTP Mode
 
-```javascript
-const response = await fetch('http://localhost:8081/mcp', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    jsonrpc: '2.0',
-    method: 'maas_list_machines',
-    params: {},
-    id: '1',
-  }),
-});
-
-const result = await response.json();
-console.log(result);
+```bash
+./build.sh run
 ```
 
-See `test-mcp-clean.js` for more examples.
+The server will be available at http://localhost:8081/mcp.
 
-### Available MCP Tools
+#### stdin/stdout Mode
 
-| Tool Name | Description |
-|-----------|-------------|
-| `maas_list_machines` | List all machines managed by MAAS |
-| `maas_get_machine_details` | Get detailed information about a specific machine |
-| `maas_allocate_machine` | Allocate a machine based on constraints |
-| `maas_deploy_machine` | Deploy an operating system to a machine |
-| `maas_release_machine` | Release a machine back to the available pool |
-| `maas_get_machine_power_state` | Get the current power state of a machine |
-| `maas_power_on_machine` | Power on a machine |
-| `maas_power_off_machine` | Power off a machine |
-| `maas_list_subnets` | List all subnets managed by MAAS |
-| `maas_get_subnet_details` | Get detailed information about a specific subnet |
+```bash
+./build.sh run-mcp-stdio
+```
+
+In this mode, the server reads JSON-RPC requests from stdin and writes responses to stdout, making it suitable for integration with AI assistants.
+
+### JSON-RPC 2.0 Message Format
+
+The server communicates using the JSON-RPC 2.0 protocol. Here's the basic message format:
+
+#### Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "method_name",
+  "params": {
+    "param1": "value1",
+    "param2": "value2"
+  },
+  "id": "request-id"
+}
+```
+
+#### Response (Success)
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "key1": "value1",
+    "key2": "value2"
+  },
+  "id": "request-id"
+}
+```
+
+#### Response (Error)
+
+```json
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32000,
+    "message": "Error message",
+    "data": {}
+  },
+  "id": "request-id"
+}
+```
+
+### Discovery
+
+To discover the capabilities of the MCP server, send a discovery request:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "discover",
+  "params": {},
+  "id": "1"
+}
+```
+
+The server will respond with information about available tools and resources:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "serverInfo": {
+      "name": "maas-mcp-server",
+      "version": "1.0.0"
+    },
+    "capabilities": {
+      "tools": [
+        {
+          "name": "maas_list_machines",
+          "description": "List all machines managed by MAAS with filtering and pagination",
+          "input_schema": {
+            "hostname": "string",
+            "zone": "string",
+            "pool": "string",
+            "status": "string",
+            "power_state": "string",
+            "system_id": "string",
+            "architecture": "string",
+            "tags": ["string"],
+            "storage_constraints": {
+              "min_size": "number",
+              "disk_type": "string",
+              "count": "number"
+            },
+            "limit": "number",
+            "offset": "number",
+            "page": "number"
+          }
+        },
+        {
+          "name": "maas_get_machine_details",
+          "description": "Get detailed information about a specific machine",
+          "input_schema": {
+            "system_id": "string"
+          }
+        }
+      ],
+      "resources": [
+        {
+          "name": "machines",
+          "description": "Access to MAAS machines",
+          "uri_pattern": "maas://machines/{system_id}"
+        }
+      ]
+    }
+  },
+  "id": "1"
+}
+```
+
+## Available Tools
+
+### maas_list_machines
+
+Lists all machines managed by MAAS with optional filtering and pagination.
+
+#### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| hostname | string | Filter by hostname |
+| zone | string | Filter by zone |
+| pool | string | Filter by resource pool |
+| status | string | Filter by status |
+| power_state | string | Filter by power state |
+| system_id | string | Filter by system ID |
+| architecture | string | Filter by architecture |
+| tags | array | Filter by tags |
+| storage_constraints | object | Filter by storage constraints |
+| limit | number | Maximum number of results to return |
+| page | number | Page number for pagination |
+
+#### Example Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "maas_list_machines",
+  "params": {
+    "zone": "default",
+    "limit": 10,
+    "page": 1
+  },
+  "id": "2"
+}
+```
+
+#### Example Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "machines": [
+      {
+        "id": "abc123",
+        "name": "machine-1",
+        "fqdn": "machine-1.maas",
+        "status": "Ready",
+        "architecture": "amd64/generic",
+        "power_state": "off",
+        "zone": "default",
+        "pool": "default",
+        "tags": ["virtual"],
+        "cpu_count": 4,
+        "memory_mb": 8192,
+        "os_info": {
+          "system": "ubuntu",
+          "distribution": "ubuntu",
+          "release": "22.04",
+          "version": "22.04 LTS"
+        },
+        "last_updated": "2025-05-15T12:00:00Z"
+      }
+    ],
+    "total_count": 1,
+    "limit": 10,
+    "page": 1,
+    "page_count": 1
+  },
+  "id": "2"
+}
+```
+
+### maas_get_machine_details
+
+Gets detailed information about a specific machine.
+
+#### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| system_id | string | The system ID of the machine |
+
+#### Example Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "maas_get_machine_details",
+  "params": {
+    "system_id": "abc123"
+  },
+  "id": "3"
+}
+```
+
+#### Example Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "id": "abc123",
+    "name": "machine-1",
+    "fqdn": "machine-1.maas",
+    "status": "Ready",
+    "architecture": "amd64/generic",
+    "power_state": "off",
+    "zone": "default",
+    "pool": "default",
+    "tags": ["virtual"],
+    "network_interfaces": [
+      {
+        "id": "eth0",
+        "name": "eth0",
+        "type": "physical",
+        "mac_address": "52:54:00:12:34:56",
+        "ip_address": "192.168.1.100",
+        "cidr": "192.168.1.0/24",
+        "subnet": "192.168.1.0/24",
+        "enabled": true,
+        "primary": true
+      }
+    ],
+    "block_devices": [
+      {
+        "id": "sda",
+        "name": "sda",
+        "type": "physical",
+        "path": "/dev/sda",
+        "size_bytes": 107374182400,
+        "used_bytes": 107374182400,
+        "available_bytes": 0,
+        "model": "QEMU HARDDISK",
+        "partitions": [
+          {
+            "id": "sda1",
+            "number": 1,
+            "size_bytes": 1073741824,
+            "path": "/dev/sda1",
+            "filesystem": {
+              "type": "ext4",
+              "mount_point": "/boot"
+            }
+          },
+          {
+            "id": "sda2",
+            "number": 2,
+            "size_bytes": 106300440576,
+            "path": "/dev/sda2",
+            "filesystem": {
+              "type": "ext4",
+              "mount_point": "/"
+            }
+          }
+        ]
+      }
+    ],
+    "cpu_count": 4,
+    "memory_mb": 8192,
+    "os_info": {
+      "system": "ubuntu",
+      "distribution": "ubuntu",
+      "release": "22.04",
+      "version": "22.04 LTS"
+    },
+    "last_updated": "2025-05-15T12:00:00Z"
+  },
+  "id": "3"
+}
+```
+
+## Example Workflows
+
+### Listing Available Machines
+
+```go
+package main
+
+import (
+	"bufio"
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+	"os/exec"
+)
+
+func main() {
+	// Start the MCP server in stdio mode
+	cmd := exec.Command("./build.sh", "run-mcp-stdio")
+	
+	stdin, _ := cmd.StdinPipe()
+	stdout, _ := cmd.StdoutPipe()
+	
+	cmd.Start()
+	
+	// Wait for server to start
+	reader := bufio.NewReader(stdout)
+	for {
+		line, _ := reader.ReadString('\n')
+		if line == "MCP server ready\n" {
+			break
+		}
+	}
+	
+	// Send list machines request
+	request := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method":  "maas_list_machines",
+		"params":  map[string]interface{}{},
+		"id":      "1",
+	}
+	
+	requestJSON, _ := json.Marshal(request)
+	io.WriteString(stdin, string(requestJSON)+"\n")
+	
+	// Read response
+	responseStr, _ := reader.ReadString('\n')
+	
+	var response map[string]interface{}
+	json.Unmarshal([]byte(responseStr), &response)
+	
+	// Pretty print the response
+	prettyJSON, _ := json.MarshalIndent(response, "", "  ")
+	fmt.Println(string(prettyJSON))
+	
+	cmd.Process.Kill()
+}
+```
+
+### Getting Machine Details and Powering On
+
+```go
+package main
+
+import (
+	"bufio"
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+	"os/exec"
+)
+
+func main() {
+	// Start the MCP server in stdio mode
+	cmd := exec.Command("./build.sh", "run-mcp-stdio")
+	
+	stdin, _ := cmd.StdinPipe()
+	stdout, _ := cmd.StdoutPipe()
+	
+	cmd.Start()
+	
+	// Wait for server to start
+	reader := bufio.NewReader(stdout)
+	for {
+		line, _ := reader.ReadString('\n')
+		if line == "MCP server ready\n" {
+			break
+		}
+	}
+	
+	// Get machine details
+	detailsRequest := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method":  "maas_get_machine_details",
+		"params":  map[string]string{"system_id": "abc123"},
+		"id":      "1",
+	}
+	
+	requestJSON, _ := json.Marshal(detailsRequest)
+	io.WriteString(stdin, string(requestJSON)+"\n")
+	
+	// Read response
+	responseStr, _ := reader.ReadString('\n')
+	
+	var response map[string]interface{}
+	json.Unmarshal([]byte(responseStr), &response)
+	
+	// Check if machine is powered off
+	result := response["result"].(map[string]interface{})
+	if result["power_state"] == "off" {
+		// Power on the machine
+		powerRequest := map[string]interface{}{
+			"jsonrpc": "2.0",
+			"method":  "maas_power_on_machine",
+			"params":  map[string]string{"system_id": "abc123"},
+			"id":      "2",
+		}
+		
+		requestJSON, _ = json.Marshal(powerRequest)
+		io.WriteString(stdin, string(requestJSON)+"\n")
+		
+		// Read power on response
+		powerResponseStr, _ := reader.ReadString('\n')
+		fmt.Println(powerResponseStr)
+	}
+	
+	cmd.Process.Kill()
+}
+```
+
+## Building and Testing
+
+### Building from Source
+
+```bash
+# Build the server
+./build.sh build
+
+# Build the clean architecture version
+./build.sh build-mcp
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+./build.sh test
+
+# Run specific tests
+go test -v ./internal/service/...
+```
+
+### Integration Tests
+
+```bash
+# Run the test client
+go run test/go/test-stdio-client.go
+```
+
+## API Reference
+
+### Error Codes
+
+| Code | Message | Description |
+|------|---------|-------------|
+| -32700 | Parse error | Invalid JSON was received |
+| -32600 | Invalid request | The JSON sent is not a valid Request object |
+| -32601 | Method not found | The method does not exist / is not available |
+| -32602 | Invalid params | Invalid method parameter(s) |
+| -32603 | Internal error | Internal JSON-RPC error |
+| -32000 | Authentication failed | Failed to authenticate with MAAS |
+| -32001 | Rate limit exceeded | Too many requests |
+| -32002 | Version not supported | The requested MCP version is not supported |
+| -32003 | Resource not found | The requested resource was not found |
+| -32004 | Operation failed | The requested operation failed |
+
+### Available Methods
+
+| Method | Description |
+|--------|-------------|
+| discover | Discover server capabilities |
+| maas_list_machines | List all machines managed by MAAS |
+| maas_get_machine_details | Get detailed information about a specific machine |
+| maas_discover_machines | Discover new machines in the network |
+| maas_allocate_machine | Allocate a machine based on constraints |
+| maas_deploy_machine | Deploy an operating system to a machine |
+| maas_release_machine | Release a machine back to the available pool |
+| maas_get_machine_power_state | Get the current power state of a machine |
+| maas_power_on_machine | Power on a machine |
+| maas_power_off_machine | Power off a machine |
+| maas_list_subnets | List all subnets managed by MAAS |
+| maas_get_subnet_details | Get detailed information about a specific subnet |
 
 ## Contributing
 
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Make your changes
-4. Run tests: `./build.sh test`
-5. Run linters: `./build.sh lint`
-6. Commit your changes: `git commit -m 'Add some feature'`
-7. Push to the branch: `git push origin feature/my-feature`
-8. Submit a pull request
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## License
 
-[MIT License](LICENSE)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

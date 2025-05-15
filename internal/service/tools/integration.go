@@ -8,6 +8,7 @@ import (
 	"github.com/lspecian/maas-mcp-server/internal/models"
 	"github.com/lspecian/maas-mcp-server/internal/service"
 	"github.com/lspecian/maas-mcp-server/internal/transport/mcp"
+	"github.com/lspecian/maas-mcp-server/internal/version"
 )
 
 // MCPToolServiceAdapter adapts the ToolService to the MCP Service interface
@@ -85,7 +86,7 @@ func (a *MCPToolServiceAdapter) GetServerInfo(ctx context.Context) (*models.MCPD
 				Version string `json:"version"`
 			}{
 				Name:    "maas-mcp-server",
-				Version: "1.0.0", // This should be fetched from a version constant
+				Version: version.GetVersion(),
 			},
 			Capabilities: struct {
 				Tools     []models.MCPTool     `json:"tools,omitempty"`

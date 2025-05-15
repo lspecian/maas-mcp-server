@@ -11,6 +11,7 @@ import (
 	"github.com/lspecian/maas-mcp-server/internal/models"
 	"github.com/lspecian/maas-mcp-server/internal/service"   // Main business logic service
 	"github.com/lspecian/maas-mcp-server/internal/transport" // For StorageConstraintsServiceInterface
+	"github.com/lspecian/maas-mcp-server/internal/version"
 	"github.com/lspecian/maas-mcp-server/pkg/mcp"
 )
 
@@ -128,7 +129,7 @@ func (s *ServiceImpl) GetServerInfo(ctx context.Context) (*models.MCPDiscoveryRe
 				Version string `json:"version"`
 			}{
 				Name:    "maas-mcp-server",
-				Version: "1.0.0", // This should be fetched from a version constant
+				Version: version.GetVersion(),
 			},
 			Capabilities: struct {
 				Tools     []models.MCPTool     `json:"tools,omitempty"`

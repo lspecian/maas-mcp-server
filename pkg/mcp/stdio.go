@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/lspecian/maas-mcp-server/internal/version"
 	"github.com/sirupsen/logrus"
 )
 
@@ -90,7 +91,7 @@ func (s *StdioServer) Run() error {
 	fmt.Fprintln(s.writer, jsonReadyMsgAlt)
 
 	// Format 4: VSCode-specific format with additional fields
-	vscodeReadyMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"ready\",\"params\":{\"name\":\"MAAS MCP Server\",\"version\":\"1.0.0\"},\"id\":\"0\"}")
+	vscodeReadyMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"method\":\"ready\",\"params\":{\"name\":\"MAAS MCP Server\",\"version\":\"%s\"},\"id\":\"0\"}", version.GetVersion())
 	s.logger.WithField("message", vscodeReadyMsg).Info("Sending VSCode-specific ready message")
 	fmt.Fprintln(s.writer, vscodeReadyMsg)
 
@@ -252,7 +253,7 @@ func (s *StdioServer) handleDiscovery(id JSONRPCID) {
 		"result": map[string]interface{}{
 			"serverInfo": map[string]interface{}{
 				"name":    "MAAS MCP Server",
-				"version": "1.0.0",
+				"version": version.GetVersion(),
 			},
 			"capabilities": map[string]interface{}{
 				"tools":     tools,

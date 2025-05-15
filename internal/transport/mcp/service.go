@@ -6,6 +6,7 @@ import (
 	"fmt"           // Added for errors
 
 	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/version"
 	// Added for StorageConstraintsServiceInterface
 )
 
@@ -73,7 +74,7 @@ func (s *DefaultService) GetServerInfo(ctx context.Context) (*models.MCPDiscover
 				Version string `json:"version"`
 			}{
 				Name:    "maas-mcp-server",
-				Version: "1.0.0", // This should be fetched from a version constant
+				Version: version.GetVersion(),
 			},
 			Capabilities: struct {
 				Tools     []models.MCPTool     `json:"tools,omitempty"`

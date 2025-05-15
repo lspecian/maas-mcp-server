@@ -36,7 +36,7 @@ type JSONRPCError struct {
 
 func main() {
 	// Start the MCP server in stdio mode
-	cmd := exec.Command("./build.sh", "run-mcp-stdio")
+	cmd := exec.Command("../../build.sh", "run-mcp-stdio")
 
 	// Get stdin and stdout pipes
 	stdin, err := cmd.StdinPipe()

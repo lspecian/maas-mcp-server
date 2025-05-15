@@ -10,6 +10,7 @@ import (
 	"github.com/lspecian/maas-mcp-server/internal/maas"
 	"github.com/lspecian/maas-mcp-server/internal/models"
 	"github.com/lspecian/maas-mcp-server/internal/service"
+	"github.com/lspecian/maas-mcp-server/internal/version"
 	"github.com/lspecian/maas-mcp-server/pkg/mcp" // Assuming MCP types are here
 )
 
@@ -508,7 +509,7 @@ func (h *Handlers) MCPDiscovery(c *gin.Context) {
 				Version string `json:"version"`
 			}{
 				Name:    "maas-mcp-server",
-				Version: "1.0.0", // This should be fetched from a version constant
+				Version: version.GetVersion(),
 			},
 			Capabilities: struct {
 				Tools     []models.MCPTool     `json:"tools,omitempty"`

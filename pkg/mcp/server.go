@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lspecian/maas-mcp-server/internal/version"
 	"github.com/sirupsen/logrus"
 )
 
@@ -68,7 +69,7 @@ func (s *Server) handleDiscovery(c *gin.Context) {
 		"result": gin.H{
 			"serverInfo": gin.H{
 				"name":    "MAAS MCP Server",
-				"version": "1.0.0",
+				"version": version.GetVersion(),
 			},
 			"capabilities": gin.H{
 				"tools":     tools,
