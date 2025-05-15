@@ -53,8 +53,8 @@ The server requires the following environment variables:
 
 - `MAAS_API_URL` - The URL of your MAAS API endpoint
 - `MAAS_API_KEY` - Your MAAS API key in the format "consumer:token:secret"
-- `SERVER_HOST` - (Optional) The host to bind the server to (default: "localhost")
-- `SERVER_PORT` - (Optional) The port to bind the server to (default: 8082)
+- `SERVER_HOST` - (Optional) The host to bind the server to when using HTTP mode (default: "localhost") - Not needed for stdio mode
+- `SERVER_PORT` - (Optional) The port to bind the server to when using HTTP mode (default: 8082) - Not needed for stdio mode
 - `LOG_LEVEL` - (Optional) The logging level (default: "info")
 - `LOG_FORMAT` - (Optional) The logging format (default: "json")
 - `AUTH_ENABLED` - (Optional) Whether authentication is enabled (default: "false")
@@ -79,8 +79,6 @@ For integration with Roo, you can configure the server using the `.roo/mcp.json`
       "env": {
         "MAAS_API_URL": "http://your-maas-server:5240/MAAS",
         "MAAS_API_KEY": "consumer:token:secret",
-        "SERVER_HOST": "localhost",
-        "SERVER_PORT": "3021",
         "LOG_LEVEL": "debug",
         "LOG_FORMAT": "json",
         "AUTH_ENABLED": "false"

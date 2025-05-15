@@ -125,8 +125,8 @@ The MAAS MCP Server provides the following tools:
 
 The Docker image supports the following environment variables:
 
-- `SERVER_HOST`: The host to bind the server to (default: 0.0.0.0)
-- `SERVER_PORT`: The port to bind the server to (default: 8082)
+- `SERVER_HOST`: The host to bind the server to when using HTTP mode (default: 0.0.0.0) - Not needed for stdio mode
+- `SERVER_PORT`: The port to bind the server to when using HTTP mode (default: 8082) - Not needed for stdio mode
 - `LOG_LEVEL`: The log level (default: info)
 - `AUTH_ENABLED`: Whether authentication is enabled (default: false)
 - `MAAS_API_URL`: The URL of the MAAS API

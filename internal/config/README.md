@@ -44,8 +44,6 @@ The configuration is structured as follows:
         "MAAS_API_URL": "http://your-maas-server:5240/MAAS",
         "MAAS_API_KEY": "consumer:token:secret",
         "LOG_LEVEL": "info",
-        "SERVER_HOST": "localhost",
-        "SERVER_PORT": "8082",
         "AUTH_ENABLED": "false"
       },
       "maasConfig": {
@@ -63,8 +61,8 @@ The following environment variables can be used to override configuration values
 
 - `MAAS_API_URL`: The URL of the MAAS API.
 - `MAAS_API_KEY`: The API key for the MAAS API.
-- `SERVER_HOST`: The host to bind the server to.
-- `SERVER_PORT`: The port to bind the server to.
+- `SERVER_HOST`: The host to bind the server to when using HTTP mode. Not needed for stdio mode.
+- `SERVER_PORT`: The port to bind the server to when using HTTP mode. Not needed for stdio mode.
 - `AUTH_ENABLED`: Whether authentication is enabled.
 - `AUTH_TYPE`: The type of authentication to use.
 - `AUTH_API_KEY`: The API key for authentication.
