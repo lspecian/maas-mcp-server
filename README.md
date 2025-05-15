@@ -53,8 +53,52 @@ The server requires the following environment variables:
 
 - `MAAS_API_URL` - The URL of your MAAS API endpoint
 - `MAAS_API_KEY` - Your MAAS API key in the format "consumer:token:secret"
+- `SERVER_HOST` - (Optional) The host to bind the server to (default: "localhost")
+- `SERVER_PORT` - (Optional) The port to bind the server to (default: 8082)
+- `LOG_LEVEL` - (Optional) The logging level (default: "info")
+- `LOG_FORMAT` - (Optional) The logging format (default: "json")
+- `AUTH_ENABLED` - (Optional) Whether authentication is enabled (default: "false")
 
 These can be set in the `.env` file or directly in your environment.
+
+### Roo Integration with .roo/mcp.json
+
+For integration with Roo, you can configure the server using the `.roo/mcp.json` file. Here's an example configuration:
+
+```json
+{
+  "mcpServers": {
+    "maas-server": {
+      "command": "./maas-mcp-server",
+      "args": [
+        "stdio"
+      ],
+      "protocol": "stdio",
+      "jsonrpc": "2.0",
+      "readyMessage": "MCP server ready",
+      "env": {
+        "MAAS_API_URL": "http://your-maas-server:5240/MAAS",
+        "MAAS_API_KEY": "consumer:token:secret",
+        "SERVER_HOST": "localhost",
+        "SERVER_PORT": "3021",
+        "LOG_LEVEL": "debug",
+        "LOG_FORMAT": "json",
+        "AUTH_ENABLED": "false"
+      },
+      "disabled": false,
+      "alwaysAllow": [
+        "maas_list_machines",
+        "maas_get_machine_details",
+        "maas_power_on_machine",
+        "maas_power_off_machine",
+        "list_machines"
+      ]
+    }
+  }
+}
+```
+
+The environment variables in the `env` section are used to configure the server. The server will read these variables and use them to configure itself.
 
 ### Using Docker
 
@@ -84,6 +128,12 @@ The server will be available at http://localhost:8081/mcp.
 
 ```bash
 ./build.sh run-mcp-stdio
+```
+
+Or directly:
+
+```bash
+./maas-mcp-server stdio
 ```
 
 In this mode, the server reads JSON-RPC requests from stdin and writes responses to stdout, making it suitable for integration with AI assistants.
@@ -543,7 +593,7 @@ The project uses GitHub Actions to automatically build and publish binaries for 
    git push origin v1.0.0
    ```
 5. The GitHub Actions workflow will automatically:
-   - Build binaries for Linux, macOS, and Windows
+   - Build binaries for Linux (amd64, arm64), macOS (amd64, arm64), and Windows (amd64)
    - Create a GitHub Release with the tag name
    - Upload the binaries as assets
    - Generate SHA256 checksums for all binaries
@@ -552,12 +602,35 @@ The project uses GitHub Actions to automatically build and publish binaries for 
 ### Binary Naming Convention
 
 Binaries follow a consistent naming pattern:
-- `mcp-server-{version}-{os}-{arch}[.exe]`
+- `maas-mcp-server-{version}-{os}-{arch}[.exe]`
 
 For example:
-- `mcp-server-1.0.0-linux-amd64`
-- `mcp-server-1.0.0-darwin-arm64`
-- `mcp-server-1.0.0-windows-amd64.exe`
+- `maas-mcp-server-1.0.0-linux-amd64`
+- `maas-mcp-server-1.0.0-linux-arm64`
+- `maas-mcp-server-1.0.0-darwin-amd64`
+- `maas-mcp-server-1.0.0-darwin-arm64`
+- `maas-mcp-server-1.0.0-windows-amd64.exe`
+
+### Building for Different Platforms
+
+You can build the server for different platforms using the Go cross-compilation feature:
+
+```bash
+# Build for Linux AMD64
+GOOS=linux GOARCH=amd64 go build -o maas-mcp-server-linux-amd64 pkg/mcp/cmd/main.go
+
+# Build for Linux ARM64
+GOOS=linux GOARCH=arm64 go build -o maas-mcp-server-linux-arm64 pkg/mcp/cmd/main.go
+
+# Build for macOS AMD64
+GOOS=darwin GOARCH=amd64 go build -o maas-mcp-server-darwin-amd64 pkg/mcp/cmd/main.go
+
+# Build for macOS ARM64 (Apple Silicon)
+GOOS=darwin GOARCH=arm64 go build -o maas-mcp-server-darwin-arm64 pkg/mcp/cmd/main.go
+
+# Build for Windows AMD64
+GOOS=windows GOARCH=amd64 go build -o maas-mcp-server-windows-amd64.exe pkg/mcp/cmd/main.go
+```
 
 ## API Reference
 
