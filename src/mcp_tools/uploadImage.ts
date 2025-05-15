@@ -39,12 +39,11 @@ const uploadImageOutputSchema = z.object({
  * @param maasClient The MAAS API client instance
  */
 function registerUploadImageTool(server, maasClient) {
-  server.registerTool({
-    name: "uploadImage",
-    description: "Upload a boot image to MAAS",
-    inputSchema: uploadImageSchema,
-    outputSchema: uploadImageOutputSchema,
-    execute: async (params, signal) => {
+  server.tool(
+    "uploadImage",
+    "Upload a boot image to MAAS",
+    uploadImageSchema,
+    async (params, signal) => {
       const logger = createRequestLogger('uploadImage');
       const progressSender = createProgressSender(params._meta?.requestId);
       
@@ -124,7 +123,7 @@ function registerUploadImageTool(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 }
 
 module.exports = { registerUploadImageTool };

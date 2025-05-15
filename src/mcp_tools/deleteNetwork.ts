@@ -27,12 +27,11 @@ const deleteNetworkOutputSchema = z.object({
  * @param maasClient The MAAS API client instance
  */
 function registerDeleteNetworkTool(server, maasClient) {
-  server.registerTool({
-    name: "deleteNetwork",
-    description: "Delete a network from MAAS",
-    inputSchema: deleteNetworkSchema,
-    outputSchema: deleteNetworkOutputSchema,
-    execute: async (params) => {
+  server.tool(
+    "deleteNetwork",
+    "Delete a network from MAAS",
+    deleteNetworkSchema,
+    async (params) => {
       const logger = createRequestLogger('deleteNetwork');
       logger.info({ params }, 'Executing deleteNetwork tool');
 
@@ -53,7 +52,7 @@ function registerDeleteNetworkTool(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 }
 
 module.exports = { registerDeleteNetworkTool };

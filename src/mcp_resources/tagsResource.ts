@@ -117,9 +117,9 @@ function registerTagsResource(server, client) {
   maasClient = client;
   
   // Register all tag-related resources
-  server.registerResource(tagsListResource);
-  server.registerResource(tagDetailsResource);
-  server.registerResource(tagMachinesResource);
+  server.resource("tagsList", tagsListResource);
+  server.resource("tagDetails", tagDetailsResource);
+  server.resource("tagMachines", tagMachinesResource);
   
   logger.info('Registered MAAS tag resources');
 }

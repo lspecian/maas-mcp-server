@@ -77,12 +77,11 @@ const updateTagOutputSchema = z.object({
  */
 function registerTagManagementTools(server, maasClient) {
   // Register the create tag tool
-  server.registerTool({
-    name: "createTag",
-    description: "Create a new tag in MAAS",
-    inputSchema: createTagSchema,
-    outputSchema: createTagOutputSchema,
-    execute: async (params) => {
+  server.tool(
+    "createTag",
+    "Create a new tag in MAAS",
+    createTagSchema,
+    async (params) => {
       const logger = createRequestLogger('createTag');
       logger.info({ params }, 'Executing createTag tool');
 
@@ -115,15 +114,14 @@ function registerTagManagementTools(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 
   // Register the delete tag tool
-  server.registerTool({
-    name: "deleteTag",
-    description: "Delete a tag from MAAS",
-    inputSchema: deleteTagSchema,
-    outputSchema: deleteTagOutputSchema,
-    execute: async (params) => {
+  server.tool(
+    "deleteTag",
+    "Delete a tag from MAAS",
+    deleteTagSchema,
+    async (params) => {
       const logger = createRequestLogger('deleteTag');
       logger.info({ params }, 'Executing deleteTag tool');
 
@@ -144,15 +142,14 @@ function registerTagManagementTools(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 
   // Register the update tag tool
-  server.registerTool({
-    name: "updateTag",
-    description: "Update an existing tag in MAAS",
-    inputSchema: updateTagSchema,
-    outputSchema: updateTagOutputSchema,
-    execute: async (params) => {
+  server.tool(
+    "updateTag",
+    "Update an existing tag in MAAS",
+    updateTagSchema,
+    async (params) => {
       const logger = createRequestLogger('updateTag');
       logger.info({ params }, 'Executing updateTag tool');
 
@@ -184,7 +181,7 @@ function registerTagManagementTools(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 }
 
 module.exports = { registerTagManagementTools };

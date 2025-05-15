@@ -39,12 +39,11 @@ const uploadScriptOutputSchema = z.object({
  * @param maasClient The MAAS API client instance
  */
 function registerUploadScriptTool(server, maasClient) {
-  server.registerTool({
-    name: "uploadScript",
-    description: "Upload a script to MAAS",
-    inputSchema: uploadScriptSchema,
-    outputSchema: uploadScriptOutputSchema,
-    execute: async (params, signal) => {
+  server.tool(
+    "uploadScript",
+    "Upload a script to MAAS",
+    uploadScriptSchema,
+    async (params, signal) => {
       const logger = createRequestLogger('uploadScript');
       const progressSender = createProgressSender(params._meta?.requestId);
       
@@ -124,7 +123,7 @@ function registerUploadScriptTool(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 }
 
 module.exports = { registerUploadScriptTool };

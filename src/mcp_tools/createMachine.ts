@@ -40,12 +40,11 @@ const createMachineOutputSchema = z.object({
  * @param maasClient The MAAS API client instance
  */
 function registerCreateMachineTool(server, maasClient) {
-  server.registerTool({
-    name: "createMachine",
-    description: "Create a new machine in MAAS",
-    inputSchema: createMachineSchema,
-    outputSchema: createMachineOutputSchema,
-    execute: async (params) => {
+  server.tool(
+    "createMachine",
+    "Create a new machine in MAAS",
+    createMachineSchema,
+    async (params) => {
       const logger = createRequestLogger('createMachine');
       logger.info({ params }, 'Executing createMachine tool');
 
@@ -93,7 +92,7 @@ function registerCreateMachineTool(server, maasClient) {
         }
       }
     }
-  });
+  );
 }
 
 module.exports = { registerCreateMachineTool };

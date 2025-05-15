@@ -129,8 +129,8 @@ function registerDomainResource(server, client) {
   maasClient = client;
   
   // Register all domain-related resources
-  server.registerResource(domainDetailsTemplate);
-  server.registerResource(domainsListTemplate);
+  server.resource("domainDetails", domainDetailsTemplate);
+  server.resource("domainsList", domainsListTemplate);
   
   logger.info('Registered MAAS domain resources');
 }

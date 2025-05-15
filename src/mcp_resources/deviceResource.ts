@@ -301,3 +301,17 @@ export function registerDevicesListResource(server: McpServer, maasClient: MaasA
     }
   );
 }
+
+/**
+ * Registers all device-related resources with the MCP server.
+ * This function is a wrapper that calls both registerDeviceDetailsResource and registerDevicesListResource.
+ *
+ * @param server The MCP server instance.
+ * @param maasClient The MAAS API client instance.
+ */
+export function registerDeviceResource(server: McpServer, maasClient: MaasApiClient) {
+  registerDeviceDetailsResource(server, maasClient);
+  registerDevicesListResource(server, maasClient);
+  
+  logger.info('Registered MAAS device resources');
+}

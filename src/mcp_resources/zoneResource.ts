@@ -301,3 +301,17 @@ export function registerZonesListResource(server: McpServer, maasClient: MaasApi
     }
   );
 }
+
+/**
+ * Registers all zone-related resources with the MCP server.
+ * This function is a wrapper that calls both registerZoneDetailsResource and registerZonesListResource.
+ *
+ * @param server The MCP server instance.
+ * @param maasClient The MAAS API client instance.
+ */
+export function registerZoneResource(server: McpServer, maasClient: MaasApiClient) {
+  registerZoneDetailsResource(server, maasClient);
+  registerZonesListResource(server, maasClient);
+  
+  logger.info('Registered MAAS zone resources');
+}

@@ -34,12 +34,11 @@ const allocateMachineOutputSchema = z.object({
  * @param maasClient The MAAS API client instance
  */
 function registerAllocateMachineTool(server, maasClient) {
-  server.registerTool({
-    name: "allocateMachine",
-    description: "Allocate a machine from the MAAS resource pool",
-    inputSchema: allocateMachineSchema,
-    outputSchema: allocateMachineOutputSchema,
-    execute: async (params) => {
+  server.tool(
+    "allocateMachine",
+    "Allocate a machine from the MAAS resource pool",
+    allocateMachineSchema,
+    async (params) => {
       const logger = createRequestLogger('allocateMachine');
       logger.info({ params }, 'Executing allocateMachine tool');
 
@@ -87,7 +86,7 @@ function registerAllocateMachineTool(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 }
 
 module.exports = { registerAllocateMachineTool };

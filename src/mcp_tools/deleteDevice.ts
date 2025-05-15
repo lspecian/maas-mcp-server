@@ -27,12 +27,11 @@ const deleteDeviceOutputSchema = z.object({
  * @param maasClient The MAAS API client instance
  */
 function registerDeleteDeviceTool(server, maasClient) {
-  server.registerTool({
-    name: "deleteDevice",
-    description: "Delete a device from MAAS",
-    inputSchema: deleteDeviceSchema,
-    outputSchema: deleteDeviceOutputSchema,
-    execute: async (params) => {
+  server.tool(
+    "deleteDevice",
+    "Delete a device from MAAS",
+    deleteDeviceSchema,
+    async (params) => {
       const logger = createRequestLogger('deleteDevice');
       logger.info({ params }, 'Executing deleteDevice tool');
 
@@ -53,7 +52,7 @@ function registerDeleteDeviceTool(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 }
 
 module.exports = { registerDeleteDeviceTool };

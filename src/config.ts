@@ -15,9 +15,8 @@ import { z } from 'zod';
  * Load environment variables from .env file in development mode
  * In production, environment variables should be set in the deployment environment
  */
-if (process.env.NODE_ENV !== 'production') {
-  dotenv.config();
-}
+// Always load environment variables from .env file
+dotenv.config();
 
 /**
  * Configuration schema with validation rules

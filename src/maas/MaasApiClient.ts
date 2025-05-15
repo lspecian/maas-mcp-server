@@ -1,17 +1,26 @@
 const { OAuth } = require('oauth');
-const logger = require('../utils/logger'); // Assuming logger.js is in src/utils
-const config = require('../config');      // Assuming config.js is in src
+const logger = require('../utils/logger');
+const config = require('../config');
 const { randomBytes } = require('crypto');
-const FormData = require('form-data'); // Import the form-data package
-const {
-  MaasApiError
-} = require('../types/maas');
+const FormData = require('form-data');
 
-// TypeScript types (these will be removed during compilation)
-// type MaasApiRequestParams = any;
-// type MaasApiRequestBody = any;
-// type MaasApiResponse = any;
-// type MaasApiOptionalResponse = any;
+// Import types
+import type {
+  MaasApiRequestParams,
+  MaasApiRequestBody,
+  MaasApiResponse,
+  MaasApiOptionalResponse
+} from '../types/maas';
+
+// Import for value usage - not as a type
+import { MaasApiError } from '../types/maas';
+
+// Define interface for Node.js form-data package
+interface NodeFormData {
+  getBuffer(): Buffer;
+  getHeaders(): Record<string, string>;
+  append(name: string, value: string | Blob, fileName?: string): void;
+}
 
 // Ensure FormData is available. If not using a modern Node.js version,
 // you might need a polyfill like 'formdata-node' and import it.
@@ -37,7 +46,7 @@ export class MaasApiClient {
   private readonly oauthTokenSecret: string;
   // oauthClient might not be directly used if manually constructing headers,
   // but can be kept for reference or future use with the oauth library's methods.
-  private readonly oauthClient: OAuth;
+  private readonly oauthClient: typeof OAuth;
 
   constructor() {
     logger.debug('Initializing MaasApiClient...');
@@ -326,7 +335,8 @@ export class MaasApiClient {
         // If it's a MaasApiError that wasn't retried, a non-retryable network error, or max retries for network error:
         logger.error(`MAAS API Request error not retried or max retries reached for network error (Attempt ${attempt + 1}). Error: ${error.message}`, {
             method, url: url.toString(), errorName: error.name, errorMessage: error.message, attempt: attempt + 1,
-            isMaasApiError: error instanceof MaasApiError, statusCode: (error as MaasApiError).statusCode
+            isMaasApiError: error instanceof MaasApiError,
+            statusCode: 'statusCode' in error ? error.statusCode : undefined
         });
         throw error; // Rethrow to be handled by the final catch block (if any) or propagate
       }
@@ -337,8 +347,8 @@ export class MaasApiClient {
         method, url: url.toString(),
         lastErrorName: lastError.name,
         lastErrorMessage: lastError.message,
-        lastErrorStatus: (lastError as MaasApiError).statusCode,
-        lastErrorDetails: (lastError as MaasApiError).details ? JSON.stringify((lastError as MaasApiError).details).substring(0,500) : undefined,
+        lastErrorStatus: 'statusCode' in lastError ? lastError.statusCode : undefined,
+        lastErrorDetails: 'details' in lastError && lastError.details ? JSON.stringify(lastError.details).substring(0,500) : undefined,
     });
     // The original outer catch block (lines 197-217 in original) will handle wrapping if lastError is not MaasApiError.
     // However, our lastError is likely already a MaasApiError or an AbortError.
@@ -424,20 +434,30 @@ export class MaasApiClient {
     logger.debug(`POST request to ${endpoint}`, { hasData: !!data, dataType: data ? data.constructor.name : 'null' });
     let bodyToSend: BodyInit | null = null;
 
-    if (data instanceof FormData || typeof data === 'string') {
-      // Convert form-data package's FormData to a format compatible with fetch
-      if (data instanceof FormData) {
-        // Use the form-data package's getBuffer method to get the raw buffer
-        bodyToSend = data.getBuffer() as unknown as BodyInit;
-      } else {
-        bodyToSend = data;
+    if (!data) {
+      bodyToSend = null;
+    } else if (typeof data === 'string') {
+      bodyToSend = data;
+      logger.debug(`Preparing body for POST: string`, { endpoint });
+    } else if (data instanceof FormData) {
+      // Use the form-data package's getBuffer method to get the raw buffer
+      try {
+        const nodeFormData = data as unknown as NodeFormData;
+        if (nodeFormData && typeof nodeFormData.getBuffer === 'function') {
+          bodyToSend = nodeFormData.getBuffer() as unknown as BodyInit;
+        } else {
+          bodyToSend = data as unknown as BodyInit;
+        }
+        logger.debug(`Preparing body for POST: FormData`, { endpoint });
+      } catch (err) {
+        logger.error(`Error preparing FormData: ${(err as Error).message}`);
+        bodyToSend = data as unknown as BodyInit;
       }
-      logger.debug(`Preparing body for POST: ${data.constructor.name}`, { endpoint });
     } else if (data && typeof data === 'object') {
       // Convert plain objects to FormData. MAAS often uses x-www-form-urlencoded for non-file posts.
       // If specific endpoints require JSON, the `data` should be pre-stringified and passed as string.
       // For now, this converts to FormData, which is suitable for key-value pairs or file uploads.
-      const formData = new FormData();
+      const formData = new FormData() as unknown as NodeFormData;
       for (const key in data) {
         if (Object.prototype.hasOwnProperty.call(data, key)) {
           const value = (data as Record<string, any>)[key];
@@ -456,7 +476,16 @@ export class MaasApiClient {
           }
         }
       }
-      bodyToSend = formData.getBuffer() as unknown as BodyInit;
+      try {
+        if (typeof formData.getBuffer === 'function') {
+          bodyToSend = formData.getBuffer() as unknown as BodyInit;
+        } else {
+          bodyToSend = formData as unknown as BodyInit;
+        }
+      } catch (err) {
+        logger.error(`Error getting buffer from FormData: ${(err as Error).message}`);
+        bodyToSend = formData as unknown as BodyInit;
+      }
       logger.debug('Preparing body for POST: Converted object to FormData', { endpoint, keys: Object.keys(data) });
     } else if (data === null) {
       bodyToSend = null;
@@ -490,17 +519,27 @@ export class MaasApiClient {
     logger.debug(`PUT request to ${endpoint}`, { hasData: !!data, dataType: data ? data.constructor.name : 'null' });
     let bodyToSend: BodyInit | null = null;
 
-    if (data instanceof FormData || typeof data === 'string') {
-      // Convert form-data package's FormData to a format compatible with fetch
-      if (data instanceof FormData) {
-        // Use the form-data package's getBuffer method to get the raw buffer
-        bodyToSend = data.getBuffer() as unknown as BodyInit;
-      } else {
-        bodyToSend = data;
+    if (!data) {
+      bodyToSend = null;
+    } else if (typeof data === 'string') {
+      bodyToSend = data;
+      logger.debug(`Preparing body for PUT: string`, { endpoint });
+    } else if (data instanceof FormData) {
+      // Use the form-data package's getBuffer method to get the raw buffer
+      try {
+        const nodeFormData = data as unknown as NodeFormData;
+        if (nodeFormData && typeof nodeFormData.getBuffer === 'function') {
+          bodyToSend = nodeFormData.getBuffer() as unknown as BodyInit;
+        } else {
+          bodyToSend = data as unknown as BodyInit;
+        }
+        logger.debug(`Preparing body for PUT: FormData`, { endpoint });
+      } catch (err) {
+        logger.error(`Error preparing FormData: ${(err as Error).message}`);
+        bodyToSend = data as unknown as BodyInit;
       }
-      logger.debug(`Preparing body for PUT: ${data.constructor.name}`, { endpoint });
     } else if (data && typeof data === 'object') {
-      const formData = new FormData();
+      const formData = new FormData() as unknown as NodeFormData;
       for (const key in data) {
         if (Object.prototype.hasOwnProperty.call(data, key)) {
           const value = (data as Record<string, any>)[key];
@@ -515,7 +554,16 @@ export class MaasApiClient {
           }
         }
       }
-      bodyToSend = formData.getBuffer() as unknown as BodyInit;
+      try {
+        if (typeof formData.getBuffer === 'function') {
+          bodyToSend = formData.getBuffer() as unknown as BodyInit;
+        } else {
+          bodyToSend = formData as unknown as BodyInit;
+        }
+      } catch (err) {
+        logger.error(`Error getting buffer from FormData: ${(err as Error).message}`);
+        bodyToSend = formData as unknown as BodyInit;
+      }
       logger.debug('Preparing body for PUT: Converted object to FormData', { endpoint, keys: Object.keys(data) });
     } else if (data === null) {
       bodyToSend = null;
@@ -584,9 +632,17 @@ export class MaasApiClient {
    * const result = await maasClient.postMultipart('/boot-resources/', formData);
    */
   public async postMultipart<TResponse = any>(endpoint: string, formData: FormData, signal?: AbortSignal): Promise<MaasApiResponse<TResponse>> {
-    logger.debug(`POST multipart request to ${endpoint}`, {
-      formDataFields: Object.keys(formData.getHeaders()).join(', ')
-    });
+    const nodeFormData = formData as unknown as NodeFormData;
+    let formDataFields = 'FormData fields';
+    try {
+      if (nodeFormData && typeof nodeFormData.getHeaders === 'function') {
+        formDataFields = Object.keys(nodeFormData.getHeaders()).join(', ');
+      }
+    } catch (err) {
+      logger.error(`Error getting headers from FormData: ${(err as Error).message}`);
+    }
+    
+    logger.debug(`POST multipart request to ${endpoint}`, { formDataFields });
     
     const url = new URL(`${this.maasApiUrl}/api/2.0${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`);
     const authHeader = this.generateAuthHeader();
@@ -594,19 +650,28 @@ export class MaasApiClient {
     const headers: Record<string, string> = {
       'Authorization': authHeader,
       'Accept': 'application/json, text/plain, */*',
-      ...formData.getHeaders() // This adds the Content-Type with boundary
     };
+    
+    try {
+      if (nodeFormData && typeof nodeFormData.getHeaders === 'function') {
+        Object.assign(headers, nodeFormData.getHeaders());
+      }
+    } catch (err) {
+      logger.error(`Error getting headers from FormData: ${(err as Error).message}`);
+    }
     
     logger.info(`MAAS API Multipart Request: POST ${url.toString()}`, {
       hasFormData: true,
-      formDataFields: Object.keys(formData.getHeaders()).join(', ')
+      formDataFields
     });
     
     try {
       const response = await fetch(url.toString(), {
         method: 'POST',
         headers,
-        body: formData.getBuffer() as unknown as BodyInit,
+        body: nodeFormData && typeof nodeFormData.getBuffer === 'function'
+          ? nodeFormData.getBuffer() as unknown as BodyInit
+          : formData as unknown as BodyInit,
         signal
       });
       

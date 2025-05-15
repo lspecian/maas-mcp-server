@@ -14,7 +14,7 @@ function initializeAuditLogger() {
   setAuditLogOptions({
     includeResourceState: config && config.auditLogIncludeResourceState,
     maskSensitiveFields: config && config.auditLogMaskSensitiveFields,
-    sensitiveFields: config && config.auditLogSensitiveFields ? config.auditLogSensitiveFields.split(',').map(field => field.trim()) : [],
+    sensitiveFields: config && config.auditLogSensitiveFields ? config.auditLogSensitiveFields.split(',').map((field: string) => field.trim()) : [],
     logToFile: config && config.auditLogToFile,
     logFilePath: config && config.auditLogFilePath
   });

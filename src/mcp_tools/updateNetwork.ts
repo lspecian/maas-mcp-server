@@ -33,12 +33,11 @@ const updateNetworkOutputSchema = z.object({
  * @param maasClient The MAAS API client instance
  */
 function registerUpdateNetworkTool(server, maasClient) {
-  server.registerTool({
-    name: "updateNetwork",
-    description: "Update a network in MAAS",
-    inputSchema: updateNetworkSchema,
-    outputSchema: updateNetworkOutputSchema,
-    execute: async (params) => {
+  server.tool(
+    "updateNetwork",
+    "Update a network in MAAS",
+    updateNetworkSchema,
+    async (params) => {
       const logger = createRequestLogger('updateNetwork');
       logger.info({ params }, 'Executing updateNetwork tool');
 
@@ -70,7 +69,7 @@ function registerUpdateNetworkTool(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 }
 
 module.exports = { registerUpdateNetworkTool };

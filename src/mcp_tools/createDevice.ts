@@ -36,12 +36,11 @@ const createDeviceResponseSchema = postSuccessResponseSchema.extend({
  * @param maasClient The MAAS API client instance
  */
 function registerCreateDeviceTool(server, maasClient) {
-  server.registerTool({
-    name: "createDevice",
-    description: "Create a new device in MAAS",
-    inputSchema: createDeviceRequestSchema,
-    outputSchema: createDeviceResponseSchema,
-    execute: async (params) => {
+  server.tool(
+    "createDevice",
+    "Create a new device in MAAS",
+    createDeviceRequestSchema,
+    async (params) => {
       const logger = createRequestLogger('createDevice');
       logger.info({ params }, 'Executing createDevice tool');
 
@@ -80,7 +79,7 @@ function registerCreateDeviceTool(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 }
 
 module.exports = { registerCreateDeviceTool };

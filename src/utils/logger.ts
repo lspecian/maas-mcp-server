@@ -1,4 +1,5 @@
-const pino = require('pino');
+import pino from 'pino';
+// Import config as a CommonJS module
 const config = require('../config');
 
 // Create a unique request ID generator
@@ -7,23 +8,26 @@ const generateRequestId = () => {
 };
 
 // Configure pino logger
-console.log('Config:', config);
+// Don't use console.log in MCP server mode as it breaks the protocol
+// If you need to debug config, use environment variables or conditional logging
 
 // Create the logger instance with pino
-const logger = pino({
-  level: config.logLevel || 'info',
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-      translateTime: 'SYS:standard',
-      ignore: 'pid,hostname'
-    }
-  }
-});
+// Check if we should be completely silent (for MCP Inspector)
+const isSilent = process.env.SILENT === 'true';
+
+const logger = isSilent
+  ? pino({ level: 'silent' }) // Completely silent logger
+  : pino({
+      level: config.logLevel || 'info',
+      // Always use file transport to avoid interfering with MCP protocol
+      transport: {
+        target: 'pino/file',
+        options: { destination: './logs/mcp-server.log' }
+      }
+    });
 
 // Create a child logger with request context
-const createRequestLogger = (operation) => {
+const createRequestLogger = (operation: string) => {
   const requestId = generateRequestId();
   return logger.child({
     requestId,

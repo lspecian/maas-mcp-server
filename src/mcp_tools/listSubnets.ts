@@ -15,12 +15,11 @@ const { createProgressSender } = require("../utils/progressNotification");
  * @param {MaasApiClient} maasClient - The MAAS API client instance
  */
 function registerListSubnetsTool(server, maasClient) {
-  server.registerTool({
-    name: "listSubnets",
-    description: "List subnets from MAAS with optional filtering",
-    inputSchema: listSubnetsSchema,
-    outputSchema: listSubnetsOutputSchema,
-    execute: async (params) => {
+  server.tool(
+    "listSubnets",
+    "List subnets from MAAS with optional filtering",
+    listSubnetsSchema,
+    async (params) => {
       const logger = createRequestLogger('listSubnets');
       const progressSender = createProgressSender(params._meta?.requestId);
       
@@ -82,7 +81,7 @@ function registerListSubnetsTool(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 }
 
 module.exports = { registerListSubnetsTool };

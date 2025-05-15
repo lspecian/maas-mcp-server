@@ -40,12 +40,11 @@ const commissionMachineWithProgressOutputSchema = z.object({
  * @param maasClient The MAAS API client instance
  */
 function registerCommissionMachineWithProgressTool(server, maasClient) {
-  server.registerTool({
-    name: "commissionMachineWithProgress",
-    description: "Commission a machine with progress notifications",
-    inputSchema: commissionMachineWithProgressSchema,
-    outputSchema: commissionMachineWithProgressOutputSchema,
-    execute: withOperationHandler(async (params, signal, context) => {
+  server.tool(
+    "commissionMachineWithProgress",
+    "Commission a machine with progress notifications",
+    commissionMachineWithProgressSchema,
+    withOperationHandler(async (params, signal, context) => {
       const logger = createRequestLogger('commissionMachineWithProgress');
       const progressSender = createProgressSender(
         params._meta?.progressToken,
@@ -101,7 +100,7 @@ function registerCommissionMachineWithProgressTool(server, maasClient) {
         throw handleOperationError(error, 'Failed to commission machine');
       }
     })
-  });
+  );
 }
 
 export { registerCommissionMachineWithProgressTool };

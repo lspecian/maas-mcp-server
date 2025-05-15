@@ -69,7 +69,7 @@ const server = new McpServer({
  * These functions will register all available MAAS operations with the MCP server
  */
 const { registerTools } = require('./mcp_tools/index');
-const { registerResources } = require('./mcp_resources/index');
+const { registerMcpResources } = require('./mcp_resources/index');
 
 /**
  * Register all MCP tools and resources with the server
@@ -77,7 +77,7 @@ const { registerResources } = require('./mcp_resources/index');
  * - Resources: Data access points like machine details, subnet information, etc.
  */
 registerTools(server, maasApiClient);
-registerResources(server, maasApiClient);
+registerMcpResources(server, maasApiClient);
 
 /**
  * Create the Express application to handle HTTP requests
@@ -97,7 +97,7 @@ app.use(express.json({ limit: '10mb' }));
  * This endpoint allows monitoring systems to verify that the server is running.
  * It returns a simple JSON response with status "ok" and a 200 status code.
  */
-app.get('/health', (req, res) => {
+app.get('/health', (req: any, res: any) => {
   res.status(200).json({ status: 'ok' });
 });
 
@@ -115,7 +115,7 @@ app.get('/health', (req, res) => {
  * - Client information extraction
  * - Transport lifecycle management
  */
-app.post('/mcp', async (req, res) => {
+app.post('/mcp', async (req: any, res: any) => {
   const requestId = generateRequestId();
   // Use a more specific logger name if possible, or ensure logger is configured to show context
   const requestLogger = logger.child({ requestId, mcpMethod: req.body?.method });

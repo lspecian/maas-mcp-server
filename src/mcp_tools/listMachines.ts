@@ -6,6 +6,15 @@ const { z } = require("zod");
 const { metaSchema, paginationSchema } = require("./schemas/common");
 const { createRequestLogger } = require("../utils/logger");
 
+// Define interfaces for type hinting
+interface IMcpServer {
+  tool: (name: string, description: string, inputSchema: any, callback: any) => void; // Use 'any' for simplicity here, ideally use a more specific type from SDK
+}
+
+interface IMaasApiClient {
+  get: (url: string, params?: any) => Promise<any>; // Define the 'get' method used
+}
+
 // Define schema for list machines tool parameters
 const listMachinesParamsSchema = z.object({
   hostname: z.string().optional().describe("Filter machines by hostname (supports globbing)."),
@@ -46,19 +55,18 @@ const listMachinesOutputSchema = z.object({
  * @param server The MCP server instance
  * @param maasClient The MAAS API client instance
  */
-function registerListMachinesTool(server, maasClient) {
-  server.registerTool({
-    name: "listMachines",
-    description: "List machines in the MAAS system with optional filtering",
-    inputSchema: listMachinesParamsSchema,
-    outputSchema: listMachinesOutputSchema,
-    execute: async (params) => {
+function registerListMachinesTool(server: IMcpServer, maasClient: IMaasApiClient) {
+  server.tool(
+    "listMachines",
+    "List machines in the MAAS system with optional filtering",
+    listMachinesParamsSchema,
+    async (params) => {
       const logger = createRequestLogger('listMachines');
       logger.info({ params }, 'Executing listMachines tool');
 
       try {
         // Convert parameters to MAAS API format
-        const apiParams = {};
+        const apiParams: any = {}; // Use 'any' for simplicity here, ideally use a more specific type
         
         // Map tool parameters to MAAS API parameters
         if (params.hostname) apiParams.hostname = params.hostname;
@@ -74,10 +82,10 @@ function registerListMachinesTool(server, maasClient) {
         if (params.limit !== undefined) apiParams.limit = params.limit;
 
         // Call MAAS API to get machines
-        const response = await maasClient.get('/machines/', apiParams);
+        const response: any[] = await maasClient.get('/machines/', apiParams); // Use 'any[]' for simplicity here, ideally use a more specific type
         
         // Transform response to match output schema
-        const machines = response.map(machine => ({
+        const machines = response.map((machine: any) => ({ // Use 'any' for simplicity here, ideally use a more specific type
           system_id: machine.system_id,
           hostname: machine.hostname,
           status: machine.status_name,
@@ -107,7 +115,7 @@ function registerListMachinesTool(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 }
 
 module.exports = { registerListMachinesTool };

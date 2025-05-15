@@ -38,12 +38,11 @@ const deployMachineWithProgressOutputSchema = z.object({
  * @param maasClient The MAAS API client instance
  */
 function registerDeployMachineWithProgressTool(server, maasClient) {
-  server.registerTool({
-    name: "deployMachineWithProgress",
-    description: "Deploy a machine with progress notifications",
-    inputSchema: deployMachineWithProgressSchema,
-    outputSchema: deployMachineWithProgressOutputSchema,
-    execute: withOperationHandler(async (params, signal, context) => {
+  server.tool(
+    "deployMachineWithProgress",
+    "Deploy a machine with progress notifications",
+    deployMachineWithProgressSchema,
+    withOperationHandler(async (params, signal, context) => {
       const logger = createRequestLogger('deployMachineWithProgress');
       const progressSender = createProgressSender(
         params._meta?.progressToken,
@@ -97,7 +96,7 @@ function registerDeployMachineWithProgressTool(server, maasClient) {
         throw handleOperationError(error, 'Failed to deploy machine');
       }
     })
-  });
+  );
 }
 
 export { registerDeployMachineWithProgressTool };

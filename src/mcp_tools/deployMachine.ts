@@ -30,12 +30,11 @@ const deployMachineOutputSchema = z.object({
  * @param maasClient The MAAS API client instance
  */
 function registerDeployMachineTool(server, maasClient) {
-  server.registerTool({
-    name: "deployMachine",
-    description: "Deploy an operating system to a machine",
-    inputSchema: deployMachineSchema,
-    outputSchema: deployMachineOutputSchema,
-    execute: async (params) => {
+  server.tool(
+    "deployMachine",
+    "Deploy an operating system to a machine",
+    deployMachineSchema,
+    async (params) => {
       const logger = createRequestLogger('deployMachine');
       logger.info({ params }, 'Executing deployMachine tool');
 
@@ -71,7 +70,7 @@ function registerDeployMachineTool(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 }
 
 module.exports = { registerDeployMachineTool };

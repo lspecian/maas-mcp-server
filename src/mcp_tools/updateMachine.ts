@@ -40,12 +40,11 @@ const updateMachineOutputSchema = z.object({
  * @param maasClient The MAAS API client instance
  */
 function registerUpdateMachineTool(server, maasClient) {
-  server.registerTool({
-    name: "updateMachine",
-    description: "Update a machine in MAAS",
-    inputSchema: updateMachineSchema,
-    outputSchema: updateMachineOutputSchema,
-    execute: async (params) => {
+  server.tool(
+    "updateMachine",
+    "Update a machine in MAAS",
+    updateMachineSchema,
+    async (params) => {
       const logger = createRequestLogger('updateMachine');
       logger.info({ params }, 'Executing updateMachine tool');
 
@@ -90,7 +89,7 @@ function registerUpdateMachineTool(server, maasClient) {
         }
       }
     }
-  });
+  );
 }
 
 module.exports = { registerUpdateMachineTool };

@@ -34,12 +34,11 @@ const createNetworkResponseSchema = postSuccessResponseSchema.extend({
  * @param maasClient The MAAS API client instance
  */
 function registerCreateNetworkTool(server, maasClient) {
-  server.registerTool({
-    name: "createNetwork",
-    description: "Create a new network in MAAS",
-    inputSchema: createNetworkRequestSchema,
-    outputSchema: createNetworkResponseSchema,
-    execute: async (params) => {
+  server.tool(
+    "createNetwork",
+    "Create a new network in MAAS",
+    createNetworkRequestSchema,
+    async (params) => {
       const logger = createRequestLogger('createNetwork');
       logger.info({ params }, 'Executing createNetwork tool');
 
@@ -76,7 +75,7 @@ function registerCreateNetworkTool(server, maasClient) {
         throw error;
       }
     }
-  });
+  );
 }
 
 module.exports = { registerCreateNetworkTool };
