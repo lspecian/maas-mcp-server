@@ -582,7 +582,7 @@ go run test/go/test-stdio-client.go
 
 The project uses GitHub Actions to automatically build and publish binaries for multiple platforms when a new tag is pushed to the repository.
 
-### Release Process
+### Automatic Release Process
 
 1. Update the version in `internal/version/version.go`
 2. Update the `CHANGELOG.md` with the changes in the new version
@@ -598,6 +598,25 @@ The project uses GitHub Actions to automatically build and publish binaries for 
    - Upload the binaries as assets
    - Generate SHA256 checksums for all binaries
    - Add release notes based on the CHANGELOG.md
+
+### Manual Release Process
+
+You can also trigger a manual release using the GitHub Actions workflow:
+
+1. Go to the GitHub repository
+2. Click on the "Actions" tab
+3. Select the "Manual Release" workflow
+4. Click on "Run workflow"
+5. Enter the version number (e.g., "1.1.0")
+6. Select whether this is a pre-release
+7. Click "Run workflow"
+
+The workflow will:
+- Build binaries for all supported platforms
+- Create a GitHub Release with the specified version
+- Upload the binaries as assets
+- Generate SHA256 checksums for all binaries
+- Add release notes from the CHANGELOG.md
 
 ### Binary Naming Convention
 
