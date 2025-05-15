@@ -47,6 +47,15 @@ This server can operate in two transport modes:
    - Server host/port
    - Logging configuration
 
+### Environment Variables
+
+The server requires the following environment variables:
+
+- `MAAS_API_URL` - The URL of your MAAS API endpoint
+- `MAAS_API_KEY` - Your MAAS API key in the format "consumer:token:secret"
+
+These can be set in the `.env` file or directly in your environment.
+
 ### Using Docker
 
 1. Build the Docker image:
@@ -78,6 +87,14 @@ The server will be available at http://localhost:8081/mcp.
 ```
 
 In this mode, the server reads JSON-RPC requests from stdin and writes responses to stdout, making it suitable for integration with AI assistants.
+
+### Version Information
+
+To display the version information:
+
+```bash
+./maas-mcp-server --version
+```
 
 ### JSON-RPC 2.0 Message Format
 
@@ -142,52 +159,38 @@ The server will respond with information about available tools and resources:
 ```json
 {
   "jsonrpc": "2.0",
-  "result": {
-    "serverInfo": {
-      "name": "maas-mcp-server",
-      "version": "1.0.0"
+  "result": [
+    {
+      "name": "maas_list_machines",
+      "description": "List all machines managed by MAAS with filtering and pagination",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "hostname": { "type": "string" },
+          "zone": { "type": "string" },
+          "pool": { "type": "string" },
+          "status": { "type": "string" },
+          "power_state": { "type": "string" },
+          "system_id": { "type": "string" },
+          "architecture": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "limit": { "type": "integer" },
+          "page": { "type": "integer" }
+        }
+      }
     },
-    "capabilities": {
-      "tools": [
-        {
-          "name": "maas_list_machines",
-          "description": "List all machines managed by MAAS with filtering and pagination",
-          "input_schema": {
-            "hostname": "string",
-            "zone": "string",
-            "pool": "string",
-            "status": "string",
-            "power_state": "string",
-            "system_id": "string",
-            "architecture": "string",
-            "tags": ["string"],
-            "storage_constraints": {
-              "min_size": "number",
-              "disk_type": "string",
-              "count": "number"
-            },
-            "limit": "number",
-            "offset": "number",
-            "page": "number"
-          }
+    {
+      "name": "maas_get_machine_details",
+      "description": "Get detailed information about a specific machine",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "system_id": { "type": "string" }
         },
-        {
-          "name": "maas_get_machine_details",
-          "description": "Get detailed information about a specific machine",
-          "input_schema": {
-            "system_id": "string"
-          }
-        }
-      ],
-      "resources": [
-        {
-          "name": "machines",
-          "description": "Access to MAAS machines",
-          "uri_pattern": "maas://machines/{system_id}"
-        }
-      ]
+        "required": ["system_id"]
+      }
     }
-  },
+  ],
   "id": "1"
 }
 ```
@@ -525,6 +528,37 @@ go test -v ./internal/service/...
 go run test/go/test-stdio-client.go
 ```
 
+## Releases
+
+The project uses GitHub Actions to automatically build and publish binaries for multiple platforms when a new tag is pushed to the repository.
+
+### Release Process
+
+1. Update the version in `internal/version/version.go`
+2. Update the `CHANGELOG.md` with the changes in the new version
+3. Commit the changes
+4. Create and push a new tag:
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+5. The GitHub Actions workflow will automatically:
+   - Build binaries for Linux, macOS, and Windows
+   - Create a GitHub Release with the tag name
+   - Upload the binaries as assets
+   - Generate SHA256 checksums for all binaries
+   - Add release notes based on the CHANGELOG.md
+
+### Binary Naming Convention
+
+Binaries follow a consistent naming pattern:
+- `mcp-server-{version}-{os}-{arch}[.exe]`
+
+For example:
+- `mcp-server-1.0.0-linux-amd64`
+- `mcp-server-1.0.0-darwin-arm64`
+- `mcp-server-1.0.0-windows-amd64.exe`
+
 ## API Reference
 
 ### Error Codes
@@ -549,15 +583,6 @@ go run test/go/test-stdio-client.go
 | discover | Discover server capabilities |
 | maas_list_machines | List all machines managed by MAAS |
 | maas_get_machine_details | Get detailed information about a specific machine |
-| maas_discover_machines | Discover new machines in the network |
-| maas_allocate_machine | Allocate a machine based on constraints |
-| maas_deploy_machine | Deploy an operating system to a machine |
-| maas_release_machine | Release a machine back to the available pool |
-| maas_get_machine_power_state | Get the current power state of a machine |
-| maas_power_on_machine | Power on a machine |
-| maas_power_off_machine | Power off a machine |
-| maas_list_subnets | List all subnets managed by MAAS |
-| maas_get_subnet_details | Get detailed information about a specific subnet |
 
 ## Contributing
 

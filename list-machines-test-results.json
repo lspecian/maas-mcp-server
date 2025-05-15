@@ -1,0 +1,166 @@
+{
+  "readyReceived": true,
+  "discoveryComplete": true,
+  "toolResponseReceived": true,
+  "lastResponse": {
+    "id": "2",
+    "jsonrpc": "2.0",
+    "result": {
+      "machines": [
+        {
+          "id": "44afsh",
+          "name": "dell-1",
+          "fqdn": "dell-1.maas",
+          "status": "6",
+          "architecture": "amd64/generic",
+          "power_state": "off",
+          "zone": "default",
+          "pool": "dell",
+          "tags": [
+            "dell-r630"
+          ],
+          "cpu_count": 32,
+          "memory_mb": 262144,
+          "os_info": {
+            "system": "ubuntu",
+            "distribution": "ubuntu",
+            "release": "focal"
+          },
+          "last_updated": "2025-05-15T20:26:34.757357089+02:00",
+          "metadata": {
+            "hostname": "dell-1",
+            "system_id": "44afsh"
+          }
+        },
+        {
+          "id": "a63frq",
+          "name": "dell-2",
+          "fqdn": "dell-2.maas",
+          "status": "6",
+          "architecture": "amd64/generic",
+          "power_state": "off",
+          "zone": "default",
+          "pool": "dell",
+          "tags": [
+            "dell-r630"
+          ],
+          "cpu_count": 32,
+          "memory_mb": 262144,
+          "os_info": {
+            "system": "ubuntu",
+            "distribution": "ubuntu",
+            "release": "focal"
+          },
+          "last_updated": "2025-05-15T20:26:34.757360441+02:00",
+          "metadata": {
+            "hostname": "dell-2",
+            "system_id": "a63frq"
+          }
+        },
+        {
+          "id": "tnyfbh",
+          "name": "dell-3",
+          "fqdn": "dell-3.maas",
+          "status": "6",
+          "architecture": "amd64/generic",
+          "power_state": "off",
+          "zone": "default",
+          "pool": "dell",
+          "tags": [
+            "dell-r630"
+          ],
+          "cpu_count": 32,
+          "memory_mb": 262144,
+          "os_info": {
+            "system": "ubuntu",
+            "distribution": "ubuntu",
+            "release": "focal"
+          },
+          "last_updated": "2025-05-15T20:26:34.757362886+02:00",
+          "metadata": {
+            "hostname": "dell-3",
+            "system_id": "tnyfbh"
+          }
+        },
+        {
+          "id": "es8c3w",
+          "name": "hp-1",
+          "fqdn": "hp-1.maas",
+          "status": "6",
+          "architecture": "amd64/generic",
+          "power_state": "off",
+          "zone": "default",
+          "pool": "default",
+          "tags": [
+            "hp",
+            "DL360p"
+          ],
+          "cpu_count": 40,
+          "memory_mb": 133120,
+          "os_info": {
+            "system": "ubuntu",
+            "distribution": "ubuntu",
+            "release": "focal"
+          },
+          "last_updated": "2025-05-15T20:26:34.75736533+02:00",
+          "metadata": {
+            "hostname": "hp-1",
+            "system_id": "es8c3w"
+          }
+        },
+        {
+          "id": "74eesd",
+          "name": "hp-2",
+          "fqdn": "hp-2.maas",
+          "status": "4",
+          "architecture": "amd64/generic",
+          "power_state": "off",
+          "zone": "default",
+          "pool": "default",
+          "tags": [
+            "hp",
+            "DL360p"
+          ],
+          "cpu_count": 32,
+          "memory_mb": 131072,
+          "os_info": {
+            "system": "ubuntu",
+            "distribution": "ubuntu",
+            "release": "focal"
+          },
+          "last_updated": "2025-05-15T20:26:34.757367705+02:00",
+          "metadata": {
+            "hostname": "hp-2",
+            "system_id": "74eesd"
+          }
+        },
+        {
+          "id": "srcd7n",
+          "name": "hp-3",
+          "fqdn": "hp-3.maas",
+          "status": "4",
+          "architecture": "amd64/generic",
+          "power_state": "off",
+          "zone": "default",
+          "pool": "default",
+          "tags": [
+            "hp",
+            "DL380e"
+          ],
+          "cpu_count": 8,
+          "memory_mb": 131072,
+          "os_info": {
+            "system": "ubuntu",
+            "distribution": "ubuntu",
+            "release": "focal"
+          },
+          "last_updated": "2025-05-15T20:26:34.75737008+02:00",
+          "metadata": {
+            "hostname": "hp-3",
+            "system_id": "srcd7n"
+          }
+        }
+      ]
+    }
+  }
+}

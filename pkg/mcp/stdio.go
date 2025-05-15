@@ -217,6 +217,13 @@ func (s *StdioServer) processLine(ctx context.Context, line string) error {
 		return nil
 	}
 
+	// Handle initialize request (required by MCP protocol)
+	if request.Method == "initialize" {
+		s.logger.Info("Handling initialize request")
+		s.handleInitialize(request.ID, request.Params)
+		return nil
+	}
+
 	// Get tool
 	s.logger.WithField("method", request.Method).Info("Looking up tool")
 	tool, ok := s.registry.GetTool(request.Method)
@@ -265,6 +272,90 @@ func (s *StdioServer) handleDiscovery(id JSONRPCID) {
 
 	// Write response
 	s.writeResponse(response)
+}
+
+// handleInitialize handles the MCP initialize request
+func (s *StdioServer) handleInitialize(id JSONRPCID, params json.RawMessage) {
+	s.logger.WithField("params", string(params)).Debug("Initialize params")
+
+	// Parse initialize params if provided
+	var initializeParams struct {
+		ProtocolVersion string `json:"protocolVersion"`
+		ClientInfo      struct {
+			Name    string `json:"name"`
+			Version string `json:"version"`
+		} `json:"clientInfo"`
+		Capabilities map[string]interface{} `json:"capabilities"`
+	}
+
+	if params != nil && len(params) > 0 {
+		if err := json.Unmarshal(params, &initializeParams); err != nil {
+			s.logger.WithError(err).Warn("Failed to parse initialize params")
+		}
+	}
+
+	// Log client info if available
+	if initializeParams.ClientInfo.Name != "" {
+		s.logger.WithFields(logrus.Fields{
+			"client_name":    initializeParams.ClientInfo.Name,
+			"client_version": initializeParams.ClientInfo.Version,
+		}).Info("Client info")
+	}
+
+	// Get all tools and resources
+	tools := s.registry.ListTools()
+	resources := s.registry.ListResources()
+
+	// Build response
+	response := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"result": map[string]interface{}{
+			"protocolVersion": initializeParams.ProtocolVersion, // Echo back the client's protocol version
+			"serverInfo": map[string]interface{}{
+				"name":    "MAAS MCP Server",
+				"version": version.GetVersion(),
+			},
+			"capabilities": map[string]interface{}{
+				"tools":     map[string]interface{}{}, // Empty object indicates we support tools
+				"resources": map[string]interface{}{}, // Empty object indicates we support resources
+			},
+		},
+		"id": id.String(),
+	}
+
+	// Write response
+	s.writeResponse(response)
+
+	// Send initialized notification
+	s.logger.Info("Sending initialized notification")
+	initializedNotification := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method":  "notifications/initialized",
+		"params":  map[string]interface{}{},
+	}
+	s.writeResponse(initializedNotification)
+
+	// After initialization, send tools/list notification
+	s.logger.Info("Sending tools/list notification")
+	toolsListNotification := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method":  "tools/list",
+		"result": map[string]interface{}{
+			"tools": tools,
+		},
+	}
+	s.writeResponse(toolsListNotification)
+
+	// After initialization, send resources/list notification
+	s.logger.Info("Sending resources/list notification")
+	resourcesListNotification := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method":  "resources/list",
+		"result": map[string]interface{}{
+			"resources": resources,
+		},
+	}
+	s.writeResponse(resourcesListNotification)
 }
 
 // writeResult writes a JSON-RPC result to stdout
