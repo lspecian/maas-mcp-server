@@ -53,3 +53,6 @@ logs/*
 .windsurfrules
 .taskmasterconfig
 .roomodes
+
+# Release binaries
+release/
