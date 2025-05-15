@@ -36,6 +36,9 @@ config/config.yaml
 bin/*
 !bin/README.md
 ts-wrapper/dist/
+mcp-server
+mcp-server-clean
+maas-mcp-server
 
 # Test results
 test/results/*

@@ -76,7 +76,7 @@ build_server() {
 # Build the MCP server
 build_mcp_server() {
   print_message "Building MCP Server..." "${YELLOW}"
-  go build -o mcp-server-clean pkg/mcp/cmd/main.go
+  go build -o maas-mcp-server pkg/mcp/cmd/main.go
   print_success "Build successful!"
 }
 
@@ -92,7 +92,7 @@ run_mcp_server() {
   validate_mcp_config
   
   print_message "Running MCP Server..." "${YELLOW}"
-  ./mcp-server-clean
+  ./maas-mcp-server
 }
 
 # Run the MCP server in stdio mode
@@ -103,7 +103,7 @@ run_mcp_stdio() {
   print_message "Running MCP Server in stdio mode..." "${YELLOW}"
   
   # Start the MCP server directly with stdio
-  ./mcp-server-clean stdio
+  ./maas-mcp-server stdio
 }
 
 # Run tests
@@ -130,10 +130,10 @@ show_help() {
   echo
   echo "Commands:"
   echo "  build         Build the server"
-  echo "  build-mcp     Build the MCP server with clean architecture"
+  echo "  build-mcp     Build the MAAS MCP server with clean architecture"
   echo "  run           Build and run the server"
-  echo "  run-mcp       Build and run the MCP server with clean architecture"
-  echo "  run-mcp-stdio Build and run the MCP server in stdio mode"
+  echo "  run-mcp       Build and run the MAAS MCP server with clean architecture"
+  echo "  run-mcp-stdio Build and run the MAAS MCP server in stdio mode"
   echo "  validate      Validate MCP configuration"
   echo "  test          Run tests"
   echo "  lint          Run linter"
