@@ -17,7 +17,7 @@ RUN go mod download
 COPY . .
 
 # Build the MCP server
-RUN go build -o mcp-server-clean pkg/mcp/cmd/main.go
+RUN go build -o maas-mcp-server pkg/mcp/cmd/main.go
 
 # Create the final image
 FROM alpine:latest
@@ -29,7 +29,7 @@ RUN apk add --no-cache ca-certificates
 WORKDIR /app
 
 # Copy the binary from the builder stage
-COPY --from=builder /app/mcp-server-clean /app/mcp-server-clean
+COPY --from=builder /app/maas-mcp-server /app/maas-mcp-server
 
 # Copy config example (will be overridden by volume mount)
 COPY config/config.yaml.example /app/config/config.yaml
@@ -44,5 +44,5 @@ ENV LOG_LEVEL=info
 ENV AUTH_ENABLED=false
 
 # Run the MCP server
-ENTRYPOINT ["/app/mcp-server-clean"]
+ENTRYPOINT ["/app/maas-mcp-server"]
 CMD ["stdio"]
