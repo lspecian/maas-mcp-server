@@ -14,7 +14,7 @@ type ToolFunc func(ctx context.Context, input json.RawMessage) (json.RawMessage,
 type ToolInfo struct {
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
-	InputSchema json.RawMessage `json:"input_schema"`
+	InputSchema json.RawMessage `json:"inputSchema"`
 	Handler     ToolFunc        `json:"-"`
 }
 

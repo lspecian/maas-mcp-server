@@ -224,6 +224,20 @@ func (s *StdioServer) processLine(ctx context.Context, line string) error {
 		return nil
 	}
 
+	// Handle tools/list request
+	if request.Method == "tools/list" {
+		s.logger.Info("Handling tools/list request")
+		s.handleToolsList(request.ID)
+		return nil
+	}
+
+	// Handle resources/list request
+	if request.Method == "resources/list" {
+		s.logger.Info("Handling resources/list request")
+		s.handleResourcesList(request.ID)
+		return nil
+	}
+
 	// Get tool
 	s.logger.WithField("method", request.Method).Info("Looking up tool")
 	tool, ok := s.registry.GetTool(request.Method)
@@ -306,18 +320,28 @@ func (s *StdioServer) handleInitialize(id JSONRPCID, params json.RawMessage) {
 	tools := s.registry.ListTools()
 	resources := s.registry.ListResources()
 
+	// Use protocol version from client or default to "2024-11-05"
+	protocolVersion := initializeParams.ProtocolVersion
+	if protocolVersion == "" {
+		protocolVersion = "2024-11-05"
+	}
+
 	// Build response
 	response := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"result": map[string]interface{}{
-			"protocolVersion": initializeParams.ProtocolVersion, // Echo back the client's protocol version
+			"protocolVersion": protocolVersion,
 			"serverInfo": map[string]interface{}{
 				"name":    "MAAS MCP Server",
 				"version": version.GetVersion(),
 			},
 			"capabilities": map[string]interface{}{
-				"tools":     map[string]interface{}{}, // Empty object indicates we support tools
-				"resources": map[string]interface{}{}, // Empty object indicates we support resources
+				"tools": map[string]interface{}{
+					"listChanged": false,
+				},
+				"resources": map[string]interface{}{
+					"listChanged": false,
+				},
 			},
 		},
 		"id": id.String(),
@@ -335,27 +359,63 @@ func (s *StdioServer) handleInitialize(id JSONRPCID, params json.RawMessage) {
 	}
 	s.writeResponse(initializedNotification)
 
-	// After initialization, send tools/list notification
-	s.logger.Info("Sending tools/list notification")
-	toolsListNotification := map[string]interface{}{
+	// After initialization, send tools/list response
+	s.logger.Info("Sending tools/list response")
+	toolsListResponse := map[string]interface{}{
 		"jsonrpc": "2.0",
-		"method":  "tools/list",
+		"id":      "tools-list",
 		"result": map[string]interface{}{
 			"tools": tools,
 		},
 	}
-	s.writeResponse(toolsListNotification)
+	s.writeResponse(toolsListResponse)
 
-	// After initialization, send resources/list notification
-	s.logger.Info("Sending resources/list notification")
-	resourcesListNotification := map[string]interface{}{
+	// After initialization, send resources/list response
+	s.logger.Info("Sending resources/list response")
+	resourcesListResponse := map[string]interface{}{
 		"jsonrpc": "2.0",
-		"method":  "resources/list",
+		"id":      "resources-list",
 		"result": map[string]interface{}{
 			"resources": resources,
 		},
 	}
-	s.writeResponse(resourcesListNotification)
+	s.writeResponse(resourcesListResponse)
+}
+
+// handleToolsList handles the tools/list request
+func (s *StdioServer) handleToolsList(id JSONRPCID) {
+	// Get all tools
+	tools := s.registry.ListTools()
+
+	// Build response
+	response := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"result": map[string]interface{}{
+			"tools": tools,
+		},
+		"id": id.String(),
+	}
+
+	// Write response
+	s.writeResponse(response)
+}
+
+// handleResourcesList handles the resources/list request
+func (s *StdioServer) handleResourcesList(id JSONRPCID) {
+	// Get all resources
+	resources := s.registry.ListResources()
+
+	// Build response
+	response := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"result": map[string]interface{}{
+			"resources": resources,
+		},
+		"id": id.String(),
+	}
+
+	// Write response
+	s.writeResponse(response)
 }
 
 // writeResult writes a JSON-RPC result to stdout
@@ -414,15 +474,18 @@ func (s *StdioServer) writeResponse(response map[string]interface{}) {
 		s.logger.WithField("bytes_written", bytesWritten).Debug("Bytes written to stdout")
 	}
 
-	// Flush stdout to ensure the response is sent immediately
+	// Try to flush stdout if the writer supports it
+	// This is just a best-effort attempt, not critical for functionality
 	if f, ok := s.writer.(interface{ Flush() error }); ok {
 		if err := f.Flush(); err != nil {
-			s.logger.WithError(err).Error("Failed to flush stdout")
+			// Just log at debug level since this is not critical
+			s.logger.WithError(err).Debug("Non-critical: Failed to flush stdout")
 		} else {
 			s.logger.Debug("Successfully flushed stdout")
 		}
 	} else {
-		s.logger.Debug("Writer does not support Flush method")
+		// This is normal for some writer types, so log at debug level
+		s.logger.Debug("Writer does not support Flush method (normal for some writer types)")
 	}
 
 	// Add a small delay to ensure the message is properly processed

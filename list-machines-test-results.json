@@ -26,7 +26,7 @@
             "distribution": "ubuntu",
             "release": "focal"
           },
-          "last_updated": "2025-05-15T20:26:34.757357089+02:00",
+          "last_updated": "2025-05-15T21:09:04.098067337+02:00",
           "metadata": {
             "hostname": "dell-1",
             "system_id": "44afsh"
@@ -51,7 +51,7 @@
             "distribution": "ubuntu",
             "release": "focal"
           },
-          "last_updated": "2025-05-15T20:26:34.757360441+02:00",
+          "last_updated": "2025-05-15T21:09:04.098070131+02:00",
           "metadata": {
             "hostname": "dell-2",
             "system_id": "a63frq"
@@ -76,7 +76,7 @@
             "distribution": "ubuntu",
             "release": "focal"
           },
-          "last_updated": "2025-05-15T20:26:34.757362886+02:00",
+          "last_updated": "2025-05-15T21:09:04.098072505+02:00",
           "metadata": {
             "hostname": "dell-3",
             "system_id": "tnyfbh"
@@ -102,7 +102,7 @@
             "distribution": "ubuntu",
             "release": "focal"
           },
-          "last_updated": "2025-05-15T20:26:34.75736533+02:00",
+          "last_updated": "2025-05-15T21:09:04.09807481+02:00",
           "metadata": {
             "hostname": "hp-1",
             "system_id": "es8c3w"
@@ -128,7 +128,7 @@
             "distribution": "ubuntu",
             "release": "focal"
           },
-          "last_updated": "2025-05-15T20:26:34.757367705+02:00",
+          "last_updated": "2025-05-15T21:09:04.098077185+02:00",
           "metadata": {
             "hostname": "hp-2",
             "system_id": "74eesd"
@@ -154,7 +154,7 @@
             "distribution": "ubuntu",
             "release": "focal"
           },
-          "last_updated": "2025-05-15T20:26:34.75737008+02:00",
+          "last_updated": "2025-05-15T21:09:04.098079629+02:00",
           "metadata": {
             "hostname": "hp-3",
             "system_id": "srcd7n"
