@@ -65,8 +65,8 @@ Add MAAS configuration to the `.roo/mcp.json` file:
       "timeout": 30000,
       "stream": true,
       "maasConfig": {
-        "apiUrl": "http://192.168.1.19:5240/MAAS",
-        "apiKey": "4H2Rns4sjFP3WVm8fq:DcyDPjj4DdpG4Jd2LD:xsMCtvhkK5cLE68y9aMnzs26Z9YrHa2t"
+        "apiUrl": "http://your-maas-server:5240/MAAS",
+        "apiKey": "consumer:key:secret"
       }
     }
   }
