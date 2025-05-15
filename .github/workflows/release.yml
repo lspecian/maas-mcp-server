@@ -7,7 +7,7 @@ on:
 
 env:
   GO_VERSION: '1.22.3'  # Matches the version in go.mod
-  BINARY_NAME: 'mcp-server'
+  BINARY_NAME: 'maas-mcp-server'
   PROJECT_PATH: 'github.com/lspecian/maas-mcp-server'
 
 jobs:
@@ -50,10 +50,10 @@ jobs:
       - name: Update main.go to include version flag
         run: |
           # Add version flag to main.go
-          sed -i '/^import (/a\\t"flag"' cmd/server/main.go
-          sed -i '/^import (/a\\t"fmt"' cmd/server/main.go
-          sed -i '/^import (/a\\t"github.com/lspecian/maas-mcp-server/internal/version"' cmd/server/main.go
-          sed -i '/^func main() {/a\\t// Handle version flag\n\tshowVersion := flag.Bool("version", false, "Show version information")\n\tflag.Parse()\n\n\tif *showVersion {\n\t\tfmt.Printf("MAAS MCP Server version %s\\n", version.Version)\n\t\tos.Exit(0)\n\t}' cmd/server/main.go
+          sed -i '/^import (/a\\t"flag"' pkg/mcp/cmd/main.go
+          sed -i '/^import (/a\\t"fmt"' pkg/mcp/cmd/main.go
+          sed -i '/^import (/a\\t"github.com/lspecian/maas-mcp-server/internal/version"' pkg/mcp/cmd/main.go
+          sed -i '/^func main() {/a\\t// Handle version flag\n\tshowVersion := flag.Bool("version", false, "Show version information")\n\tflag.Parse()\n\n\tif *showVersion {\n\t\tfmt.Printf("MAAS MCP Server version %s\\n", version.Version)\n\t\tos.Exit(0)\n\t}' pkg/mcp/cmd/main.go
       
       - name: Build for multiple platforms
         run: |
@@ -74,7 +74,7 @@ jobs:
             fi
             
             echo "Building for $GOOS/$GOARCH..."
-            GOOS=$GOOS GOARCH=$GOARCH go build -ldflags="-s -w -X ${PROJECT_PATH}/internal/version.Version=${VERSION}" -o "dist/${output_name}" ./cmd/server
+            GOOS=$GOOS GOARCH=$GOARCH go build -ldflags="-s -w -X ${PROJECT_PATH}/internal/version.Version=${VERSION}" -o "dist/${output_name}" ./pkg/mcp/cmd
             
             # Create checksum for the binary
             if [ "$GOOS" = "linux" ] && [ "$GOARCH" = "amd64" ]; then
@@ -135,11 +135,11 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            dist/mcp-server-${{ env.VERSION }}-linux-amd64
-            dist/mcp-server-${{ env.VERSION }}-linux-arm64
-            dist/mcp-server-${{ env.VERSION }}-darwin-amd64
-            dist/mcp-server-${{ env.VERSION }}-darwin-arm64
-            dist/mcp-server-${{ env.VERSION }}-windows-amd64.exe
+            dist/maas-mcp-server-${{ env.VERSION }}-linux-amd64
+            dist/maas-mcp-server-${{ env.VERSION }}-linux-arm64
+            dist/maas-mcp-server-${{ env.VERSION }}-darwin-amd64
+            dist/maas-mcp-server-${{ env.VERSION }}-darwin-arm64
+            dist/maas-mcp-server-${{ env.VERSION }}-windows-amd64.exe
             dist/checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
