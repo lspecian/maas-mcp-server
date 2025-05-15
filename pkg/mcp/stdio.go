@@ -238,6 +238,12 @@ func (s *StdioServer) processLine(ctx context.Context, line string) error {
 		return nil
 	}
 
+	// Handle tools/call request (MCP protocol standard)
+	if request.Method == "tools/call" {
+		s.logger.Info("Handling tools/call request")
+		return s.handleToolsCall(ctx, request.ID, request.Params)
+	}
+
 	// Get tool
 	s.logger.WithField("method", request.Method).Info("Looking up tool")
 	tool, ok := s.registry.GetTool(request.Method)
