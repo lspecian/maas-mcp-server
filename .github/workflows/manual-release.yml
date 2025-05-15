@@ -1,0 +1,132 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.1.0)'
+        required: true
+      prerelease:
+        description: 'Is this a pre-release?'
+        required: true
+        default: 'false'
+        type: boolean
+
+env:
+  GO_VERSION: '1.22.3'  # Matches the version in go.mod
+  BINARY_NAME: 'maas-mcp-server'
+  PROJECT_PATH: 'github.com/lspecian/maas-mcp-server'
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for proper versioning and release notes
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      
+      - name: Set version variable
+        id: set_version
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Create version.go file
+        run: |
+          mkdir -p internal/version
+          cat > internal/version/version.go << EOF
+          package version
+
+          // Version information
+          const (
+              // Version is the current version of the MCP server
+              Version = "${{ env.VERSION }}"
+          )
+          EOF
+      
+      - name: Update main.go to include version flag
+        run: |
+          # Add version flag to main.go
+          sed -i '/^import (/a\\t"flag"' pkg/mcp/cmd/main.go
+          sed -i '/^import (/a\\t"fmt"' pkg/mcp/cmd/main.go
+          sed -i '/^import (/a\\t"github.com/lspecian/maas-mcp-server/internal/version"' pkg/mcp/cmd/main.go
+          sed -i '/^func main() {/a\\t// Handle version flag\n\tshowVersion := flag.Bool("version", false, "Show version information")\n\tflag.Parse()\n\n\tif *showVersion {\n\t\tfmt.Printf("MAAS MCP Server version %s\\n", version.Version)\n\t\tos.Exit(0)\n\t}' pkg/mcp/cmd/main.go
+      
+      - name: Build for multiple platforms
+        run: |
+          platforms=("linux/amd64" "linux/arm64" "darwin/amd64" "darwin/arm64" "windows/amd64")
+          mkdir -p dist
+          
+          for platform in "${platforms[@]}"; do
+            # Split the platform into OS and architecture
+            IFS="/" read -r -a array <<< "$platform"
+            GOOS="${array[0]}"
+            GOARCH="${array[1]}"
+            
+            # Set output binary name with extension for Windows
+            if [ "$GOOS" = "windows" ]; then
+              output_name="${BINARY_NAME}-${VERSION}-${GOOS}-${GOARCH}.exe"
+            else
+              output_name="${BINARY_NAME}-${VERSION}-${GOOS}-${GOARCH}"
+            fi
+            
+            echo "Building for $GOOS/$GOARCH..."
+            GOOS=$GOOS GOARCH=$GOARCH go build -ldflags="-s -w -X ${PROJECT_PATH}/internal/version.Version=${VERSION}" -o "dist/${output_name}" ./pkg/mcp/cmd
+            
+            # Create checksum for the binary
+            if [ "$GOOS" = "linux" ] && [ "$GOARCH" = "amd64" ]; then
+              # Use this binary for smoke test on the runner
+              cp "dist/${output_name}" "dist/${BINARY_NAME}"
+              chmod +x "dist/${BINARY_NAME}"
+            fi
+            
+            (cd dist && sha256sum "${output_name}" >> checksums.txt)
+          done
+      
+      - name: Run smoke test
+        run: |
+          # Basic smoke test to ensure the binary starts correctly
+          echo "Running smoke test..."
+          ./dist/${BINARY_NAME} --version
+          if [ $? -ne 0 ]; then
+            echo "Smoke test failed!"
+            exit 1
+          fi
+          echo "Smoke test passed!"
+      
+      - name: Read CHANGELOG
+        id: changelog
+        run: |
+          CHANGELOG=$(cat CHANGELOG.md | sed -n "/## \[${{ env.VERSION }}\]/,/## \[/p" | sed '$d')
+          echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+          echo "$CHANGELOG" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: MAAS MCP Server v${{ env.VERSION }}
+          body: ${{ env.CHANGELOG }}
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease }}
+          files: |
+            dist/maas-mcp-server-${{ env.VERSION }}-linux-amd64
+            dist/maas-mcp-server-${{ env.VERSION }}-linux-arm64
+            dist/maas-mcp-server-${{ env.VERSION }}-darwin-amd64
+            dist/maas-mcp-server-${{ env.VERSION }}-darwin-arm64
+            dist/maas-mcp-server-${{ env.VERSION }}-windows-amd64.exe
+            dist/checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
