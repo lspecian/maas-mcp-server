@@ -48,8 +48,27 @@ func (s *StdioServer) handleToolsCall(ctx context.Context, id JSONRPCID, params 
 		return err
 	}
 
+	// Format the result according to MCP protocol requirements
+	// The MCP protocol requires a "content" array in the response
+	formattedResult := map[string]interface{}{
+		"content": []map[string]interface{}{
+			{
+				"type": "text",
+				"text": string(result),
+			},
+		},
+	}
+
+	// Marshal the formatted result
+	formattedResultJSON, err := json.Marshal(formattedResult)
+	if err != nil {
+		s.logger.WithError(err).WithField("tool", toolsCallParams.Name).Error("Failed to marshal formatted result")
+		s.writeError(id, -32000, "Server error", "Failed to format result")
+		return err
+	}
+
 	// Write result
 	s.logger.WithField("tool", toolsCallParams.Name).Info("Tool execution succeeded")
-	s.writeResult(id, result)
+	s.writeResult(id, formattedResultJSON)
 	return nil
 }
