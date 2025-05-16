@@ -1,0 +1,85 @@
+{
+  "generatedAt": "2025-05-15T23:37:23+02:00",
+  "tasks": [
+    {
+      "id": "1",
+      "title": "Discovery & Planning",
+      "complexity": 6,
+      "recommendedSubtasks": 3,
+      "reasoning": "This task involves research and analysis of the MAAS API, which requires understanding the existing API structure and planning how to map it to MCP tools. Medium complexity due to the research nature."
+    },
+    {
+      "id": "2",
+      "title": "Tool Definition Generator",
+      "complexity": 8,
+      "recommendedSubtasks": 5,
+      "reasoning": "Building a code generator requires careful design and implementation. High complexity due to the need to parse API specs, generate correct tool definitions, and ensure idempotent operation."
+    },
+    {
+      "id": "3",
+      "title": "Input Schema Improvements",
+      "complexity": 5,
+      "recommendedSubtasks": 3,
+      "reasoning": "Enhancing input schemas is moderately complex, requiring consistent application of standards across multiple tools."
+    },
+    {
+      "id": "4",
+      "title": "Core Machine Management Tools",
+      "complexity": 7,
+      "recommendedSubtasks": 4,
+      "reasoning": "Implementing core machine management tools involves significant functionality and proper error handling. High complexity due to the importance of these tools."
+    },
+    {
+      "id": "5",
+      "title": "Network Management Tools",
+      "complexity": 7,
+      "recommendedSubtasks": 4,
+      "reasoning": "Network management tools involve complex operations and require careful implementation of MAAS network APIs."
+    },
+    {
+      "id": "6",
+      "title": "Storage Management Tools",
+      "complexity": 7,
+      "recommendedSubtasks": 4,
+      "reasoning": "Storage management tools involve complex operations like RAID configuration and volume management."
+    },
+    {
+      "id": "7",
+      "title": "Tag and Resource Management Tools",
+      "complexity": 5,
+      "recommendedSubtasks": 3,
+      "reasoning": "Tag and resource management is moderately complex but more straightforward than other areas."
+    },
+    {
+      "id": "8",
+      "title": "Deployment and Image Management Tools",
+      "complexity": 6,
+      "recommendedSubtasks": 3,
+      "reasoning": "Deployment and image management involves several operations but follows established patterns."
+    },
+    {
+      "id": "9",
+      "title": "Error Handling Improvements",
+      "complexity": 6,
+      "recommendedSubtasks": 3,
+      "reasoning": "Implementing consistent error handling across all tools requires careful attention to detail."
+    },
+    {
+      "id": "10",
+      "title": "Documentation Improvements",
+      "complexity": 5,
+      "recommendedSubtasks": 3,
+      "reasoning": "Documentation work is moderately complex, requiring clear explanations and examples."
+    }
+  ],
+  "summary": {
+    "averageComplexity": 6.2,
+    "highComplexityTasks": ["2", "4", "5", "6"],
+    "mediumComplexityTasks": ["1", "3", "7", "8", "9", "10"],
+    "lowComplexityTasks": []
+  },
+  "recommendations": {
+    "priorityExpansion": ["2", "4", "5", "6"],
+    "generalRecommendation": "Focus on breaking down the Tool Definition Generator task first, as it has the highest complexity and is a dependency for many other tasks."
+  }
+}

@@ -1,0 +1,261 @@
+[
+  {
+    "path": "/api/2.0/machines",
+    "method": "GET",
+    "summary": "List all machines",
+    "description": "Returns a list of machines in the MAAS system",
+    "operationId": "listMachines",
+    "tags": ["machines"],
+    "parameters": [
+      {
+        "name": "hostname",
+        "description": "Filter by hostname",
+        "type": "string",
+        "in": "query",
+        "required": false
+      },
+      {
+        "name": "zone",
+        "description": "Filter by zone",
+        "type": "string",
+        "in": "query",
+        "required": false
+      },
+      {
+        "name": "pool",
+        "description": "Filter by resource pool",
+        "type": "string",
+        "in": "query",
+        "required": false
+      },
+      {
+        "name": "status",
+        "description": "Filter by status",
+        "type": "string",
+        "in": "query",
+        "required": false
+      },
+      {
+        "name": "power_state",
+        "description": "Filter by power state",
+        "type": "string",
+        "in": "query",
+        "required": false
+      },
+      {
+        "name": "system_id",
+        "description": "Filter by system ID",
+        "type": "string",
+        "in": "query",
+        "required": false
+      },
+      {
+        "name": "architecture",
+        "description": "Filter by architecture",
+        "type": "string",
+        "in": "query",
+        "required": false
+      },
+      {
+        "name": "tags",
+        "description": "Filter by tags",
+        "type": "string",
+        "in": "query",
+        "required": false
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "List of machines",
+        "schema": {
+          "type": "array",
+          "items": "Machine"
+        }
+      },
+      "401": {
+        "description": "Unauthorized"
+      }
+    }
+  },
+  {
+    "path": "/api/2.0/machines/{system_id}",
+    "method": "GET",
+    "summary": "Get machine details",
+    "description": "Returns details for a specific machine",
+    "operationId": "getMachine",
+    "tags": ["machines"],
+    "parameters": [
+      {
+        "name": "system_id",
+        "description": "System ID of the machine",
+        "type": "string",
+        "in": "path",
+        "required": true
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Machine details",
+        "schema": {
+          "type": "object",
+          "ref": "Machine"
+        }
+      },
+      "404": {
+        "description": "Machine not found"
+      },
+      "401": {
+        "description": "Unauthorized"
+      }
+    }
+  },
+  {
+    "path": "/api/2.0/machines/{system_id}/power",
+    "method": "POST",
+    "summary": "Power on/off a machine",
+    "description": "Controls the power state of a machine",
+    "operationId": "powerMachine",
+    "tags": ["machines", "power"],
+    "parameters": [
+      {
+        "name": "system_id",
+        "description": "System ID of the machine",
+        "type": "string",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "action",
+        "description": "Power action to perform",
+        "type": "string",
+        "in": "body",
+        "required": true,
+        "enum": ["on", "off", "cycle"]
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Power action initiated",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "system_id": "string",
+            "status": "string"
+          }
+        }
+      },
+      "404": {
+        "description": "Machine not found"
+      },
+      "401": {
+        "description": "Unauthorized"
+      }
+    }
+  },
+  {
+    "path": "/api/2.0/subnets",
+    "method": "GET",
+    "summary": "List all subnets",
+    "description": "Returns a list of subnets in the MAAS system",
+    "operationId": "listSubnets",
+    "tags": ["networks", "subnets"],
+    "parameters": [],
+    "responses": {
+      "200": {
+        "description": "List of subnets",
+        "schema": {
+          "type": "array",
+          "items": "Subnet"
+        }
+      },
+      "401": {
+        "description": "Unauthorized"
+      }
+    }
+  },
+  {
+    "path": "/api/2.0/subnets/{id}",
+    "method": "GET",
+    "summary": "Get subnet details",
+    "description": "Returns details for a specific subnet",
+    "operationId": "getSubnet",
+    "tags": ["networks", "subnets"],
+    "parameters": [
+      {
+        "name": "id",
+        "description": "ID of the subnet",
+        "type": "integer",
+        "in": "path",
+        "required": true
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Subnet details",
+        "schema": {
+          "type": "object",
+          "ref": "Subnet"
+        }
+      },
+      "404": {
+        "description": "Subnet not found"
+      },
+      "401": {
+        "description": "Unauthorized"
+      }
+    }
+  },
+  {
+    "path": "/api/2.0/tags",
+    "method": "GET",
+    "summary": "List all tags",
+    "description": "Returns a list of tags in the MAAS system",
+    "operationId": "listTags",
+    "tags": ["tags"],
+    "parameters": [],
+    "responses": {
+      "200": {
+        "description": "List of tags",
+        "schema": {
+          "type": "array",
+          "items": "Tag"
+        }
+      },
+      "401": {
+        "description": "Unauthorized"
+      }
+    }
+  },
+  {
+    "path": "/api/2.0/tags/{name}",
+    "method": "GET",
+    "summary": "Get tag details",
+    "description": "Returns details for a specific tag",
+    "operationId": "getTag",
+    "tags": ["tags"],
+    "parameters": [
+      {
+        "name": "name",
+        "description": "Name of the tag",
+        "type": "string",
+        "in": "path",
+        "required": true
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Tag details",
+        "schema": {
+          "type": "object",
+          "ref": "Tag"
+        }
+      },
+      "404": {
+        "description": "Tag not found"
+      },
+      "401": {
+        "description": "Unauthorized"
+      }
+    }
+  }
+]

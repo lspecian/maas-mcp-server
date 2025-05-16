@@ -1,0 +1,332 @@
+[
+  {
+    "Path": "/api/2.0/machines",
+    "Method": "GET",
+    "Summary": "List all machines",
+    "Description": "Returns a list of machines in the MAAS system",
+    "Parameters": [
+      {
+        "Name": "hostname",
+        "Description": "Filter by hostname",
+        "Type": "string",
+        "Location": "query",
+        "Required": false,
+        "Default": null,
+        "Enum": null
+      },
+      {
+        "Name": "zone",
+        "Description": "Filter by zone",
+        "Type": "string",
+        "Location": "query",
+        "Required": false,
+        "Default": null,
+        "Enum": null
+      },
+      {
+        "Name": "pool",
+        "Description": "Filter by resource pool",
+        "Type": "string",
+        "Location": "query",
+        "Required": false,
+        "Default": null,
+        "Enum": null
+      },
+      {
+        "Name": "status",
+        "Description": "Filter by status",
+        "Type": "string",
+        "Location": "query",
+        "Required": false,
+        "Default": null,
+        "Enum": null
+      },
+      {
+        "Name": "power_state",
+        "Description": "Filter by power state",
+        "Type": "string",
+        "Location": "query",
+        "Required": false,
+        "Default": null,
+        "Enum": null
+      },
+      {
+        "Name": "system_id",
+        "Description": "Filter by system ID",
+        "Type": "string",
+        "Location": "query",
+        "Required": false,
+        "Default": null,
+        "Enum": null
+      },
+      {
+        "Name": "architecture",
+        "Description": "Filter by architecture",
+        "Type": "string",
+        "Location": "query",
+        "Required": false,
+        "Default": null,
+        "Enum": null
+      },
+      {
+        "Name": "tags",
+        "Description": "Filter by tags",
+        "Type": "string",
+        "Location": "query",
+        "Required": false,
+        "Default": null,
+        "Enum": null
+      }
+    ],
+    "Responses": {
+      "200": {
+        "StatusCode": 200,
+        "Description": "List of machines",
+        "Schema": {
+          "items": "Machine",
+          "type": "array"
+        }
+      },
+      "401": {
+        "StatusCode": 401,
+        "Description": "Unauthorized",
+        "Schema": {}
+      }
+    },
+    "Tags": [
+      "machines"
+    ],
+    "OperationID": "listMachines"
+  },
+  {
+    "Path": "/api/2.0/machines/{system_id}",
+    "Method": "GET",
+    "Summary": "Get machine details",
+    "Description": "Returns details for a specific machine",
+    "Parameters": [
+      {
+        "Name": "system_id",
+        "Description": "System ID of the machine",
+        "Type": "string",
+        "Location": "path",
+        "Required": true,
+        "Default": null,
+        "Enum": null
+      }
+    ],
+    "Responses": {
+      "200": {
+        "StatusCode": 200,
+        "Description": "Machine details",
+        "Schema": {
+          "ref": "Machine",
+          "type": "object"
+        }
+      },
+      "401": {
+        "StatusCode": 401,
+        "Description": "Unauthorized",
+        "Schema": {}
+      },
+      "404": {
+        "StatusCode": 404,
+        "Description": "Machine not found",
+        "Schema": {}
+      }
+    },
+    "Tags": [
+      "machines"
+    ],
+    "OperationID": "getMachine"
+  },
+  {
+    "Path": "/api/2.0/machines/{system_id}/power",
+    "Method": "POST",
+    "Summary": "Power on/off a machine",
+    "Description": "Controls the power state of a machine",
+    "Parameters": [
+      {
+        "Name": "system_id",
+        "Description": "System ID of the machine",
+        "Type": "string",
+        "Location": "path",
+        "Required": true,
+        "Default": null,
+        "Enum": null
+      },
+      {
+        "Name": "action",
+        "Description": "Power action to perform",
+        "Type": "string",
+        "Location": "body",
+        "Required": true,
+        "Default": null,
+        "Enum": [
+          "on",
+          "off",
+          "cycle"
+        ]
+      }
+    ],
+    "Responses": {
+      "200": {
+        "StatusCode": 200,
+        "Description": "Power action initiated",
+        "Schema": {
+          "type": "object"
+        }
+      },
+      "401": {
+        "StatusCode": 401,
+        "Description": "Unauthorized",
+        "Schema": {}
+      },
+      "404": {
+        "StatusCode": 404,
+        "Description": "Machine not found",
+        "Schema": {}
+      }
+    },
+    "Tags": [
+      "machines",
+      "power"
+    ],
+    "OperationID": "powerMachine"
+  },
+  {
+    "Path": "/api/2.0/subnets",
+    "Method": "GET",
+    "Summary": "List all subnets",
+    "Description": "Returns a list of subnets in the MAAS system",
+    "Parameters": null,
+    "Responses": {
+      "200": {
+        "StatusCode": 200,
+        "Description": "List of subnets",
+        "Schema": {
+          "items": "Subnet",
+          "type": "array"
+        }
+      },
+      "401": {
+        "StatusCode": 401,
+        "Description": "Unauthorized",
+        "Schema": {}
+      }
+    },
+    "Tags": [
+      "networks",
+      "subnets"
+    ],
+    "OperationID": "listSubnets"
+  },
+  {
+    "Path": "/api/2.0/subnets/{id}",
+    "Method": "GET",
+    "Summary": "Get subnet details",
+    "Description": "Returns details for a specific subnet",
+    "Parameters": [
+      {
+        "Name": "id",
+        "Description": "ID of the subnet",
+        "Type": "integer",
+        "Location": "path",
+        "Required": true,
+        "Default": null,
+        "Enum": null
+      }
+    ],
+    "Responses": {
+      "200": {
+        "StatusCode": 200,
+        "Description": "Subnet details",
+        "Schema": {
+          "ref": "Subnet",
+          "type": "object"
+        }
+      },
+      "401": {
+        "StatusCode": 401,
+        "Description": "Unauthorized",
+        "Schema": {}
+      },
+      "404": {
+        "StatusCode": 404,
+        "Description": "Subnet not found",
+        "Schema": {}
+      }
+    },
+    "Tags": [
+      "networks",
+      "subnets"
+    ],
+    "OperationID": "getSubnet"
+  },
+  {
+    "Path": "/api/2.0/tags",
+    "Method": "GET",
+    "Summary": "List all tags",
+    "Description": "Returns a list of tags in the MAAS system",
+    "Parameters": null,
+    "Responses": {
+      "200": {
+        "StatusCode": 200,
+        "Description": "List of tags",
+        "Schema": {
+          "items": "Tag",
+          "type": "array"
+        }
+      },
+      "401": {
+        "StatusCode": 401,
+        "Description": "Unauthorized",
+        "Schema": {}
+      }
+    },
+    "Tags": [
+      "tags"
+    ],
+    "OperationID": "listTags"
+  },
+  {
+    "Path": "/api/2.0/tags/{name}",
+    "Method": "GET",
+    "Summary": "Get tag details",
+    "Description": "Returns details for a specific tag",
+    "Parameters": [
+      {
+        "Name": "name",
+        "Description": "Name of the tag",
+        "Type": "string",
+        "Location": "path",
+        "Required": true,
+        "Default": null,
+        "Enum": null
+      }
+    ],
+    "Responses": {
+      "200": {
+        "StatusCode": 200,
+        "Description": "Tag details",
+        "Schema": {
+          "ref": "Tag",
+          "type": "object"
+        }
+      },
+      "401": {
+        "StatusCode": 401,
+        "Description": "Unauthorized",
+        "Schema": {}
+      },
+      "404": {
+        "StatusCode": 404,
+        "Description": "Tag not found",
+        "Schema": {}
+      }
+    },
+    "Tags": [
+      "tags"
+    ],
+    "OperationID": "getTag"
+  }
+]

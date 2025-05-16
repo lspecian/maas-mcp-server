@@ -22,6 +22,11 @@ This server can operate in two transport modes:
 - MAAS server with API access
 - MAAS API key in the format "consumer:token:secret"
 
+### With script from release
+
+curl -sSL https://raw.githubusercontent.com/lspecian/maas-mcp-server/main/scripts/install.sh | bash
+
+
 ### From Source
 
 1. Clone the repository:
@@ -53,8 +58,6 @@ The server requires the following environment variables:
 
 - `MAAS_API_URL` - The URL of your MAAS API endpoint
 - `MAAS_API_KEY` - Your MAAS API key in the format "consumer:token:secret"
-- `SERVER_HOST` - (Optional) The host to bind the server to when using HTTP mode (default: "localhost") - Not needed for stdio mode
-- `SERVER_PORT` - (Optional) The port to bind the server to when using HTTP mode (default: 8082) - Not needed for stdio mode
 - `LOG_LEVEL` - (Optional) The logging level (default: "info")
 - `LOG_FORMAT` - (Optional) The logging format (default: "json")
 - `AUTH_ENABLED` - (Optional) Whether authentication is enabled (default: "false")
