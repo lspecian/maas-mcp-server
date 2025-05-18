@@ -76,7 +76,7 @@ build_server() {
 # Build the MCP server
 build_mcp_server() {
   print_message "Building MCP Server..." "${YELLOW}"
-  go build -o maas-mcp-server pkg/mcp/cmd/main.go
+  go build -o maas-mcp-server cmd/server/main.go
   print_success "Build successful!"
 }
 

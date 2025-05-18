@@ -3,7 +3,7 @@ package version
 // Version information
 const (
 	// Version is the current version of the MCP server
-	Version = "1.1.1"
+	Version = "1.1.2"
 )
 
 // GetVersion returns the current version of the MCP server

@@ -17,15 +17,43 @@ detect_platform() {
 }
 
 PLATFORM=$(detect_platform)
-BINARY="maas-mcp-server-${PLATFORM}"
+BINARY="maas-mcp-server_${VERSION}_${PLATFORM//-/_}"
 
 echo "Downloading maas-mcp-server $VERSION for $PLATFORM..."
 
-URL="https://github.com/${REPO}/releases/download/${VERSION}/${BINARY}"
+# The release assets are likely packaged as tar.gz or zip
+if [[ "$PLATFORM" == *"windows"* ]]; then
+  ARCHIVE="${BINARY}.zip"
+  EXTRACT_CMD="unzip"
+else
+  ARCHIVE="${BINARY}.tar.gz"
+  EXTRACT_CMD="tar -xzf"
+fi
 
-curl -L -o maas-mcp-server "$URL"
-chmod +x maas-mcp-server
-sudo mv maas-mcp-server /usr/local/bin/
+URL="https://github.com/${REPO}/releases/download/${VERSION}/${ARCHIVE}"
+
+# Create a temporary directory
+TMP_DIR=$(mktemp -d)
+cd "$TMP_DIR"
+
+# Download the archive
+echo "Downloading from: $URL"
+if ! curl -L -o "$ARCHIVE" "$URL"; then
+  echo "❌ Failed to download the binary. Please check the URL and try again."
+  exit 1
+fi
+
+# Extract the binary
+echo "Extracting binary..."
+$EXTRACT_CMD "$ARCHIVE"
+
+# Make it executable and move to /usr/local/bin
+chmod +x "$BINARY"
+sudo mv "$BINARY" /usr/local/bin/maas-mcp-server
+
+# Clean up
+cd - > /dev/null
+rm -rf "$TMP_DIR"
 
 echo "✅ Installed successfully as 'maas-mcp-server'"
 echo "� Run it with:  maas-mcp-server"
