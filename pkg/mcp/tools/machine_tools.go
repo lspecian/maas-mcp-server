@@ -6,16 +6,16 @@ import (
 	"fmt"
 
 	"github.com/lspecian/maas-mcp-server/internal/models/types"
-	"github.com/lspecian/maas-mcp-server/internal/transport/machine"
+	"github.com/lspecian/maas-mcp-server/internal/service/machine"
 )
 
 // MachineTools provides MCP tools for machine management
 type MachineTools struct {
-	service machine.Service
+	service *machine.Service
 }
 
 // NewMachineTools creates a new MachineTools instance
-func NewMachineTools(service machine.Service) *MachineTools {
+func NewMachineTools(service *machine.Service) *MachineTools {
 	return &MachineTools{
 		service: service,
 	}
