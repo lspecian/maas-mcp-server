@@ -100,6 +100,8 @@ func NewServer() (*Server, error) {
 // NewServerWithService creates a new server instance with the provided service
 // This maintains backward compatibility with the existing code
 func NewServerWithService(mcpService *service.MCPService, cfg *models.AppConfig, logger *logrus.Logger) *gin.Engine {
+	fmt.Println("NewServerWithService: Creating server with MCP service")
+
 	// Create a wrapper logger for compatibility
 	logConfig := logging.LoggerConfig{
 		Level:  cfg.Logging.Level,
@@ -109,39 +111,50 @@ func NewServerWithService(mcpService *service.MCPService, cfg *models.AppConfig,
 		},
 	}
 
+	fmt.Println("NewServerWithService: Creating enhanced logger")
 	// Create enhanced logger
 	enhancedLogger, err := logging.NewEnhancedLogger(logConfig)
 	if err != nil {
+		fmt.Printf("NewServerWithService: Failed to create enhanced logger: %v, falling back to basic logger\n", err)
 		// Fallback to basic logger
 		enhancedLogger = &logging.Logger{
 			Logger: logger,
 		}
 	}
+	fmt.Println("NewServerWithService: Enhanced logger created successfully")
 
 	// Set Gin mode
 	if cfg.Logging.Level == "debug" {
+		fmt.Println("NewServerWithService: Setting Gin mode to debug")
 		gin.SetMode(gin.DebugMode)
 	} else {
+		fmt.Println("NewServerWithService: Setting Gin mode to release")
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	fmt.Println("NewServerWithService: Creating Gin router")
 	// Create router
 	router := gin.New()
 
+	fmt.Println("NewServerWithService: Adding middleware")
 	// Add middleware
 	router.Use(middleware.ErrorHandlerMiddleware(enhancedLogger))
 	router.Use(logging.GinLoggerMiddleware(enhancedLogger))
 	router.Use(gin.Recovery())
 
+	fmt.Println("NewServerWithService: Setting 404 handler")
 	// Set 404 handler
 	router.NoRoute(middleware.NotFoundMiddleware(enhancedLogger))
 
+	fmt.Println("NewServerWithService: Setting 405 handler")
 	// Set 405 handler
 	router.NoMethod(middleware.MethodNotAllowedMiddleware(enhancedLogger))
 
+	fmt.Println("NewServerWithService: Creating handlers")
 	// Create handlers
 	handlers := NewHandlers(mcpService, enhancedLogger) // Pass enhancedLogger
 
+	fmt.Println("NewServerWithService: Registering MCP routes")
 	// Register MCP routes
 	router.POST("/mcp", handlers.MCPDiscovery)
 	router.POST("/mcp/maas_list_machines", handlers.ListMachines)
@@ -155,11 +168,13 @@ func NewServerWithService(mcpService *service.MCPService, cfg *models.AppConfig,
 	router.POST("/mcp/maas_list_subnets", handlers.ListSubnets)
 	router.POST("/mcp/maas_get_subnet_details", handlers.GetSubnetDetails)
 
+	fmt.Println("NewServerWithService: Setting up health check endpoint")
 	// Health check endpoint
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
+	fmt.Println("NewServerWithService: Server setup complete")
 	return router
 }
 

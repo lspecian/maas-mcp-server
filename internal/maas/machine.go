@@ -10,8 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/lspecian/maas-mcp-server/internal/maas/common"
-	"github.com/lspecian/maas-mcp-server/internal/models"
-	modelsmaas "github.com/lspecian/maas-mcp-server/internal/models/maas"
+	"github.com/lspecian/maas-mcp-server/internal/models/types"
 )
 
 // machineClient implements the common.MachineClient interface
@@ -31,7 +30,7 @@ func newMachineClient(client *client.Client, logger *logrus.Logger, retry common
 }
 
 // ListMachines retrieves machines based on filters with pagination.
-func (m *machineClient) ListMachines(ctx context.Context, filters map[string]string, pagination *modelsmaas.PaginationOptions) ([]models.Machine, int, error) {
+func (m *machineClient) ListMachines(ctx context.Context, filters map[string]string, pagination *types.PaginationOptions) ([]types.Machine, int, error) {
 	params := &entity.MachinesParams{}
 	if id, ok := filters["id"]; ok && id != "" {
 		params.ID = []string{id}
@@ -87,9 +86,9 @@ func (m *machineClient) ListMachines(ctx context.Context, filters map[string]str
 		return nil, 0, err
 	}
 
-	modelMachines := make([]models.Machine, len(entityMachines))
+	modelMachines := make([]types.Machine, len(entityMachines))
 	for i, em := range entityMachines {
-		var mm models.Machine
+		var mm types.Machine
 		mm.FromEntity(&em) // Use the FromEntity method from models.Machine
 		modelMachines[i] = mm
 	}
@@ -97,7 +96,7 @@ func (m *machineClient) ListMachines(ctx context.Context, filters map[string]str
 }
 
 // GetMachine retrieves details for a specific machine.
-func (m *machineClient) GetMachine(systemID string) (*models.Machine, error) {
+func (m *machineClient) GetMachine(systemID string) (*types.Machine, error) {
 	var entityMachine *entity.Machine
 	operation := func() error {
 		var err error
@@ -114,13 +113,24 @@ func (m *machineClient) GetMachine(systemID string) (*models.Machine, error) {
 		return nil, err
 	}
 
-	var modelMachine models.Machine
+	var modelMachine types.Machine
 	modelMachine.FromEntity(entityMachine)
+
+	// Get network interfaces
+	networkClient := newNetworkClient(m.client, m.logger, m.retry)
+	interfaces, err := networkClient.GetMachineInterfaces(systemID)
+	if err != nil {
+		m.logger.WithError(err).Warn("Failed to get machine interfaces")
+		// Continue with partial data
+	} else {
+		modelMachine.Interfaces = interfaces
+	}
+
 	return &modelMachine, nil
 }
 
 // AllocateMachine allocates a machine based on constraints.
-func (m *machineClient) AllocateMachine(params *entity.MachineAllocateParams) (*models.Machine, error) {
+func (m *machineClient) AllocateMachine(params *entity.MachineAllocateParams) (*types.Machine, error) {
 	var entityMachine *entity.Machine
 	operation := func() error {
 		var err error
@@ -136,13 +146,13 @@ func (m *machineClient) AllocateMachine(params *entity.MachineAllocateParams) (*
 	if err != nil {
 		return nil, err
 	}
-	var modelMachine models.Machine
+	var modelMachine types.Machine
 	modelMachine.FromEntity(entityMachine)
 	return &modelMachine, nil
 }
 
 // DeployMachine deploys an allocated machine.
-func (m *machineClient) DeployMachine(systemID string, params *entity.MachineDeployParams) (*models.Machine, error) {
+func (m *machineClient) DeployMachine(systemID string, params *entity.MachineDeployParams) (*types.Machine, error) {
 	var entityMachine *entity.Machine
 	operation := func() error {
 		var err error
@@ -158,7 +168,7 @@ func (m *machineClient) DeployMachine(systemID string, params *entity.MachineDep
 	if err != nil {
 		return nil, err
 	}
-	var modelMachine models.Machine
+	var modelMachine types.Machine
 	modelMachine.FromEntity(entityMachine)
 	return &modelMachine, nil
 }
@@ -178,7 +188,7 @@ func (m *machineClient) ReleaseMachine(systemIDs []string, comment string) error
 }
 
 // PowerOnMachine powers on a machine.
-func (m *machineClient) PowerOnMachine(systemID string) (*models.Machine, error) {
+func (m *machineClient) PowerOnMachine(systemID string) (*types.Machine, error) {
 	var entityMachine *entity.Machine
 	operation := func() error {
 		var err error
@@ -196,13 +206,13 @@ func (m *machineClient) PowerOnMachine(systemID string) (*models.Machine, error)
 	if err != nil {
 		return nil, err
 	}
-	var modelMachine models.Machine
+	var modelMachine types.Machine
 	modelMachine.FromEntity(entityMachine)
 	return &modelMachine, nil
 }
 
 // PowerOffMachine powers off a machine.
-func (m *machineClient) PowerOffMachine(systemID string) (*models.Machine, error) {
+func (m *machineClient) PowerOffMachine(systemID string) (*types.Machine, error) {
 	var entityMachine *entity.Machine
 	operation := func() error {
 		var err error
@@ -220,13 +230,13 @@ func (m *machineClient) PowerOffMachine(systemID string) (*models.Machine, error
 	if err != nil {
 		return nil, err
 	}
-	var modelMachine models.Machine
+	var modelMachine types.Machine
 	modelMachine.FromEntity(entityMachine)
 	return &modelMachine, nil
 }
 
 // ListMachinesSimple retrieves machines based on filters without pagination.
-func (m *machineClient) ListMachinesSimple(ctx context.Context, filters map[string]string) ([]models.Machine, error) {
+func (m *machineClient) ListMachinesSimple(ctx context.Context, filters map[string]string) ([]types.Machine, error) {
 	// Calls ListMachines with no pagination. The total count is ignored.
 	machines, _, err := m.ListMachines(ctx, filters, nil)
 	return machines, err
@@ -235,7 +245,7 @@ func (m *machineClient) ListMachinesSimple(ctx context.Context, filters map[stri
 // GetMachineWithDetails retrieves details for a specific machine with optional detailed information.
 // For now, this is equivalent to GetMachine as gomaasclient.Machine.Get() fetches standard details.
 // If more details are needed and MAAS API provides a way, this can be expanded.
-func (m *machineClient) GetMachineWithDetails(ctx context.Context, systemID string, includeDetails bool) (*models.Machine, error) {
+func (m *machineClient) GetMachineWithDetails(ctx context.Context, systemID string, includeDetails bool) (*types.Machine, error) {
 	return m.GetMachine(systemID)
 }
 
@@ -244,7 +254,7 @@ func (m *machineClient) GetMachineWithDetails(ctx context.Context, systemID stri
 // The actual MAAS API for constraint validation is likely via StorageClient.ValidateStorageConstraints.
 // For ClientWrapper, this can be a simple pass-through or a local check if feasible.
 // For now, returning true to satisfy interface. Actual logic might be in the service layer or delegate to StorageClient.
-func (m *machineClient) CheckStorageConstraints(machine *models.Machine, constraints *models.SimpleStorageConstraint) bool {
+func (m *machineClient) CheckStorageConstraints(machine *types.Machine, constraints *types.SimpleStorageConstraint) bool {
 	// Placeholder implementation.
 	// A real implementation might involve calling a MAAS endpoint if one exists for this specific check,
 	// or performing a local evaluation based on machine.BlockDevices and constraints.

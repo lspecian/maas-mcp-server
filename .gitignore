@@ -56,3 +56,4 @@ logs/*
 
 # Release binaries
 release/
+config/config.yaml

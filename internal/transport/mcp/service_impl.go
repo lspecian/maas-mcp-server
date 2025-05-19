@@ -92,7 +92,7 @@ func (s *ServiceImpl) GetResource(ctx context.Context, uri string) (interface{},
 	}).Info("Accessing MCP resource")
 
 	// Parse URI
-	parts := strings.Split(uri, "://")
+	parts := strings.SplitN(uri, "://")
 	if len(parts) != 2 {
 		return nil, errors.NewValidationError("Invalid URI format", nil)
 	}
@@ -287,8 +287,26 @@ func (s *ServiceImpl) executeMaasGetMachineDetails(ctx context.Context, rawParam
 		return nil, errors.NewValidationError("system_id is required", nil)
 	}
 
-	// Execute the service method
-	return s.mcpService.GetMachineDetails(ctx, request.SystemID)
+	// Get machine details from the service layer
+	machine, err := s.mcpService.MachineService.GetMachine(ctx, request.SystemID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get network interfaces from the NetworkClient
+	interfaces, err := s.mcpService.NetworkService.GetMachineInterfaces(request.SystemID)
+	if err != nil {
+		s.logger.WithError(err).Warn("Failed to get machine interfaces")
+	} else {
+		// Add IP addresses to the MachineContext
+		for _, iface := range interfaces {
+			for _, link := range iface.Links {
+				machine.IPAddresses = append(machine.IPAddresses, link.IPAddress)
+			}
+		}
+	}
+
+	return machine, nil
 }
 
 func (s *ServiceImpl) executeMaasAllocateMachine(ctx context.Context, rawParams json.RawMessage) (interface{}, error) {
@@ -480,7 +498,7 @@ func (s *ServiceImpl) handleMaasResource(ctx context.Context, path string) (inte
 func (s *ServiceImpl) executeSetMachineStorageConstraints(ctx context.Context, rawParams json.RawMessage) (interface{}, error) {
 	var params SetMachineStorageConstraintsParams // From mcp/models.go
 	if err := json.Unmarshal(rawParams, &params); err != nil {
-		return nil, errors.NewValidationError("Invalid params for set_machine_storage_constraints: "+err.Error(), err)
+		return nil, errors.NewValidationError("Invalid parameters for set_machine_storage_constraints: "+err.Error(), err)
 	}
 	if params.MachineID == "" {
 		return nil, errors.NewValidationError("machine_id is required for set_machine_storage_constraints", nil)
@@ -498,84 +516,3 @@ func (s *ServiceImpl) executeSetMachineStorageConstraints(ctx context.Context, r
 func (s *ServiceImpl) executeGetMachineStorageConstraints(ctx context.Context, rawParams json.RawMessage) (interface{}, error) {
 	var params GetMachineStorageConstraintsParams // From mcp/models.go
 	if err := json.Unmarshal(rawParams, &params); err != nil {
-		return nil, errors.NewValidationError("Invalid params for get_machine_storage_constraints: "+err.Error(), err)
-	}
-	if params.MachineID == "" {
-		return nil, errors.NewValidationError("machine_id is required for get_machine_storage_constraints", nil)
-	}
-
-	mcpContextConstraints, err := s.storageConstraintsService.GetStorageConstraints(ctx, params.MachineID)
-	if err != nil {
-		return nil, err
-	}
-
-	resultItems := make([]StorageConstraintItemParams, len(mcpContextConstraints.Constraints))
-	for i, item := range mcpContextConstraints.Constraints {
-		resultItems[i] = StorageConstraintItemParams{
-			Type:       item.Type,
-			Value:      item.Value,
-			Operator:   item.Operator,
-			TargetType: item.TargetType,
-		}
-	}
-	return &GetMachineStorageConstraintsResult{
-		MachineID:   params.MachineID,
-		Constraints: resultItems,
-	}, nil
-}
-
-func (s *ServiceImpl) executeValidateMachineStorageConstraints(ctx context.Context, rawParams json.RawMessage) (interface{}, error) {
-	var params ValidateMachineStorageConstraintsParams // From mcp/models.go
-	if err := json.Unmarshal(rawParams, &params); err != nil {
-		return nil, errors.NewValidationError("Invalid params for validate_machine_storage_constraints: "+err.Error(), err)
-	}
-	if params.MachineID == "" {
-		return nil, errors.NewValidationError("machine_id is required for validate_machine_storage_constraints", nil)
-	}
-
-	modelParams := convertMCPItemsToModelParams(params.Constraints)
-
-	valid, violations, err := s.storageConstraintsService.ValidateStorageConstraints(ctx, params.MachineID, modelParams)
-	if err != nil {
-		return nil, err
-	}
-	return &ValidateMachineStorageConstraintsResult{
-		MachineID:  params.MachineID,
-		Valid:      valid,
-		Violations: violations,
-	}, nil
-}
-
-func (s *ServiceImpl) executeApplyMachineStorageConstraints(ctx context.Context, rawParams json.RawMessage) (interface{}, error) {
-	var params ApplyMachineStorageConstraintsParams // From mcp/models.go
-	if err := json.Unmarshal(rawParams, &params); err != nil {
-		return nil, errors.NewValidationError("Invalid params for apply_machine_storage_constraints: "+err.Error(), err)
-	}
-	if params.MachineID == "" {
-		return nil, errors.NewValidationError("machine_id is required for apply_machine_storage_constraints", nil)
-	}
-
-	modelParams := convertMCPItemsToModelParams(params.Constraints)
-
-	err := s.storageConstraintsService.ApplyStorageConstraints(ctx, params.MachineID, modelParams)
-	if err != nil {
-		return nil, err
-	}
-	return GenericMCPResult{Status: "success", MachineID: params.MachineID}, nil
-}
-
-func (s *ServiceImpl) executeDeleteMachineStorageConstraints(ctx context.Context, rawParams json.RawMessage) (interface{}, error) {
-	var params DeleteMachineStorageConstraintsParams // From mcp/models.go
-	if err := json.Unmarshal(rawParams, &params); err != nil {
-		return nil, errors.NewValidationError("Invalid params for delete_machine_storage_constraints: "+err.Error(), err)
-	}
-	if params.MachineID == "" {
-		return nil, errors.NewValidationError("machine_id is required for delete_machine_storage_constraints", nil)
-	}
-
-	err := s.storageConstraintsService.DeleteStorageConstraints(ctx, params.MachineID)
-	if err != nil {
-		return nil, err
-	}
-	return GenericMCPResult{Status: "success", MachineID: params.MachineID}, nil
-}

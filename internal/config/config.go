@@ -13,7 +13,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 
-	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/models/types"
 )
 
 const (
@@ -24,14 +24,14 @@ const (
 )
 
 var (
-	instance     *models.AppConfig
+	instance     *types.AppConfig
 	instanceLock sync.RWMutex
 	validate     = validator.New()
-	configChan   = make(chan models.ConfigChangeEvent, 10)
+	configChan   = make(chan types.ConfigChangeEvent, 10)
 )
 
 // GetConfig returns the singleton instance of the Config.
-func GetConfig() *models.AppConfig {
+func GetConfig() *types.AppConfig {
 	instanceLock.RLock()
 	defer instanceLock.RUnlock()
 	return instance
@@ -50,7 +50,7 @@ func GetLogLevel() string {
 }
 
 // GetLogFormat returns the logging format.
-func GetLogFormat() models.LogFormat {
+func GetLogFormat() types.LogFormat {
 	cfg := GetConfig()
 	return cfg.Logging.Format
 }
@@ -79,23 +79,31 @@ func StringToBool(s string) (bool, error) {
 }
 
 // LoadConfig loads the configuration from .roo/mcp.json, environment variables, and fallback to config.yaml if needed.
-func LoadConfig() (*models.AppConfig, error) {
+func LoadConfig() (*types.AppConfig, error) {
+	fmt.Println("Starting configuration loading process...")
 	instanceLock.Lock()
 	defer instanceLock.Unlock()
 
 	if instance != nil {
+		fmt.Println("Using cached configuration instance")
 		return instance, nil
 	}
 
+	fmt.Println("Attempting to load configuration from .roo/mcp.json at path:", DefaultConfigPath)
 	// Try to load from .roo/mcp.json first
 	config, err := loadFromMCPJson()
 	if err != nil {
 		// If .roo/mcp.json doesn't exist or has errors, fall back to config.yaml
-		fmt.Println("Failed to load from .roo/mcp.json, falling back to config.yaml:", err)
+		fmt.Printf("Failed to load from .roo/mcp.json: %v\n", err)
+		fmt.Println("Falling back to config.yaml at path:", FallbackConfigPath)
 		config, err = loadFromConfigYaml()
 		if err != nil {
+			fmt.Printf("Failed to load from config.yaml: %v\n", err)
 			return nil, fmt.Errorf("failed to load configuration: %w", err)
 		}
+		fmt.Println("Successfully loaded configuration from config.yaml")
+	} else {
+		fmt.Println("Successfully loaded configuration from .roo/mcp.json")
 	}
 
 	// Apply environment variable overrides
@@ -116,44 +124,50 @@ func LoadConfig() (*models.AppConfig, error) {
 }
 
 // loadFromMCPJson loads the configuration from .roo/mcp.json
-func loadFromMCPJson() (*models.AppConfig, error) {
+func loadFromMCPJson() (*types.AppConfig, error) {
 	// Check if .roo/mcp.json exists
 	if _, err := os.Stat(DefaultConfigPath); os.IsNotExist(err) {
+		fmt.Printf("Configuration file not found at path: %s\n", DefaultConfigPath)
 		return nil, fmt.Errorf("configuration file not found: %s", DefaultConfigPath)
 	}
+	fmt.Printf("Found configuration file at path: %s\n", DefaultConfigPath)
 
 	// Read the file
 	data, err := os.ReadFile(DefaultConfigPath)
 	if err != nil {
+		fmt.Printf("Failed to read configuration file: %v\n", err)
 		return nil, fmt.Errorf("failed to read configuration file: %w", err)
 	}
+	fmt.Printf("Successfully read configuration file, size: %d bytes\n", len(data))
 
 	// Parse the JSON
-	var mcpConfig models.MCPConfig
+	var mcpConfig types.MCPConfig
 	if err := json.Unmarshal(data, &mcpConfig); err != nil {
+		fmt.Printf("Failed to parse configuration file as JSON: %v\n", err)
 		return nil, fmt.Errorf("failed to parse configuration file: %w", err)
 	}
+	fmt.Println("Successfully parsed configuration file as JSON")
 
 	// Convert to AppConfig
-	config := &models.AppConfig{
-		Server: models.ServerConfig{
+	config := &types.AppConfig{
+		Server: types.ServerConfig{
 			Host: "localhost",
 			Port: 8082,
 		},
-		MAASInstances: make(map[string]models.MAASInstanceConfig),
-		Auth: models.AuthConfig{
+		MAASInstances: make(map[string]types.MAASInstanceConfig),
+		Auth: types.AuthConfig{
 			Enabled:   false,
 			Type:      "apikey",
 			UserStore: "memory",
-			RateLimit: models.RateLimitConfig{
+			RateLimit: types.RateLimitConfig{
 				Enabled:     true,
 				MaxAttempts: 5,
 				Window:      300, // 5 minutes
 			},
 		},
-		Logging: models.LoggingConfig{
+		Logging: types.LoggingConfig{
 			Level:      "info",
-			Format:     models.LogFormatJSON,
+			Format:     types.LogFormatJSON,
 			FilePath:   "",
 			MaxAge:     7,  // 7 days
 			RotateTime: 24, // 24 hours
@@ -161,24 +175,37 @@ func loadFromMCPJson() (*models.AppConfig, error) {
 	}
 
 	// Extract MAAS configurations from MCP servers
+	fmt.Printf("Found %d MCP servers in configuration\n", len(mcpConfig.MCPServers))
 	for name, server := range mcpConfig.MCPServers {
+		fmt.Printf("Processing MCP server: %s\n", name)
+
 		// Check if the server has a MAAS configuration
 		if server.MaasConfig != nil {
-			config.MAASInstances[name] = models.MAASInstanceConfig{
+			fmt.Printf("Server %s has explicit MAAS configuration\n", name)
+			config.MAASInstances[name] = types.MAASInstanceConfig{
 				APIURL: server.MaasConfig.APIURL,
 				APIKey: server.MaasConfig.APIKey,
 			}
+			fmt.Printf("Added MAAS instance from MaasConfig: %s with API URL: %s\n",
+				name, server.MaasConfig.APIURL)
 		}
 
 		// Check if the server has MAAS configuration in environment variables
 		if server.Env != nil {
+			fmt.Printf("Server %s has environment variables\n", name)
 			apiURL, hasAPIURL := server.Env["MAAS_API_URL"]
 			apiKey, hasAPIKey := server.Env["MAAS_API_KEY"]
+
+			fmt.Printf("Server %s environment has MAAS_API_URL: %v, MAAS_API_KEY: %v\n",
+				name, hasAPIURL, hasAPIKey)
+
 			if hasAPIURL && hasAPIKey {
-				config.MAASInstances[name] = models.MAASInstanceConfig{
+				config.MAASInstances[name] = types.MAASInstanceConfig{
 					APIURL: apiURL,
 					APIKey: apiKey,
 				}
+				fmt.Printf("Added MAAS instance from Env: %s with API URL: %s\n",
+					name, apiURL)
 			}
 
 			// Check for logging configuration
@@ -186,7 +213,7 @@ func loadFromMCPJson() (*models.AppConfig, error) {
 				config.Logging.Level = logLevel
 			}
 			if logFormat, hasLogFormat := server.Env["LOG_FORMAT"]; hasLogFormat {
-				config.Logging.Format = models.LogFormat(logFormat)
+				config.Logging.Format = types.LogFormat(logFormat)
 			}
 			if logFilePath, hasLogFilePath := server.Env["LOG_FILE_PATH"]; hasLogFilePath {
 				config.Logging.FilePath = logFilePath
@@ -204,11 +231,22 @@ func loadFromMCPJson() (*models.AppConfig, error) {
 		}
 	}
 
+	// Check if we have any MAAS instances
+	if len(config.MAASInstances) == 0 {
+		fmt.Println("WARNING: No MAAS instances were found in the configuration")
+	} else {
+		fmt.Printf("Found %d MAAS instances in the configuration\n", len(config.MAASInstances))
+		for name, instance := range config.MAASInstances {
+			fmt.Printf("MAAS instance: %s, API URL: %s, API Key present: %v\n",
+				name, instance.APIURL, instance.APIKey != "")
+		}
+	}
+
 	return config, nil
 }
 
 // loadFromConfigYaml loads the configuration from config.yaml
-func loadFromConfigYaml() (*models.AppConfig, error) {
+func loadFromConfigYaml() (*types.AppConfig, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./config/")
@@ -255,14 +293,14 @@ func loadFromConfigYaml() (*models.AppConfig, error) {
 		fmt.Println("No config file found, using environment variables and defaults")
 	}
 
-	var config models.AppConfig
+	var config types.AppConfig
 	if err := viper.Unmarshal(&config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
 	// Initialize the map if it's nil
 	if config.MAASInstances == nil {
-		config.MAASInstances = make(map[string]models.MAASInstanceConfig)
+		config.MAASInstances = make(map[string]types.MAASInstanceConfig)
 	}
 
 	// Check if we have any MAAS instances defined
@@ -272,7 +310,7 @@ func loadFromConfigYaml() (*models.AppConfig, error) {
 		apiKey := os.Getenv("MAAS_API_KEY")
 
 		if apiUrl != "" && apiKey != "" {
-			config.MAASInstances["default"] = models.MAASInstanceConfig{
+			config.MAASInstances["default"] = types.MAASInstanceConfig{
 				APIURL: apiUrl,
 				APIKey: apiKey,
 			}
@@ -286,7 +324,7 @@ func loadFromConfigYaml() (*models.AppConfig, error) {
 }
 
 // applyEnvironmentOverrides applies environment variable overrides to the configuration
-func applyEnvironmentOverrides(config *models.AppConfig) {
+func applyEnvironmentOverrides(config *types.AppConfig) {
 	// Server configuration
 	if host := os.Getenv("SERVER_HOST"); host != "" {
 		config.Server.Host = host
@@ -338,7 +376,7 @@ func applyEnvironmentOverrides(config *models.AppConfig) {
 		config.Logging.Level = level
 	}
 	if format := os.Getenv("LOG_FORMAT"); format != "" {
-		config.Logging.Format = models.LogFormat(format)
+		config.Logging.Format = types.LogFormat(format)
 	}
 	if filePath := os.Getenv("LOG_FILE_PATH"); filePath != "" {
 		config.Logging.FilePath = filePath
@@ -370,7 +408,7 @@ func applyEnvironmentOverrides(config *models.AppConfig) {
 			config.MAASInstances["default"] = instance
 		} else if len(config.MAASInstances) == 0 {
 			// Create a new default instance if none exists
-			config.MAASInstances["default"] = models.MAASInstanceConfig{
+			config.MAASInstances["default"] = types.MAASInstanceConfig{
 				APIURL: apiUrl,
 				APIKey: apiKey,
 			}
@@ -462,22 +500,31 @@ func ReloadConfig() error {
 	// Set the last updated time
 	newConfig.LastUpdated = time.Now()
 
-	// Update the singleton instance
-	instance = newConfig
-
-	// Notify subscribers of the configuration change
-	configChan <- models.ConfigChangeEvent{
+	// Create a change event
+	event := types.ConfigChangeEvent{
 		OldConfig: oldConfig,
 		NewConfig: newConfig,
 		Timestamp: time.Now(),
 	}
+
+	// Send the event to the channel
+	select {
+	case configChan <- event:
+		// Event sent successfully
+	default:
+		// Channel is full, log a warning
+		fmt.Println("Warning: config change event channel is full, event dropped")
+	}
+
+	// Set the new instance
+	instance = newConfig
 
 	fmt.Println("Configuration reloaded successfully")
 	return nil
 }
 
 // GetConfigChangeChannel returns the channel for configuration change events
-func GetConfigChangeChannel() <-chan models.ConfigChangeEvent {
+func GetConfigChangeChannel() <-chan types.ConfigChangeEvent {
 	return configChan
 }
 
@@ -499,8 +546,8 @@ func CreateDefaultConfig() error {
 	}
 
 	// Create a default configuration
-	defaultConfig := models.MCPConfig{
-		MCPServers: map[string]models.MCPServerConfig{
+	defaultConfig := types.MCPConfig{
+		MCPServers: map[string]types.MCPServerConfig{
 			"maas-server": {
 				Command:  "./build.sh",
 				Args:     []string{"run-mcp"},

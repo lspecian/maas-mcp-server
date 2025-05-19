@@ -33,11 +33,14 @@ func main() {
 	}
 
 	// Load configuration
+	fmt.Println("=== MCP SERVER INITIALIZATION ===")
+	fmt.Println("Step 1: Loading configuration...")
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		fmt.Printf("Failed to load configuration: %v\n", err)
+		fmt.Printf("FATAL: Failed to load configuration: %v\n", err)
 		os.Exit(1)
 	}
+	fmt.Println("Configuration loaded successfully")
 
 	// Initialize enhanced logger
 	logConfig := logging.LoggerConfig{
@@ -60,6 +63,7 @@ func main() {
 	// For backward compatibility, create a logrus logger
 	logger := enhancedLogger.Logger
 	logger.Info("Starting MCP server")
+	fmt.Println("Step 2: Logger initialized successfully")
 
 	// Create MAAS client (maasClient is unused, replaced by maasClientWrapper)
 	// maasClient, err := maasclient.NewMaasClient(cfg, logger)
@@ -68,13 +72,19 @@ func main() {
 	// }
 
 	// Get the default MAAS instance
+	fmt.Println("Step 3: Getting default MAAS instance...")
 	maasInstance := cfg.GetDefaultMAASInstance()
+	fmt.Printf("Default MAAS instance - API URL: %s, API Key present: %v\n",
+		maasInstance.APIURL, maasInstance.APIKey != "")
 
 	// Create a MAAS client wrapper for the MCP service
+	fmt.Println("Step 4: Creating MAAS client wrapper...")
 	maasClientWrapper, err := maas.NewClientWrapper(maasInstance.APIURL, maasInstance.APIKey, "2.0", logger)
 	if err != nil {
+		fmt.Printf("FATAL: Failed to create MAAS client wrapper: %v\n", err)
 		logger.WithError(err).Fatal("Failed to create MAAS client wrapper")
 	}
+	fmt.Println("MAAS client wrapper created successfully")
 
 	// Initialize repositories
 	machineRepo := machine.NewMaasRepository(maasClientWrapper, logger)
@@ -102,10 +112,14 @@ func main() {
 	tagHandler := transport.NewTagHandler(tagService, logger)
 
 	// Initialize MCP service
+	fmt.Println("Step 5: Initializing MCP service...")
 	mcpService := service.NewMCPService(machineServiceOld, networkService, tagService, storageService, enhancedLogger)
+	fmt.Println("MCP service initialized successfully")
 
 	// Set up Gin router using the server package
+	fmt.Println("Step 6: Setting up Gin router...")
 	router := server.NewServerWithService(mcpService, cfg, logger)
+	fmt.Println("Gin router set up successfully")
 
 	// Register API routes for new clean architecture handlers
 	machineHandlerNew.RegisterRoutes(router)
@@ -120,10 +134,12 @@ func main() {
 	tagHandler.RegisterRoutes(apiGroup)
 
 	// Start server
+	fmt.Println("Step 7: Starting HTTP server...")
 	srv := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
 		Handler: router,
 	}
+	fmt.Println("HTTP server created successfully")
 
 	// Start server in a goroutine
 	go func() {
@@ -132,7 +148,11 @@ func main() {
 			"port": cfg.Server.Port,
 		}).Info("HTTP server listening")
 
+		fmt.Printf("Step 8: HTTP server listening on %s:%d\n", cfg.Server.Host, cfg.Server.Port)
+		fmt.Println("=== MCP SERVER INITIALIZATION COMPLETE ===")
+
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			fmt.Printf("FATAL: Failed to start server: %v\n", err)
 			enhancedLogger.WithField("error", err.Error()).Fatal("Failed to start server")
 		}
 	}()

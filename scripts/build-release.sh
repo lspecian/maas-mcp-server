@@ -34,6 +34,7 @@ print_error() {
 # Get version from version.go
 VERSION=$(grep -o 'Version = "[^"]*"' internal/version/version.go | cut -d'"' -f2)
 print_message "Building release binaries for version ${VERSION}..." "${YELLOW}"
+print_message "This will build both HTTP and stdio server binaries for all platforms" "${YELLOW}"
 
 # Create release directory
 RELEASE_DIR="release/v${VERSION}"
@@ -54,31 +55,41 @@ for PLATFORM in "${PLATFORMS[@]}"; do
   OS=$(echo ${PLATFORM} | cut -d'/' -f1)
   ARCH=$(echo ${PLATFORM} | cut -d'/' -f2)
   
-  # Set output binary name
+  # Set output binary names
   if [ "${OS}" = "windows" ]; then
-    OUTPUT_NAME="maas-mcp-server_${VERSION}_${OS}_${ARCH}.exe"
+    HTTP_OUTPUT_NAME="mcp-server_${VERSION}_${OS}_${ARCH}.exe"
+    STDIO_OUTPUT_NAME="maas-mcp-server_${VERSION}_${OS}_${ARCH}.exe"
+    ARCHIVE_NAME="maas-mcp-server_${VERSION}_${OS}_${ARCH}.zip"
   else
-    OUTPUT_NAME="maas-mcp-server_${VERSION}_${OS}_${ARCH}"
+    HTTP_OUTPUT_NAME="mcp-server_${VERSION}_${OS}_${ARCH}"
+    STDIO_OUTPUT_NAME="maas-mcp-server_${VERSION}_${OS}_${ARCH}"
+    ARCHIVE_NAME="maas-mcp-server_${VERSION}_${OS}_${ARCH}.tar.gz"
   fi
   
-  OUTPUT_PATH="${RELEASE_DIR}/${OUTPUT_NAME}"
+  HTTP_OUTPUT_PATH="${RELEASE_DIR}/${HTTP_OUTPUT_NAME}"
+  STDIO_OUTPUT_PATH="${RELEASE_DIR}/${STDIO_OUTPUT_NAME}"
   
   print_message "Building for ${OS}/${ARCH}..." "${YELLOW}"
   
-  # Build the binary
-  GOOS=${OS} GOARCH=${ARCH} go build -o ${OUTPUT_PATH} cmd/server/main.go
+  # Build the HTTP server binary
+  print_message "Building HTTP server for ${OS}/${ARCH}..." "${YELLOW}"
+  GOOS=${OS} GOARCH=${ARCH} go build -ldflags="-s -w" -o ${HTTP_OUTPUT_PATH} cmd/server/main.go
+  
+  # Build the stdio server binary
+  print_message "Building stdio server for ${OS}/${ARCH}..." "${YELLOW}"
+  GOOS=${OS} GOARCH=${ARCH} go build -ldflags="-s -w" -o ${STDIO_OUTPUT_PATH} pkg/mcp/cmd/main.go
   
   if [ $? -eq 0 ]; then
-    print_success "Successfully built binary for ${OS}/${ARCH}"
+    print_success "Successfully built binaries for ${OS}/${ARCH}"
     
     # Create archive
     if [ "${OS}" = "windows" ]; then
       # Create zip for Windows
-      zip -j "${RELEASE_DIR}/maas-mcp-server_${VERSION}_${OS}_${ARCH}.zip" "${OUTPUT_PATH}"
+      zip -j "${RELEASE_DIR}/${ARCHIVE_NAME}" "${HTTP_OUTPUT_PATH}" "${STDIO_OUTPUT_PATH}"
       print_success "Created zip archive for ${OS}/${ARCH}"
     else
       # Create tar.gz for Linux and macOS
-      tar -czf "${RELEASE_DIR}/maas-mcp-server_${VERSION}_${OS}_${ARCH}.tar.gz" -C "${RELEASE_DIR}" "${OUTPUT_NAME}"
+      tar -czf "${RELEASE_DIR}/${ARCHIVE_NAME}" -C "${RELEASE_DIR}" "${HTTP_OUTPUT_NAME}" "${STDIO_OUTPUT_NAME}"
       print_success "Created tar.gz archive for ${OS}/${ARCH}"
     fi
   else
@@ -93,4 +104,5 @@ shasum -a 256 *.zip *.tar.gz > checksums.txt
 cd -
 
 print_success "Release binaries built successfully in ${RELEASE_DIR}"
+print_message "Each archive contains both the HTTP server (mcp-server) and stdio server (maas-mcp-server) binaries." "${GREEN}"
 print_message "You can now upload these binaries to the GitHub release." "${GREEN}"

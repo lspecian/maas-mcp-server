@@ -20,6 +20,7 @@ type Handler struct {
 
 // NewHandler creates a new MCP handler
 func NewHandler(service Service, logger *logging.Logger) *Handler {
+	fmt.Println("MCP: Creating new MCP handler")
 	return &Handler{
 		service: service,
 		logger:  logger,
@@ -28,10 +29,14 @@ func NewHandler(service Service, logger *logging.Logger) *Handler {
 
 // RegisterRoutes registers the MCP routes with the given router
 func (h *Handler) RegisterRoutes(router *gin.Engine, middleware *Middleware) {
+	fmt.Println("MCP: Registering MCP routes")
+
 	// Create a group for MCP routes with middleware
 	mcpGroup := router.Group("/mcp")
+	fmt.Println("MCP: Created route group /mcp")
 
 	// Apply middleware
+	fmt.Println("MCP: Applying middleware to route group")
 	mcpGroup.Use(middleware.LoggingMiddleware())
 	mcpGroup.Use(middleware.VersionNegotiationMiddleware())
 	mcpGroup.Use(middleware.ContentTypeMiddleware())
@@ -39,8 +44,10 @@ func (h *Handler) RegisterRoutes(router *gin.Engine, middleware *Middleware) {
 	mcpGroup.Use(middleware.RateLimitMiddleware())
 	mcpGroup.Use(middleware.ErrorHandlerMiddleware())
 	mcpGroup.Use(middleware.CORSMiddleware())
+	fmt.Println("MCP: All middleware applied")
 
 	// Register routes
+	fmt.Println("MCP: Registering route handlers")
 	mcpGroup.POST("", h.HandleToolCall)
 	mcpGroup.GET("/stream", h.HandleStream)
 	mcpGroup.POST("/resource", h.HandleResourceAccess)
@@ -48,15 +55,20 @@ func (h *Handler) RegisterRoutes(router *gin.Engine, middleware *Middleware) {
 	// Register health check and monitoring routes
 	mcpGroup.GET("/healthz", h.HandleHealthCheck)
 	mcpGroup.GET("/metrics", h.HandleMetrics)
+	fmt.Println("MCP: All routes registered")
 }
 
 // HandleToolCall handles MCP tool calls
 func (h *Handler) HandleToolCall(c *gin.Context) {
+	fmt.Println("MCP Handler: HandleToolCall called")
+
 	// Get request from context
 	var request MCPRequest
 	if mcpRequest, exists := c.Get("mcp_request"); exists {
+		fmt.Println("MCP Handler: Found mcp_request in context")
 		request = *(mcpRequest.(*MCPRequest))
 	} else {
+		fmt.Println("MCP Handler: No mcp_request in context, parsing from request body")
 		// Parse request if not already parsed by middleware
 		if err := c.ShouldBindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, NewMCPErrorResponse(

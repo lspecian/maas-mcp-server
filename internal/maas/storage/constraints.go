@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/lspecian/maas-mcp-server/internal/maas/common"
-	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/models/types"
 )
 
 // constraintsClient implements the common.StorageConstraintsClient interface
@@ -28,7 +28,7 @@ func NewConstraintsClient(client *client.Client, logger *logrus.Logger, retry co
 
 // ApplyStorageConstraints applies the given storage constraints to a machine.
 // Placeholder implementation.
-func (c *constraintsClient) ApplyStorageConstraints(systemID string, params models.StorageConstraintParams) error {
+func (c *constraintsClient) ApplyStorageConstraints(systemID string, params types.StorageConstraintParams) error {
 	c.logger.Warnf("ApplyStorageConstraints for machine %s is a placeholder and currently does nothing, returning nil.", systemID)
 	// TODO: Implement actual MAAS API call to apply storage constraints.
 	// This might involve converting models.StorageConstraintParams to an entity equivalent
@@ -40,7 +40,7 @@ func (c *constraintsClient) ApplyStorageConstraints(systemID string, params mode
 
 // SetStorageConstraints sets the storage constraints for a machine.
 // Placeholder - MAAS might not have a direct "set" like this, often it's part of layout or deployment.
-func (c *constraintsClient) SetStorageConstraints(systemID string, params models.StorageConstraintParams) error {
+func (c *constraintsClient) SetStorageConstraints(systemID string, params types.StorageConstraintParams) error {
 	c.logger.Warnf("SetStorageConstraints for machine %s is a placeholder.", systemID)
 	// This would likely call a MAAS API endpoint.
 	// For example, if MAAS has `POST /machines/{system_id}/storage-constraints`
@@ -51,7 +51,7 @@ func (c *constraintsClient) SetStorageConstraints(systemID string, params models
 
 // GetStorageConstraints retrieves the storage constraints for a machine.
 // Placeholder - MAAS might not have a direct "get" for applied constraints in this exact format.
-func (c *constraintsClient) GetStorageConstraints(systemID string) (*models.StorageConstraintParams, error) {
+func (c *constraintsClient) GetStorageConstraints(systemID string) (*types.StorageConstraintParams, error) {
 	c.logger.Warnf("GetStorageConstraints for machine %s is a placeholder.", systemID)
 	// This would call a MAAS API endpoint.
 	// For example, `GET /machines/{system_id}/storage-constraints`
@@ -62,7 +62,7 @@ func (c *constraintsClient) GetStorageConstraints(systemID string) (*models.Stor
 
 // ValidateStorageConstraints validates storage constraints against a machine.
 // Placeholder - MAAS might have an endpoint for this.
-func (c *constraintsClient) ValidateStorageConstraints(systemID string, params models.StorageConstraintParams) (bool, []string, error) {
+func (c *constraintsClient) ValidateStorageConstraints(systemID string, params types.StorageConstraintParams) (bool, []string, error) {
 	c.logger.Warnf("ValidateStorageConstraints for machine %s is a placeholder.", systemID)
 	// This would call a MAAS API endpoint, e.g., `POST /machines/{system_id}/validate-storage-constraints`
 	// For now, returning error to indicate not implemented.

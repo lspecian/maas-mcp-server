@@ -37,19 +37,9 @@ if ! command -v go &> /dev/null; then
   exit 1
 fi
 
-# Check Go version
+# Get Go version for information only
 GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
-GO_MAJOR=$(echo $GO_VERSION | cut -d. -f1)
-GO_MINOR=$(echo $GO_VERSION | cut -d. -f2)
-
-if [ "$GO_MAJOR" -lt 1 ] || ([ "$GO_MAJOR" -eq 1 ] && [ "$GO_MINOR" -lt 22 ]); then
-  print_warning "Go version $GO_VERSION detected. This project requires Go 1.22 or later."
-  read -p "Continue anyway? (y/n) " -n 1 -r
-  echo
-  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    exit 1
-  fi
-fi
+print_message "Using Go version $GO_VERSION" "${GREEN}"
 
 # Validate MCP configuration
 validate_mcp_config() {
@@ -77,6 +67,25 @@ build_server() {
 build_mcp_server() {
   print_message "Building MCP Server..." "${YELLOW}"
   go build -o maas-mcp-server cmd/server/main.go
+  print_success "Build successful!"
+}
+
+# Build the MCP server for stdio mode
+# Build the MCP server for stdio mode
+build_mcp_stdio_server() {
+  print_message "Building MCP Server for stdio mode..." "${YELLOW}"
+  
+  # Try to use Go 1.21.6 explicitly
+  GO_1_21_6="/home/lspecian/.goenv/versions/1.21.6/bin/go"
+  
+  if [ -x "$GO_1_21_6" ]; then
+    print_message "Using Go 1.21.6 to match dependencies..." "${YELLOW}"
+    $GO_1_21_6 build -o maas-mcp-server pkg/mcp/cmd/main.go
+  else
+    print_message "Go 1.21.6 not found, using current Go version..." "${YELLOW}"
+    go build -o maas-mcp-server pkg/mcp/cmd/main.go
+  fi
+  
   print_success "Build successful!"
 }
 
@@ -131,6 +140,7 @@ show_help() {
   echo "Commands:"
   echo "  build         Build the server"
   echo "  build-mcp     Build the MAAS MCP server with clean architecture"
+  echo "  build-stdio   Build the MAAS MCP server for stdio mode"
   echo "  run           Build and run the server"
   echo "  run-mcp       Build and run the MAAS MCP server with clean architecture"
   echo "  run-mcp-stdio Build and run the MAAS MCP server in stdio mode"
@@ -149,6 +159,9 @@ case "$1" in
   build-mcp)
     build_mcp_server
     ;;
+  build-stdio)
+    build_mcp_stdio_server
+    ;;
   run)
     build_server
     run_server
@@ -158,7 +171,7 @@ case "$1" in
     run_mcp_server
     ;;
   run-mcp-stdio)
-    build_mcp_server
+    build_mcp_stdio_server
     run_mcp_stdio
     ;;
   validate)

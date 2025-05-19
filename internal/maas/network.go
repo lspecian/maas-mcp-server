@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/lspecian/maas-mcp-server/internal/maas/common"
-	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/models/types"
 )
 
 // networkClient implements the common.NetworkClient interface
@@ -29,7 +29,7 @@ func newNetworkClient(client *client.Client, logger *logrus.Logger, retry common
 }
 
 // GetSubnet retrieves subnet details.
-func (n *networkClient) GetSubnet(id int) (*models.Subnet, error) {
+func (n *networkClient) GetSubnet(id int) (*types.Subnet, error) {
 	var entitySubnet *entity.Subnet
 	operation := func() error {
 		var err error
@@ -45,13 +45,13 @@ func (n *networkClient) GetSubnet(id int) (*models.Subnet, error) {
 	if err != nil {
 		return nil, err
 	}
-	var modelSubnet models.Subnet
+	var modelSubnet types.Subnet
 	modelSubnet.FromEntity(entitySubnet)
 	return &modelSubnet, nil
 }
 
 // ListSubnets retrieves all subnets.
-func (n *networkClient) ListSubnets() ([]models.Subnet, error) {
+func (n *networkClient) ListSubnets() ([]types.Subnet, error) {
 	var entitySubnets []entity.Subnet
 	operation := func() error {
 		var err error
@@ -67,9 +67,9 @@ func (n *networkClient) ListSubnets() ([]models.Subnet, error) {
 	if err != nil {
 		return nil, err
 	}
-	modelSubnets := make([]models.Subnet, len(entitySubnets))
+	modelSubnets := make([]types.Subnet, len(entitySubnets))
 	for i, es := range entitySubnets {
-		var ms models.Subnet
+		var ms types.Subnet
 		ms.FromEntity(&es)
 		modelSubnets[i] = ms
 	}
@@ -77,7 +77,7 @@ func (n *networkClient) ListSubnets() ([]models.Subnet, error) {
 }
 
 // ListVLANs retrieves VLANs for a specific fabric.
-func (n *networkClient) ListVLANs(fabricID int) ([]models.VLAN, error) {
+func (n *networkClient) ListVLANs(fabricID int) ([]types.VLAN, error) {
 	var entityVLANs []entity.VLAN
 	operation := func() error {
 		var err error
@@ -95,9 +95,9 @@ func (n *networkClient) ListVLANs(fabricID int) ([]models.VLAN, error) {
 		return nil, err
 	}
 
-	modelVLANs := make([]models.VLAN, len(entityVLANs))
+	modelVLANs := make([]types.VLAN, len(entityVLANs))
 	for i, ev := range entityVLANs {
-		var mv models.VLAN
+		var mv types.VLAN
 		mv.FromEntity(&ev)
 		modelVLANs[i] = mv
 	}
@@ -106,7 +106,7 @@ func (n *networkClient) ListVLANs(fabricID int) ([]models.VLAN, error) {
 
 // GetMachineInterfaces retrieves network interfaces for a specific machine.
 // This is not directly part of NetworkClient but useful for machine details.
-func (n *networkClient) GetMachineInterfaces(systemID string) ([]models.NetworkInterface, error) {
+func (n *networkClient) GetMachineInterfaces(systemID string) ([]types.NetworkInterface, error) {
 	var entityInterfaces []entity.NetworkInterface
 	operation := func() error {
 		var err error
@@ -122,9 +122,9 @@ func (n *networkClient) GetMachineInterfaces(systemID string) ([]models.NetworkI
 	if err != nil {
 		return nil, err
 	}
-	modelInterfaces := make([]models.NetworkInterface, len(entityInterfaces))
+	modelInterfaces := make([]types.NetworkInterface, len(entityInterfaces))
 	for i, ei := range entityInterfaces {
-		var mi models.NetworkInterface
+		var mi types.NetworkInterface
 		mi.FromEntity(&ei)
 		modelInterfaces[i] = mi
 	}

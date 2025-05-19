@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/lspecian/maas-mcp-server/internal/maas/common"
-	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/models/types"
 )
 
 // tagClient implements the common.TagClient interface
@@ -30,7 +30,7 @@ func newTagClient(client *client.Client, logger *logrus.Logger, retry common.Ret
 }
 
 // ListTags retrieves all tags.
-func (t *tagClient) ListTags() ([]models.Tag, error) {
+func (t *tagClient) ListTags() ([]types.Tag, error) {
 	var entityTags []entity.Tag
 	operation := func() error {
 		var err error
@@ -47,9 +47,9 @@ func (t *tagClient) ListTags() ([]models.Tag, error) {
 		return nil, err
 	}
 
-	modelTags := make([]models.Tag, len(entityTags))
+	modelTags := make([]types.Tag, len(entityTags))
 	for i, et := range entityTags {
-		var mt models.Tag
+		var mt types.Tag
 		mt.FromEntity(&et)
 		modelTags[i] = mt
 	}
@@ -57,7 +57,7 @@ func (t *tagClient) ListTags() ([]models.Tag, error) {
 }
 
 // CreateTag creates a new tag.
-func (t *tagClient) CreateTag(name, comment, definition string) (*models.Tag, error) {
+func (t *tagClient) CreateTag(name, comment, definition string) (*types.Tag, error) {
 	var entityTag *entity.Tag
 	// gomaasclient Tags.Create takes *entity.TagParams
 	tagParams := &entity.TagParams{
@@ -81,7 +81,7 @@ func (t *tagClient) CreateTag(name, comment, definition string) (*models.Tag, er
 		return nil, err
 	}
 
-	var modelTag models.Tag
+	var modelTag types.Tag
 	modelTag.FromEntity(entityTag)
 	return &modelTag, nil
 }

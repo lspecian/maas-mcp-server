@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/lspecian/maas-mcp-server/internal/maas/common"
-	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/models/types"
 )
 
 // raidClient implements the common.RAIDClient interface
@@ -28,7 +28,7 @@ func NewRAIDClient(client *client.Client, logger *logrus.Logger, retry common.Re
 
 // CreateRAID creates a RAID array on a machine.
 // Placeholder implementation.
-func (r *raidClient) CreateRAID(systemID string, params models.RAIDParams) (*models.RAID, error) {
+func (r *raidClient) CreateRAID(systemID string, params types.RAIDParams) (*types.RAID, error) {
 	r.logger.Warnf("CreateRAID for machine %s is a placeholder.", systemID)
 	return nil, fmt.Errorf("CreateRAID not implemented")
 }
@@ -42,21 +42,21 @@ func (r *raidClient) DeleteRAID(systemID string, raidID int) error {
 
 // GetRAID retrieves a specific RAID array from a machine.
 // Placeholder implementation.
-func (r *raidClient) GetRAID(systemID string, raidID int) (*models.RAID, error) {
+func (r *raidClient) GetRAID(systemID string, raidID int) (*types.RAID, error) {
 	r.logger.Warnf("GetRAID for machine %s, raid %d is a placeholder.", systemID, raidID)
 	return nil, fmt.Errorf("GetRAID not implemented")
 }
 
 // ListRAIDs lists RAID arrays on a machine.
 // Placeholder implementation.
-func (r *raidClient) ListRAIDs(systemID string) ([]models.RAID, error) {
+func (r *raidClient) ListRAIDs(systemID string) ([]types.RAID, error) {
 	r.logger.Warnf("ListRAIDs for machine %s is a placeholder.", systemID)
 	return nil, fmt.Errorf("ListRAIDs not implemented")
 }
 
 // UpdateRAID updates a RAID array on a machine.
 // Placeholder implementation.
-func (r *raidClient) UpdateRAID(systemID string, raidID int, params models.RAIDUpdateParams) (*models.RAID, error) {
+func (r *raidClient) UpdateRAID(systemID string, raidID int, params types.RAIDUpdateParams) (*types.RAID, error) {
 	r.logger.Warnf("UpdateRAID for machine %s, raid %d is a placeholder.", systemID, raidID)
 	return nil, fmt.Errorf("UpdateRAID not implemented")
 }

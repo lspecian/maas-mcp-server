@@ -1,4 +1,4 @@
-package maas
+package types
 
 import (
 	"fmt"
@@ -49,8 +49,8 @@ func (m *Machine) FromEntity(entity *entity.Machine) {
 	m.SystemID = entity.SystemID
 	m.Hostname = entity.Hostname
 	m.FQDN = entity.FQDN
-	m.Status = fmt.Sprint(entity.Status)
-	m.StatusName = entity.StatusName
+	m.Status = fmt.Sprint(entity.Status)                       // Store the numeric status as a string
+	m.StatusName = mapMAASStatusFromEntity(int(entity.Status)) // entity.Status is node.Status, cast to int
 	m.Architecture = entity.Architecture
 	m.PowerState = entity.PowerState
 	m.PowerType = entity.PowerType
@@ -92,14 +92,6 @@ func (m *Machine) FromEntity(entity *entity.Machine) {
 	// Add some basic metadata from available fields
 	m.Metadata["system_id"] = entity.SystemID
 	m.Metadata["hostname"] = entity.Hostname
-
-	// Convert network interfaces
-	m.Interfaces = make([]NetworkInterface, 0)
-	for _, entityInterface := range entity.Interfaces {
-		var iface NetworkInterface
-		iface.FromEntity(&entityInterface)
-		m.Interfaces = append(m.Interfaces, iface)
-	}
 }
 
 // Subnet represents a MAAS subnet entity
@@ -217,33 +209,6 @@ func (v *VLAN) FromEntity(entity *entity.VLAN) {
 
 	// Handle Description
 	v.Description = entity.Description
-}
-
-// Fabric represents a MAAS fabric entity
-type Fabric struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	ResourceURL string `json:"resource_url"`
-	ClassType   string `json:"class_type,omitempty"`
-}
-
-// Validate checks if the Fabric has all required fields
-func (f *Fabric) Validate() error {
-	if f.Name == "" {
-		return fmt.Errorf("fabric name is required")
-	}
-	return nil
-}
-
-// FromEntity converts a gomaasclient entity.Fabric to our Fabric model
-func (f *Fabric) FromEntity(entity *entity.Fabric) {
-	f.ID = entity.ID
-	f.Name = entity.Name
-	// Description might not be directly available in the entity
-	f.Description = "" // Default empty description
-	f.ResourceURL = entity.ResourceURI
-	f.ClassType = entity.ClassType
 }
 
 // NetworkInterface represents a MAAS network interface entity
@@ -392,13 +357,6 @@ type Tag struct {
 	ResourceURL string `json:"resource_url"`
 }
 
-// PartitionCreateParams represents parameters for creating a partition in MAAS
-type PartitionCreateParams struct {
-	Size   int64  `json:"size"`             // Size in bytes
-	FSType string `json:"fstype,omitempty"` // Filesystem type (e.g., "ext4", "xfs", "swap") to format with
-	// Add other relevant parameters if needed based on MAAS API documentation
-}
-
 // Validate checks if the Tag has all required fields
 func (t *Tag) Validate() error {
 	if t.Name == "" {
@@ -444,4 +402,51 @@ func (t *Tag) FromEntity(entity *entity.Tag) {
 	}
 
 	t.ResourceURL = entity.ResourceURI
+}
+
+// PartitionCreateParams represents parameters for creating a partition in MAAS
+type PartitionCreateParams struct {
+	Size   int64  `json:"size"`             // Size in bytes
+	FSType string `json:"fstype,omitempty"` // Filesystem type (e.g., "ext4", "xfs", "swap") to format with
+}
+
+// mapMAASStatusFromEntity converts MAAS machine status to a human-readable string.
+// This is a helper for the FromEntity method.
+func mapMAASStatusFromEntity(maasStatusCode int) string {
+	// Values are based on common MAAS status codes.
+	// Ref: gomaasclient/entity/machine.go (Status is int)
+	switch maasStatusCode {
+	case 0: // Typically "New" or "Unknown" if 0 is not explicitly New
+		return "New"
+	case 1: // Commissioning
+		return "Commissioning"
+	case 2: // Failed Commissioning
+		return "Failed Commissioning"
+	case 3: // Missing / Lost connection
+		return "Missing/Lost"
+	case 4: // Ready
+		return "Ready"
+	case 5: // Reserved by a user
+		return "Reserved"
+	case 6: // Allocated to a user / Deployed (gomaasclient uses Deployed for 6)
+		return "Allocated" // Or "Deployed" - MAAS UI often shows "Allocated" at this stage
+	case 7: // Deploying
+		return "Deploying"
+	case 8: // Deployed (after OS installation, if distinct from 6)
+		return "Deployed"
+	case 9: // Retiring
+		return "Retiring"
+	case 10: // Failed deployment
+		return "Failed Deployment"
+	case 11: // Releasing
+		return "Releasing"
+	case 12: // Failed releasing
+		return "Failed Releasing"
+	case 13: // Disk erasing
+		return "Disk Erasing"
+	case 14: // Failed disk erasing
+		return "Failed Disk Erasing"
+	default:
+		return fmt.Sprintf("Unknown (%d)", maasStatusCode)
+	}
 }

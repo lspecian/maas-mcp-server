@@ -9,8 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/lspecian/maas-mcp-server/internal/maas/common"
-	"github.com/lspecian/maas-mcp-server/internal/models"
-	modelsmaas "github.com/lspecian/maas-mcp-server/internal/models/maas"
+	"github.com/lspecian/maas-mcp-server/internal/models/types"
 )
 
 // blockDeviceClient implements the common.BlockDeviceClient interface
@@ -30,7 +29,7 @@ func NewBlockDeviceClient(client *client.Client, logger *logrus.Logger, retry co
 }
 
 // GetMachineBlockDevices retrieves block devices for a specific machine.
-func (b *blockDeviceClient) GetMachineBlockDevices(systemID string) ([]models.BlockDevice, error) {
+func (b *blockDeviceClient) GetMachineBlockDevices(systemID string) ([]types.BlockDevice, error) {
 	var entityBlockDevices []entity.BlockDevice
 	operation := func() error {
 		var err error
@@ -47,9 +46,9 @@ func (b *blockDeviceClient) GetMachineBlockDevices(systemID string) ([]models.Bl
 	if err != nil {
 		return nil, err
 	}
-	modelBlockDevices := make([]models.BlockDevice, len(entityBlockDevices))
+	modelBlockDevices := make([]types.BlockDevice, len(entityBlockDevices))
 	for i, ebd := range entityBlockDevices {
-		var mbd models.BlockDevice
+		var mbd types.BlockDevice
 		mbd.FromEntity(&ebd)
 		modelBlockDevices[i] = mbd
 	}
@@ -57,7 +56,7 @@ func (b *blockDeviceClient) GetMachineBlockDevices(systemID string) ([]models.Bl
 }
 
 // GetMachineBlockDevice retrieves a specific block device for a machine.
-func (b *blockDeviceClient) GetMachineBlockDevice(systemID string, deviceID int) (*models.BlockDevice, error) {
+func (b *blockDeviceClient) GetMachineBlockDevice(systemID string, deviceID int) (*types.BlockDevice, error) {
 	var entityBlockDevice *entity.BlockDevice
 	operation := func() error {
 		var err error
@@ -75,14 +74,14 @@ func (b *blockDeviceClient) GetMachineBlockDevice(systemID string, deviceID int)
 		return nil, err
 	}
 
-	var modelBlockDevice models.BlockDevice
+	var modelBlockDevice types.BlockDevice
 	modelBlockDevice.FromEntity(entityBlockDevice)
 	return &modelBlockDevice, nil
 }
 
 // CreateMachinePartition creates a partition on a block device.
 // Placeholder implementation until gomaasclient API is fully implemented.
-func (b *blockDeviceClient) CreateMachinePartition(systemID string, blockDeviceID int, params modelsmaas.PartitionCreateParams) (*models.Partition, error) {
+func (b *blockDeviceClient) CreateMachinePartition(systemID string, blockDeviceID int, params types.PartitionCreateParams) (*types.Partition, error) {
 	b.logger.Debugf("Creating partition for machine %s, device %d with params %+v", systemID, blockDeviceID, params)
 
 	// Placeholder for actual implementation
@@ -99,7 +98,7 @@ func (b *blockDeviceClient) CreateMachinePartition(systemID string, blockDeviceI
 	}
 
 	// Simulating a successful response
-	modelPartition := &models.Partition{
+	modelPartition := &types.Partition{
 		ID:          123, // Simulated ID
 		Size:        params.Size,
 		Path:        fmt.Sprintf("/dev/sda%d", blockDeviceID),                                                          // Simulated path
@@ -108,7 +107,7 @@ func (b *blockDeviceClient) CreateMachinePartition(systemID string, blockDeviceI
 	}
 
 	if params.FSType != "" {
-		modelPartition.Filesystem = &models.Filesystem{
+		modelPartition.Filesystem = &types.Filesystem{
 			FSType: params.FSType,
 		}
 	}
@@ -119,7 +118,7 @@ func (b *blockDeviceClient) CreateMachinePartition(systemID string, blockDeviceI
 
 // UpdateMachinePartition updates a partition on a block device.
 // Placeholder implementation.
-func (b *blockDeviceClient) UpdateMachinePartition(systemID string, blockDeviceID, partitionID int, params map[string]interface{}) (*models.Partition, error) {
+func (b *blockDeviceClient) UpdateMachinePartition(systemID string, blockDeviceID, partitionID int, params map[string]interface{}) (*types.Partition, error) {
 	b.logger.Warnf("UpdateMachinePartition for machine %s, device %d, partition %d is a placeholder.", systemID, blockDeviceID, partitionID)
 	return nil, fmt.Errorf("UpdateMachinePartition not implemented")
 }
@@ -133,7 +132,7 @@ func (b *blockDeviceClient) DeleteMachinePartition(systemID string, blockDeviceI
 
 // FormatMachinePartition formats a partition on a block device.
 // Placeholder implementation.
-func (b *blockDeviceClient) FormatMachinePartition(systemID string, blockDeviceID, partitionID int, params map[string]interface{}) (*models.Filesystem, error) {
+func (b *blockDeviceClient) FormatMachinePartition(systemID string, blockDeviceID, partitionID int, params map[string]interface{}) (*types.Filesystem, error) {
 	b.logger.Warnf("FormatMachinePartition for machine %s, device %d, partition %d is a placeholder.", systemID, blockDeviceID, partitionID)
 	return nil, fmt.Errorf("FormatMachinePartition not implemented")
 }

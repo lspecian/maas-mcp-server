@@ -5,18 +5,18 @@ import (
 	"errors"
 
 	"github.com/canonical/gomaasclient/entity"
-	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/models/types"
 )
 
 // MockRepository is a mock implementation of the Repository interface for testing
 type MockRepository struct {
-	ListMachinesFn    func(ctx context.Context, filters map[string]string) ([]models.Machine, error)
-	GetMachineFn      func(ctx context.Context, systemID string) (*models.Machine, error)
-	AllocateMachineFn func(ctx context.Context, params *entity.MachineAllocateParams) (*models.Machine, error)
-	DeployMachineFn   func(ctx context.Context, systemID string, params *entity.MachineDeployParams) (*models.Machine, error)
+	ListMachinesFn    func(ctx context.Context, filters map[string]string) ([]types.Machine, error)
+	GetMachineFn      func(ctx context.Context, systemID string) (*types.Machine, error)
+	AllocateMachineFn func(ctx context.Context, params *entity.MachineAllocateParams) (*types.Machine, error)
+	DeployMachineFn   func(ctx context.Context, systemID string, params *entity.MachineDeployParams) (*types.Machine, error)
 	ReleaseMachineFn  func(ctx context.Context, systemIDs []string, comment string) error
-	PowerOnMachineFn  func(ctx context.Context, systemID string) (*models.Machine, error)
-	PowerOffMachineFn func(ctx context.Context, systemID string) (*models.Machine, error)
+	PowerOnMachineFn  func(ctx context.Context, systemID string) (*types.Machine, error)
+	PowerOffMachineFn func(ctx context.Context, systemID string) (*types.Machine, error)
 }
 
 // Ensure MockRepository implements Repository interface
@@ -28,15 +28,15 @@ func (m *MockRepository) Close() error {
 }
 
 // ListMachines implements the Repository interface
-func (m *MockRepository) ListMachines(ctx context.Context, filters map[string]string) ([]models.Machine, error) {
+func (m *MockRepository) ListMachines(ctx context.Context, filters map[string]string) ([]types.Machine, error) {
 	if m.ListMachinesFn != nil {
 		return m.ListMachinesFn(ctx, filters)
 	}
-	return []models.Machine{}, errors.New("ListMachines not implemented")
+	return []types.Machine{}, errors.New("ListMachines not implemented")
 }
 
 // GetMachine implements the Repository interface
-func (m *MockRepository) GetMachine(ctx context.Context, systemID string) (*models.Machine, error) {
+func (m *MockRepository) GetMachine(ctx context.Context, systemID string) (*types.Machine, error) {
 	if m.GetMachineFn != nil {
 		return m.GetMachineFn(ctx, systemID)
 	}
@@ -44,7 +44,7 @@ func (m *MockRepository) GetMachine(ctx context.Context, systemID string) (*mode
 }
 
 // AllocateMachine implements the Repository interface
-func (m *MockRepository) AllocateMachine(ctx context.Context, params *entity.MachineAllocateParams) (*models.Machine, error) {
+func (m *MockRepository) AllocateMachine(ctx context.Context, params *entity.MachineAllocateParams) (*types.Machine, error) {
 	if m.AllocateMachineFn != nil {
 		return m.AllocateMachineFn(ctx, params)
 	}
@@ -52,7 +52,7 @@ func (m *MockRepository) AllocateMachine(ctx context.Context, params *entity.Mac
 }
 
 // DeployMachine implements the Repository interface
-func (m *MockRepository) DeployMachine(ctx context.Context, systemID string, params *entity.MachineDeployParams) (*models.Machine, error) {
+func (m *MockRepository) DeployMachine(ctx context.Context, systemID string, params *entity.MachineDeployParams) (*types.Machine, error) {
 	if m.DeployMachineFn != nil {
 		return m.DeployMachineFn(ctx, systemID, params)
 	}
@@ -68,7 +68,7 @@ func (m *MockRepository) ReleaseMachine(ctx context.Context, systemIDs []string,
 }
 
 // PowerOnMachine implements the Repository interface
-func (m *MockRepository) PowerOnMachine(ctx context.Context, systemID string) (*models.Machine, error) {
+func (m *MockRepository) PowerOnMachine(ctx context.Context, systemID string) (*types.Machine, error) {
 	if m.PowerOnMachineFn != nil {
 		return m.PowerOnMachineFn(ctx, systemID)
 	}
@@ -76,7 +76,7 @@ func (m *MockRepository) PowerOnMachine(ctx context.Context, systemID string) (*
 }
 
 // PowerOffMachine implements the Repository interface
-func (m *MockRepository) PowerOffMachine(ctx context.Context, systemID string) (*models.Machine, error) {
+func (m *MockRepository) PowerOffMachine(ctx context.Context, systemID string) (*types.Machine, error) {
 	if m.PowerOffMachineFn != nil {
 		return m.PowerOffMachineFn(ctx, systemID)
 	}
@@ -84,8 +84,8 @@ func (m *MockRepository) PowerOffMachine(ctx context.Context, systemID string) (
 }
 
 // CreateTestMachine is a helper function to create a test machine
-func CreateTestMachine(id string) *models.Machine {
-	return &models.Machine{
+func CreateTestMachine(id string) *types.Machine {
+	return &types.Machine{
 		SystemID:     id,
 		Hostname:     "test-machine-" + id,
 		FQDN:         "test-machine-" + id + ".maas",

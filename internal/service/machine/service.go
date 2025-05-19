@@ -9,7 +9,8 @@ import (
 	"github.com/canonical/gomaasclient/entity"
 	"github.com/sirupsen/logrus"
 
-	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/conversion"
+	"github.com/lspecian/maas-mcp-server/internal/models/types"
 	"github.com/lspecian/maas-mcp-server/internal/repository/machine"
 )
 
@@ -58,7 +59,7 @@ func NewService(repository machine.Repository, logger *logrus.Logger) *Service {
 }
 
 // ListMachines retrieves a list of machines with optional filtering
-func (s *Service) ListMachines(ctx context.Context, filters map[string]string) ([]models.MachineContext, error) {
+func (s *Service) ListMachines(ctx context.Context, filters map[string]string) ([]types.MachineContext, error) {
 	s.logger.WithFields(logrus.Fields{
 		"filters": filters,
 	}).Debug("Listing machines")
@@ -80,10 +81,28 @@ func (s *Service) ListMachines(ctx context.Context, filters map[string]string) (
 	}
 
 	// Convert machines to MCP context
-	result := make([]models.MachineContext, len(machines))
+	result := make([]types.MachineContext, len(machines))
 	for i, m := range machines {
-		machineContext := models.MaasMachineToMCPContext(&m)
-		result[i] = *machineContext
+		// Create a simple MachineContext from the Machine
+		result[i] = types.MachineContext{
+			ID:           m.SystemID,
+			Name:         m.Hostname,
+			FQDN:         m.FQDN,
+			Status:       m.Status,
+			Architecture: m.Architecture,
+			PowerState:   m.PowerState,
+			Zone:         m.Zone,
+			Pool:         m.Pool,
+			Tags:         m.Tags,
+			CPUCount:     m.CPUCount,
+			Memory:       m.Memory,
+			OSInfo: types.OSInfo{
+				System:       m.OSSystem,
+				Distribution: m.OSSystem,
+				Release:      m.DistroSeries,
+			},
+			Metadata: m.Metadata,
+		}
 	}
 
 	s.logger.WithField("count", len(result)).Debug("Successfully retrieved machines")
@@ -91,7 +110,7 @@ func (s *Service) ListMachines(ctx context.Context, filters map[string]string) (
 }
 
 // GetMachine retrieves a specific machine by ID
-func (s *Service) GetMachine(ctx context.Context, id string) (*models.MachineContext, error) {
+func (s *Service) GetMachine(ctx context.Context, id string) (*types.MachineContext, error) {
 	s.logger.WithField("id", id).Debug("Getting machine by ID")
 
 	// Validate ID
@@ -110,8 +129,8 @@ func (s *Service) GetMachine(ctx context.Context, id string) (*models.MachineCon
 		return nil, mapRepositoryError(err)
 	}
 
-	// Convert MAAS machine to MCP context
-	result := models.MaasMachineToMCPContext(machine)
+	// Use the conversion function to create a MachineContext from the Machine
+	result := conversion.MaasMachineToMCPContext(machine, machine.SystemID, s.logger, nil)
 
 	s.logger.WithField("id", id).Debug("Successfully retrieved machine")
 	return result, nil
@@ -146,7 +165,7 @@ func (s *Service) GetMachinePowerState(ctx context.Context, id string) (string, 
 }
 
 // AllocateMachine allocates a machine based on constraints
-func (s *Service) AllocateMachine(ctx context.Context, constraints map[string]string) (*models.MachineContext, error) {
+func (s *Service) AllocateMachine(ctx context.Context, constraints map[string]string) (*types.MachineContext, error) {
 	s.logger.WithField("constraints", constraints).Debug("Allocating machine")
 
 	// Validate constraints
@@ -168,8 +187,8 @@ func (s *Service) AllocateMachine(ctx context.Context, constraints map[string]st
 		return nil, mapRepositoryError(err)
 	}
 
-	// Convert MAAS machine to MCP context
-	result := models.MaasMachineToMCPContext(machine)
+	// Use the conversion function to create a MachineContext from the Machine
+	result := conversion.MaasMachineToMCPContext(machine, machine.SystemID, s.logger, nil)
 
 	s.logger.WithFields(logrus.Fields{
 		"id":   machine.SystemID,
@@ -180,7 +199,7 @@ func (s *Service) AllocateMachine(ctx context.Context, constraints map[string]st
 }
 
 // DeployMachine deploys a machine with specified OS and configuration
-func (s *Service) DeployMachine(ctx context.Context, id string, osConfig map[string]string) (*models.MachineContext, error) {
+func (s *Service) DeployMachine(ctx context.Context, id string, osConfig map[string]string) (*types.MachineContext, error) {
 	s.logger.WithFields(logrus.Fields{
 		"id":        id,
 		"os_config": osConfig,
@@ -214,8 +233,8 @@ func (s *Service) DeployMachine(ctx context.Context, id string, osConfig map[str
 		return nil, mapRepositoryError(err)
 	}
 
-	// Convert MAAS machine to MCP context
-	result := models.MaasMachineToMCPContext(machine)
+	// Use the conversion function to create a MachineContext from the Machine
+	result := conversion.MaasMachineToMCPContext(machine, machine.SystemID, s.logger, nil)
 
 	s.logger.WithFields(logrus.Fields{
 		"id":   machine.SystemID,
@@ -253,7 +272,7 @@ func (s *Service) ReleaseMachine(ctx context.Context, id string, comment string)
 }
 
 // PowerOnMachine powers on a machine
-func (s *Service) PowerOnMachine(ctx context.Context, id string) (*models.MachineContext, error) {
+func (s *Service) PowerOnMachine(ctx context.Context, id string) (*types.MachineContext, error) {
 	s.logger.WithField("id", id).Debug("Powering on machine")
 
 	// Validate ID
@@ -272,8 +291,8 @@ func (s *Service) PowerOnMachine(ctx context.Context, id string) (*models.Machin
 		return nil, mapRepositoryError(err)
 	}
 
-	// Convert MAAS machine to MCP context
-	result := models.MaasMachineToMCPContext(machine)
+	// Use the conversion function to create a MachineContext from the Machine
+	result := conversion.MaasMachineToMCPContext(machine, machine.SystemID, s.logger, nil)
 
 	s.logger.WithFields(logrus.Fields{
 		"id":   id,
@@ -284,7 +303,7 @@ func (s *Service) PowerOnMachine(ctx context.Context, id string) (*models.Machin
 }
 
 // PowerOffMachine powers off a machine
-func (s *Service) PowerOffMachine(ctx context.Context, id string) (*models.MachineContext, error) {
+func (s *Service) PowerOffMachine(ctx context.Context, id string) (*types.MachineContext, error) {
 	s.logger.WithField("id", id).Debug("Powering off machine")
 
 	// Validate ID
@@ -303,8 +322,8 @@ func (s *Service) PowerOffMachine(ctx context.Context, id string) (*models.Machi
 		return nil, mapRepositoryError(err)
 	}
 
-	// Convert MAAS machine to MCP context
-	result := models.MaasMachineToMCPContext(machine)
+	// Use the conversion function to create a MachineContext from the Machine
+	result := conversion.MaasMachineToMCPContext(machine, machine.SystemID, s.logger, nil)
 
 	s.logger.WithFields(logrus.Fields{
 		"id":   id,

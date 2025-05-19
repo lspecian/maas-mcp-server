@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/lspecian/maas-mcp-server/internal/maas"
-	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/models/types"
 )
 
 // MaasRepository implements the Repository interface using the MAAS client
@@ -31,51 +31,51 @@ func (r *MaasRepository) Close() error {
 }
 
 // ListMachines retrieves machines based on filters
-func (r *MaasRepository) ListMachines(ctx context.Context, filters map[string]string) ([]models.Machine, error) {
+func (r *MaasRepository) ListMachines(ctx context.Context, filters map[string]string) ([]types.Machine, error) {
 	// Call MAAS client. ClientWrapper.ListMachines now handles mapping filters and pagination (nil for no pagination).
-	// It returns []models.Machine, int (count), error.
-	modelMachines, _, err := r.client.ListMachines(ctx, filters, nil)
+	// It returns []types.Machine, int (count), error.
+	modelMachines, _, err := r.client.MachineClient.ListMachines(ctx, filters, nil)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to list machines from MAAS via ClientWrapper")
 		return nil, err
 	}
-	// The result from ClientWrapper is already []models.Machine, so no further conversion is needed here.
+	// The result from ClientWrapper is already []types.Machine, so no further conversion is needed here.
 	return modelMachines, nil
 }
 
 // GetMachine retrieves details for a specific machine
-func (r *MaasRepository) GetMachine(ctx context.Context, systemID string) (*models.Machine, error) {
-	// Call MAAS client. ClientWrapper.GetMachine returns *models.Machine.
-	machine, err := r.client.GetMachine(systemID)
+func (r *MaasRepository) GetMachine(ctx context.Context, systemID string) (*types.Machine, error) {
+	// Call MAAS client. ClientWrapper.GetMachine returns *types.Machine.
+	machine, err := r.client.MachineClient.GetMachine(systemID)
 	if err != nil {
 		r.logger.WithError(err).WithField("id", systemID).Error("Failed to get machine from MAAS via ClientWrapper")
 		return nil, err
 	}
-	// The result from ClientWrapper is already *models.Machine.
+	// The result from ClientWrapper is already *types.Machine.
 	return machine, nil
 }
 
 // AllocateMachine allocates a machine based on constraints
-func (r *MaasRepository) AllocateMachine(ctx context.Context, params *entity.MachineAllocateParams) (*models.Machine, error) {
-	// Call MAAS client. ClientWrapper.AllocateMachine returns *models.Machine.
-	machine, err := r.client.AllocateMachine(params)
+func (r *MaasRepository) AllocateMachine(ctx context.Context, params *entity.MachineAllocateParams) (*types.Machine, error) {
+	// Call MAAS client. ClientWrapper.AllocateMachine returns *types.Machine.
+	machine, err := r.client.MachineClient.AllocateMachine(params)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to allocate machine from MAAS via ClientWrapper")
 		return nil, err
 	}
-	// The result from ClientWrapper is already *models.Machine.
+	// The result from ClientWrapper is already *types.Machine.
 	return machine, nil
 }
 
 // DeployMachine deploys an allocated machine
-func (r *MaasRepository) DeployMachine(ctx context.Context, systemID string, params *entity.MachineDeployParams) (*models.Machine, error) {
-	// Call MAAS client. ClientWrapper.DeployMachine returns *models.Machine.
-	machine, err := r.client.DeployMachine(systemID, params)
+func (r *MaasRepository) DeployMachine(ctx context.Context, systemID string, params *entity.MachineDeployParams) (*types.Machine, error) {
+	// Call MAAS client. ClientWrapper.DeployMachine returns *types.Machine.
+	machine, err := r.client.MachineClient.DeployMachine(systemID, params)
 	if err != nil {
 		r.logger.WithError(err).WithField("id", systemID).Error("Failed to deploy machine from MAAS via ClientWrapper")
 		return nil, err
 	}
-	// The result from ClientWrapper is already *models.Machine.
+	// The result from ClientWrapper is already *types.Machine.
 	return machine, nil
 }
 
@@ -83,7 +83,7 @@ func (r *MaasRepository) DeployMachine(ctx context.Context, systemID string, par
 func (r *MaasRepository) ReleaseMachine(ctx context.Context, systemIDs []string, comment string) error {
 	// Call MAAS client
 	// ClientWrapper.ReleaseMachine signature matches this.
-	err := r.client.ReleaseMachine(systemIDs, comment)
+	err := r.client.MachineClient.ReleaseMachine(systemIDs, comment)
 	if err != nil {
 		r.logger.WithError(err).WithField("ids", systemIDs).Error("Failed to release machine from MAAS via ClientWrapper")
 		return err
@@ -92,26 +92,26 @@ func (r *MaasRepository) ReleaseMachine(ctx context.Context, systemIDs []string,
 }
 
 // PowerOnMachine powers on a machine
-func (r *MaasRepository) PowerOnMachine(ctx context.Context, systemID string) (*models.Machine, error) {
-	// Call MAAS client. ClientWrapper.PowerOnMachine returns *models.Machine.
-	machine, err := r.client.PowerOnMachine(systemID)
+func (r *MaasRepository) PowerOnMachine(ctx context.Context, systemID string) (*types.Machine, error) {
+	// Call MAAS client. ClientWrapper.PowerOnMachine returns *types.Machine.
+	machine, err := r.client.MachineClient.PowerOnMachine(systemID)
 	if err != nil {
 		r.logger.WithError(err).WithField("id", systemID).Error("Failed to power on machine via ClientWrapper")
 		return nil, err
 	}
-	// The result from ClientWrapper is already *models.Machine.
+	// The result from ClientWrapper is already *types.Machine.
 	return machine, nil
 }
 
 // PowerOffMachine powers off a machine
-func (r *MaasRepository) PowerOffMachine(ctx context.Context, systemID string) (*models.Machine, error) {
-	// Call MAAS client. ClientWrapper.PowerOffMachine returns *models.Machine.
-	machine, err := r.client.PowerOffMachine(systemID)
+func (r *MaasRepository) PowerOffMachine(ctx context.Context, systemID string) (*types.Machine, error) {
+	// Call MAAS client. ClientWrapper.PowerOffMachine returns *types.Machine.
+	machine, err := r.client.MachineClient.PowerOffMachine(systemID)
 	if err != nil {
 		r.logger.WithError(err).WithField("id", systemID).Error("Failed to power off machine via ClientWrapper")
 		return nil, err
 	}
-	// The result from ClientWrapper is already *models.Machine.
+	// The result from ClientWrapper is already *types.Machine.
 	return machine, nil
 }
 

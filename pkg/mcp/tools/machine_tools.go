@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/models/types"
 	"github.com/lspecian/maas-mcp-server/internal/transport/machine"
 )
 
@@ -28,7 +28,7 @@ type ListMachinesInput struct {
 
 // ListMachinesOutput represents the output for the ListMachines tool
 type ListMachinesOutput struct {
-	Machines []models.MachineContext `json:"machines"`
+	Machines []types.MachineContext `json:"machines"`
 }
 
 // ListMachines lists machines with optional filtering
@@ -66,7 +66,7 @@ type GetMachineDetailsInput struct {
 
 // GetMachineDetailsOutput represents the output for the GetMachineDetails tool
 type GetMachineDetailsOutput struct {
-	Machine *models.MachineContext `json:"machine"`
+	Machine *types.MachineContext `json:"machine"`
 }
 
 // GetMachineDetails gets details for a specific machine
@@ -109,7 +109,7 @@ type PowerOnMachineInput struct {
 
 // PowerOnMachineOutput represents the output for the PowerOnMachine tool
 type PowerOnMachineOutput struct {
-	Machine *models.MachineContext `json:"machine"`
+	Machine *types.MachineContext `json:"machine"`
 }
 
 // PowerOnMachine powers on a machine
@@ -152,7 +152,7 @@ type PowerOffMachineInput struct {
 
 // PowerOffMachineOutput represents the output for the PowerOffMachine tool
 type PowerOffMachineOutput struct {
-	Machine *models.MachineContext `json:"machine"`
+	Machine *types.MachineContext `json:"machine"`
 }
 
 // PowerOffMachine powers off a machine

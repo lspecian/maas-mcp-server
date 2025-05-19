@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"errors" // Added standard errors package
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -22,6 +23,7 @@ type Middleware struct {
 
 // NewMiddleware creates a new MCP middleware
 func NewMiddleware(logger *logging.Logger, config *models.AppConfig, authHandler *auth.Middleware) *Middleware {
+	fmt.Println("MCP: Creating new MCP middleware")
 	return &Middleware{
 		logger:      logger,
 		config:      config,
@@ -32,6 +34,7 @@ func NewMiddleware(logger *logging.Logger, config *models.AppConfig, authHandler
 // CORSMiddleware returns a middleware for handling CORS
 func (m *Middleware) CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		fmt.Println("MCP Middleware: Handling CORS")
 		// Set CORS headers
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
@@ -42,6 +45,7 @@ func (m *Middleware) CORSMiddleware() gin.HandlerFunc {
 
 		// Handle preflight requests
 		if c.Request.Method == "OPTIONS" {
+			fmt.Println("MCP Middleware: Handling OPTIONS preflight request")
 			c.AbortWithStatus(http.StatusNoContent)
 			return
 		}
@@ -53,16 +57,22 @@ func (m *Middleware) CORSMiddleware() gin.HandlerFunc {
 // VersionNegotiationMiddleware handles protocol version negotiation
 func (m *Middleware) VersionNegotiationMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		fmt.Println("MCP Middleware: Handling version negotiation")
+
 		// Get client version from header
 		clientVersion := c.GetHeader("X-MCP-Version")
 		if clientVersion == "" {
 			// Default to version 1.0 if not specified
 			clientVersion = "1.0"
+			fmt.Println("MCP Middleware: No client version specified, defaulting to 1.0")
+		} else {
+			fmt.Printf("MCP Middleware: Client requested version: %s\n", clientVersion)
 		}
 
 		// Check if client version is supported
 		// For now, we only support version 1.0
 		if !strings.HasPrefix(clientVersion, "1.") {
+			fmt.Printf("MCP Middleware: Unsupported version requested: %s\n", clientVersion)
 			c.AbortWithStatusJSON(http.StatusBadRequest, NewMCPErrorResponse(
 				NewMCPError(
 					ErrorCodeVersionNotSupported,
@@ -79,6 +89,7 @@ func (m *Middleware) VersionNegotiationMiddleware() gin.HandlerFunc {
 
 		// Set server version in response header
 		c.Header("X-MCP-Version", "1.0")
+		fmt.Println("MCP Middleware: Version negotiation successful, using version 1.0")
 
 		c.Next()
 	}
@@ -87,10 +98,15 @@ func (m *Middleware) VersionNegotiationMiddleware() gin.HandlerFunc {
 // ContentTypeMiddleware ensures the correct content type for MCP requests and responses
 func (m *Middleware) ContentTypeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		fmt.Println("MCP Middleware: Checking content type")
+
 		// Check content type for non-GET requests
 		if c.Request.Method != http.MethodGet && c.Request.Method != http.MethodOptions {
 			contentType := c.GetHeader("Content-Type")
+			fmt.Printf("MCP Middleware: Request content type: %s\n", contentType)
+
 			if contentType == "" {
+				fmt.Println("MCP Middleware: Missing Content-Type header")
 				c.AbortWithStatusJSON(http.StatusBadRequest, NewMCPErrorResponse(
 					NewMCPError(
 						ErrorCodeInvalidRequest,

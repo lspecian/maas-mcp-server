@@ -309,7 +309,8 @@ func (h *Handlers) GetMachineDetails(c *gin.Context) {
 	}
 
 	// Fall back to the default service if no MAAS configuration is provided
-	details, err := h.service.GetMachineDetails(c.Request.Context(), params.SystemID)
+	// Pass the ClientWrapper to the GetMachine function
+	details, err := h.service.GetMachineDetails(c.Request.Context(), h.service.MachineService.ClientWrapper, params.SystemID)
 	if err != nil {
 		// Return JSON-RPC error response
 		c.JSON(http.StatusOK, gin.H{
