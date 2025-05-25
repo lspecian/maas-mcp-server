@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"encoding/json" // Added for MCPService.CallAPI
+	"strings"       // Added for strings.EqualFold
 
 	"github.com/lspecian/maas-mcp-server/internal/logging"
 	"github.com/lspecian/maas-mcp-server/internal/models"
+	"github.com/lspecian/maas-mcp-server/internal/maasclient" // Added for MaasClient field
 )
 
 // ServiceError represents an error from a service
@@ -50,6 +53,7 @@ type MCPService struct {
 	tagService     *TagService
 	storageService *StorageService // Added StorageService
 	logger         *logging.Logger
+	maasClient     *maasclient.MaasClient // Added MaasClient field
 }
 
 // NewMCPService creates a new MCP service
@@ -59,6 +63,7 @@ func NewMCPService(
 	tagService *TagService,
 	storageService *StorageService, // Added StorageService
 	logger *logging.Logger,
+	maasClient *maasclient.MaasClient, // Added maasClient parameter
 ) *MCPService {
 	return &MCPService{
 		machineService: machineService,
@@ -66,6 +71,7 @@ func NewMCPService(
 		tagService:     tagService,
 		storageService: storageService, // Added StorageService
 		logger:         logger,
+		maasClient:     maasClient,     // Assigned maasClient
 	}
 }
 
@@ -316,4 +322,41 @@ func (s *MCPService) DeleteStorageConstraints(ctx context.Context, machineID str
 		return fmt.Errorf("StorageService not initialized in MCPService")
 	}
 	return s.storageService.DeleteStorageConstraints(ctx, machineID)
+}
+
+// CallAPI delegates generic API calls to the MaasClient.
+func (s *MCPService) CallAPI(ctx context.Context, httpMethod string, apiPath string, requestBody json.RawMessage) (interface{}, error) {
+	s.logger.WithContext(ctx).Infof("MCPService.CallAPI routing call for %s %s", httpMethod, apiPath)
+	if s.maasClient == nil {
+		s.logger.Error("MCPService: MaasClient is not initialized!")
+		return nil, &ServiceError{
+			Err:        ErrInternalServer,
+			StatusCode: http.StatusInternalServerError,
+			Message:    "internal server error: MaasClient not available in MCPService",
+		}
+	}
+
+	// Specific handling for GET /api/2.0/version
+	// Note: The derivedPath from the tool name "maas_get_api_2.0_version" is "/api/2.0/version"
+	if strings.EqualFold(httpMethod, "GET") && apiPath == "/api/2.0/version" {
+		s.logger.Info("MCPService: Dispatching to GetVersion for /api/2.0/version")
+		return s.maasClient.GetVersion(ctx)
+	}
+	
+	// Specific handling for other known tools can be added here as else-if blocks.
+	// For example, if we had a specific method for listing machines:
+	// if strings.EqualFold(httpMethod, "GET") && apiPath == "/api/2.0/machines" {
+	//    s.logger.Info("MCPService: Dispatching to a specific ListMachines method if it existed")
+	//    // return s.maasClient.ListMachines(ctx, requestBody) // Hypothetical
+	// } else if strings.EqualFold(httpMethod, "POST") && apiPath == "/api/2.0/account/op-create_authorisation_token" {
+	// 	s.logger.Info("MCPService: Dispatching to generic MaasClient.CallAPI for POST /api/2.0/account/op-create_authorisation_token")
+	// 	// This specific tool will use the generic CallAPI in MaasClient for now.
+	// 	// Future work could involve s.maasClient.CreateAuthorisationToken(ctx, params_from_requestBody)
+	// 	return s.maasClient.CallAPI(ctx, httpMethod, apiPath, requestBody)
+	// }
+
+
+	// Fallback to the generic CallAPI placeholder for other tools not specifically handled above
+	s.logger.Info("MCPService: Dispatching to generic MaasClient.CallAPI (placeholder) for unrecognized or not-yet-specifically-handled tool.")
+	return s.maasClient.CallAPI(ctx, httpMethod, apiPath, requestBody)
 }

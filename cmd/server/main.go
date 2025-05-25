@@ -9,8 +9,10 @@ import (
 	"time"
 
 	"github.com/lspecian/maas-mcp-server/internal/config"
+	"github.com/lspecian/maas-mcp-server/internal/config"
 	"github.com/lspecian/maas-mcp-server/internal/logging"
 	"github.com/lspecian/maas-mcp-server/internal/maas"
+	"github.com/lspecian/maas-mcp-server/internal/maasclient" // Added for MaasClient initialization
 	"github.com/lspecian/maas-mcp-server/internal/repository/machine"
 	"github.com/lspecian/maas-mcp-server/internal/service"
 	"github.com/lspecian/maas-mcp-server/internal/version"
@@ -88,7 +90,15 @@ func main() {
 
 	// Initialize MCP service
 	fmt.Println("Step 5: Initializing MCP service...")
-	_ = service.NewMCPService(machineService, nil, nil, nil, enhancedLogger)
+	// Initialize MaasClient (the one that includes CallAPI)
+	// Use cfg (AppConfig) and enhancedLogger.Logger (logrus.Logger)
+	genericMaasClient, err := maasclient.NewMaasClient(cfg, enhancedLogger.Logger)
+	if err != nil {
+		enhancedLogger.Fatalf("Failed to create generic MAAS client: %v", err)
+	}
+	fmt.Println("Generic MAAS client (with CallAPI) initialized successfully")
+
+	_ = service.NewMCPService(machineService, nil, nil, nil, enhancedLogger, genericMaasClient) // Pass genericMaasClient
 	fmt.Println("MCP service initialized successfully")
 
 	// Wait for interrupt signal
