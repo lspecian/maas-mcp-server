@@ -226,198 +226,17 @@ The server will respond with information about available tools and resources:
           "architecture": { "type": "string" },
           "tags": { "type": "array", "items": { "type": "string" } },
           "limit": { "type": "integer" },
-          "page": { "type": "integer" }
+    "page": { "type": "integer" } // Example parameter, actual parameters are dynamically generated
         }
       }
-    },
-    {
-      "name": "maas_get_machine_details",
-      "description": "Get detailed information about a specific machine",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "system_id": { "type": "string" }
-        },
-        "required": ["system_id"]
-      }
     }
+    // ... (list of all dynamically generated tools)
   ],
   "id": "1"
 }
 ```
 
-## Available Tools
-
-### maas_list_machines
-
-Lists all machines managed by MAAS with optional filtering and pagination.
-
-#### Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| hostname | string | Filter by hostname |
-| zone | string | Filter by zone |
-| pool | string | Filter by resource pool |
-| status | string | Filter by status |
-| power_state | string | Filter by power state |
-| system_id | string | Filter by system ID |
-| architecture | string | Filter by architecture |
-| tags | array | Filter by tags |
-| storage_constraints | object | Filter by storage constraints |
-| limit | number | Maximum number of results to return |
-| page | number | Page number for pagination |
-
-#### Example Request
-
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "maas_list_machines",
-  "params": {
-    "zone": "default",
-    "limit": 10,
-    "page": 1
-  },
-  "id": "2"
-}
-```
-
-#### Example Response
-
-```json
-{
-  "jsonrpc": "2.0",
-  "result": {
-    "machines": [
-      {
-        "id": "abc123",
-        "name": "machine-1",
-        "fqdn": "machine-1.maas",
-        "status": "Ready",
-        "architecture": "amd64/generic",
-        "power_state": "off",
-        "zone": "default",
-        "pool": "default",
-        "tags": ["virtual"],
-        "cpu_count": 4,
-        "memory_mb": 8192,
-        "os_info": {
-          "system": "ubuntu",
-          "distribution": "ubuntu",
-          "release": "22.04",
-          "version": "22.04 LTS"
-        },
-        "last_updated": "2025-05-15T12:00:00Z"
-      }
-    ],
-    "total_count": 1,
-    "limit": 10,
-    "page": 1,
-    "page_count": 1
-  },
-  "id": "2"
-}
-```
-
-### maas_get_machine_details
-
-Gets detailed information about a specific machine.
-
-#### Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| system_id | string | The system ID of the machine |
-
-#### Example Request
-
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "maas_get_machine_details",
-  "params": {
-    "system_id": "abc123"
-  },
-  "id": "3"
-}
-```
-
-#### Example Response
-
-```json
-{
-  "jsonrpc": "2.0",
-  "result": {
-    "id": "abc123",
-    "name": "machine-1",
-    "fqdn": "machine-1.maas",
-    "status": "Ready",
-    "architecture": "amd64/generic",
-    "power_state": "off",
-    "zone": "default",
-    "pool": "default",
-    "tags": ["virtual"],
-    "network_interfaces": [
-      {
-        "id": "eth0",
-        "name": "eth0",
-        "type": "physical",
-        "mac_address": "52:54:00:12:34:56",
-        "ip_address": "192.168.1.100",
-        "cidr": "192.168.1.0/24",
-        "subnet": "192.168.1.0/24",
-        "enabled": true,
-        "primary": true
-      }
-    ],
-    "block_devices": [
-      {
-        "id": "sda",
-        "name": "sda",
-        "type": "physical",
-        "path": "/dev/sda",
-        "size_bytes": 107374182400,
-        "used_bytes": 107374182400,
-        "available_bytes": 0,
-        "model": "QEMU HARDDISK",
-        "partitions": [
-          {
-            "id": "sda1",
-            "number": 1,
-            "size_bytes": 1073741824,
-            "path": "/dev/sda1",
-            "filesystem": {
-              "type": "ext4",
-              "mount_point": "/boot"
-            }
-          },
-          {
-            "id": "sda2",
-            "number": 2,
-            "size_bytes": 106300440576,
-            "path": "/dev/sda2",
-            "filesystem": {
-              "type": "ext4",
-              "mount_point": "/"
-            }
-          }
-        ]
-      }
-    ],
-    "cpu_count": 4,
-    "memory_mb": 8192,
-    "os_info": {
-      "system": "ubuntu",
-      "distribution": "ubuntu",
-      "release": "22.04",
-      "version": "22.04 LTS"
-    },
-    "last_updated": "2025-05-15T12:00:00Z"
-  },
-  "id": "3"
-}
-```
+The list of tools is dynamically generated based on the MAAS API documentation. This provides a comprehensive set of tools for interacting with various MAAS functionalities. For details on how these tools are generated and how to update them, please refer to the [MAAS API Tool Generation documentation](cmd/gen-tools/README.md).
 
 ## Example Workflows
 
@@ -671,11 +490,11 @@ GOOS=windows GOARCH=amd64 go build -o maas-mcp-server-windows-amd64.exe pkg/mcp/
 
 ### Available Methods
 
-| Method | Description |
-|--------|-------------|
-| discover | Discover server capabilities |
-| maas_list_machines | List all machines managed by MAAS |
-| maas_get_machine_details | Get detailed information about a specific machine |
+The available methods (tools) are discovered via the `discover` JSON-RPC method. The server dynamically registers a comprehensive set of tools based on the parsed MAAS API. Refer to the "Discovery" section above for an example of how to retrieve the list of available tools and their schemas.
+
+## Tool Generation
+
+The MAAS tools provided by this server are dynamically generated from the MAAS API documentation. This ensures that the server can adapt to a wide range of MAAS API functionalities. For detailed information on how these tools are parsed, generated, and how to update them if the MAAS API changes, please see the [MAAS API Tool Generation documentation in `cmd/gen-tools/README.md`](cmd/gen-tools/README.md).
 
 ## Contributing
 

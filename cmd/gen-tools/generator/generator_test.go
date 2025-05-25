@@ -245,6 +245,28 @@ func TestGenerateInputSchema(t *testing.T) {
 		t.Errorf("Header parameter should not be included in the schema")
 	}
 
+	// Check description for string_param
+	stringProp, ok := properties["string_param"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("Expected string_param property to be a map, got %T", properties["string_param"])
+	}
+	if desc, _ := stringProp["description"].(string); desc != "A string parameter" {
+		t.Errorf("Expected string_param description to be 'A string parameter', got '%s'", desc)
+	}
+
+	// Check description and default for int_param
+	intProp, ok := properties["int_param"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("Expected int_param property to be a map, got %T", properties["int_param"])
+	}
+	if desc, _ := intProp["description"].(string); desc != "An integer parameter" {
+		t.Errorf("Expected int_param description to be 'An integer parameter', got '%s'", desc)
+	}
+	if def, _ := intProp["default"].(float64); def != 42 { // JSON numbers are float64
+		t.Errorf("Expected int_param default to be 42, got %v", def)
+	}
+
+
 	// Check required fields
 	required, ok := schema["required"].([]string)
 	if !ok {
