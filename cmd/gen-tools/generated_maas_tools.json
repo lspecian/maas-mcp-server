@@ -1,0 +1,5639 @@
+{
+  "tools": [
+    {
+      "name": "maas_post_api_2.0_account_op-create_authorisation_token",
+      "description": "Create an authorisation token",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_account_op-delete_authorisation_token",
+      "description": "Delete an authorisation token",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_account_op-list_authorisation_tokens",
+      "description": "List authorisation tokens",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_account_op-update_token_name",
+      "description": "Modify authorisation token SSH Keys",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_account_prefs_sshkeys",
+      "description": "List SSH keys",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_account_prefs_sshkeys",
+      "description": "Add a new SSH key",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_account_prefs_sshkeys_op-import",
+      "description": "Import SSH keys SSH Key",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_account_prefs_sshkeys_id",
+      "description": "Delete an SSH key",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_account_prefs_sshkeys_id",
+      "description": "Retrieve an SSH key SSL Keys",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_account_prefs_sslkeys",
+      "description": "List keys",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_account_prefs_sslkeys",
+      "description": "Add a new SSL key SSL Key",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_account_prefs_sslkeys_id",
+      "description": "Delete an SSL key",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_account_prefs_sslkeys_id",
+      "description": "Retrieve an SSL key Boot resources",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_boot-resources",
+      "description": "List boot resources",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_boot-resources",
+      "description": "Upload a new boot resource",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_boot-resources_op-import",
+      "description": "Import boot resources",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_boot-resources_op-is_importing",
+      "description": "Importing status",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_boot-resources_op-stop_import",
+      "description": "Stop import boot resources Boot resource",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_boot-resources_id",
+      "description": "Delete a boot resource",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_boot-resources_id",
+      "description": "Read a boot resource Boot sources",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_boot-sources",
+      "description": "List boot sources",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_boot-sources",
+      "description": "Create a boot source Boot source selections",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_boot-sources_boot_source_id_selections",
+      "description": "List boot-source selections",
+      "input_schema": {
+        "properties": {
+          "boot_source_id": {
+            "description": "Path parameter boot_source_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "boot_source_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_boot-sources_boot_source_id_selections",
+      "description": "Create a boot-source selection Boot source selection",
+      "input_schema": {
+        "properties": {
+          "boot_source_id": {
+            "description": "Path parameter boot_source_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "boot_source_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_boot-sources_boot_source_id_selections_id",
+      "description": "Delete a boot source",
+      "input_schema": {
+        "properties": {
+          "boot_source_id": {
+            "description": "Path parameter boot_source_id",
+            "type": "string"
+          },
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "boot_source_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_boot-sources_boot_source_id_selections_id",
+      "description": "Read a boot source selection",
+      "input_schema": {
+        "properties": {
+          "boot_source_id": {
+            "description": "Path parameter boot_source_id",
+            "type": "string"
+          },
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "boot_source_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_boot-sources_boot_source_id_selections_id",
+      "description": "Update a boot-source selection Boot source",
+      "input_schema": {
+        "properties": {
+          "boot_source_id": {
+            "description": "Path parameter boot_source_id",
+            "type": "string"
+          },
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "boot_source_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_boot-sources_id",
+      "description": "Delete a boot source",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_boot-sources_id",
+      "description": "Read a boot source",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_boot-sources_id",
+      "description": "Update a boot source Commissioning scripts (deprecated)",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_commissioning-scripts",
+      "description": "CommissioningScriptsHandler read",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_commissioning-scripts",
+      "description": "CommissioningScriptsHandler create Commissioning script (deprecated)",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_commissioning-scripts_name",
+      "description": "CommissioningScriptHandler delete",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_commissioning-scripts_name",
+      "description": "CommissioningScriptHandler read",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_commissioning-scripts_name",
+      "description": "CommissioningScriptHandler update Devices",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_devices",
+      "description": "List Nodes visible to the user",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_devices",
+      "description": "Create a new device",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_devices_op-is_registered",
+      "description": "MAC address registered",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_devices_op-set_zone",
+      "description": "Assign nodes to a zone Device",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_devices_system_id",
+      "description": "Delete a device",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_devices_system_id",
+      "description": "Read a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_devices_system_id",
+      "description": "Update a device",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_devices_system_id_op-details",
+      "description": "Get system details",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_devices_system_id_op-power_parameters",
+      "description": "Get power parameters",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_devices_system_id_op-restore_default_configuration",
+      "description": "Reset device configuration",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_devices_system_id_op-restore_networking_configuration",
+      "description": "Reset networking options",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_devices_system_id_op-set_owner_data",
+      "description": "Deprecated, use set-workload-annotations.",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_devices_system_id_op-set_workload_annotations",
+      "description": "Set key=value data DHCP Snippets (deprecated)",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_dhcp-snippets",
+      "description": "List DHCP snippets",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_dhcp-snippets",
+      "description": "Create a DHCP snippet DHCP Snippet (deprecated)",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_dhcp-snippets_id",
+      "description": "Delete a DHCP snippet",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_dhcp-snippets_id",
+      "description": "Read a DHCP snippet",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_dhcp-snippets_id",
+      "description": "Update a DHCP snippet",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_dhcp-snippets_id_op-revert",
+      "description": "Revert DHCP snippet to earlier version Discoveries",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_discovery",
+      "description": "List all discovered devices",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_discovery_op-by_unknown_ip",
+      "description": "List all discovered devices with an unknown IP address",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_discovery_op-by_unknown_ip_and_mac",
+      "description": "Lists all discovered devices completely unknown to MAAS",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_discovery_op-by_unknown_mac",
+      "description": "List all discovered devices with unknown MAC",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_discovery_op-clear",
+      "description": "Delete all discovered neighbours",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_discovery_op-clear_by_mac_and_ip",
+      "description": "Delete discoveries that match a MAC and IP",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_discovery_op-scan",
+      "description": "Run discovery scan on rack networks Discovery",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_discovery_discovery_id",
+      "description": "Read a discovery DNSResourceRecords",
+      "input_schema": {
+        "properties": {
+          "discovery_id": {
+            "description": "Path parameter discovery_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "discovery_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_dnsresourcerecords",
+      "description": "List all DNS resource records",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_dnsresourcerecords",
+      "description": "Create a DNS resource record DNSResourceRecord",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_dnsresourcerecords_id",
+      "description": "Delete a DNS resource record",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_dnsresourcerecords_id",
+      "description": "Read a DNS resource record description Read a DNS resource record with the given id.",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_dnsresourcerecords_id",
+      "description": "Update a DNS resource record DNSResources",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_dnsresources",
+      "description": "List resources",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_dnsresources",
+      "description": "Create a DNS resource DNSResource",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_dnsresources_id",
+      "description": "Delete a DNS resource",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_dnsresources_id",
+      "description": "Read a DNS resource",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_dnsresources_id",
+      "description": "Update a DNS resource Domains",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_domains",
+      "description": "List all domains",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_domains",
+      "description": "Create a domain",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_domains_op-set_serial",
+      "description": "Set the SOA serial number Domain",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_domains_id",
+      "description": "Delete domain",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_domains_id",
+      "description": "Read domain",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_domains_id",
+      "description": "Update a domain",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_domains_id_op-set_default",
+      "description": "Set domain as default Events",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_events_op-query",
+      "description": "List node events Fabrics",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_fabrics",
+      "description": "List fabrics",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_fabrics",
+      "description": "Create a fabric VLANs",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_fabrics_fabric_id_vlans",
+      "description": "List VLANs",
+      "input_schema": {
+        "properties": {
+          "fabric_id": {
+            "description": "Path parameter fabric_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fabric_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_fabrics_fabric_id_vlans",
+      "description": "Create a VLAN VLAN",
+      "input_schema": {
+        "properties": {
+          "fabric_id": {
+            "description": "Path parameter fabric_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fabric_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_fabrics_fabric_id_vlans_vid",
+      "description": "Delete a VLAN",
+      "input_schema": {
+        "properties": {
+          "fabric_id": {
+            "description": "Path parameter fabric_id",
+            "type": "string"
+          },
+          "vid": {
+            "description": "Path parameter vid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fabric_id",
+          "vid"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_fabrics_fabric_id_vlans_vid",
+      "description": "Retrieve VLAN",
+      "input_schema": {
+        "properties": {
+          "fabric_id": {
+            "description": "Path parameter fabric_id",
+            "type": "string"
+          },
+          "vid": {
+            "description": "Path parameter vid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fabric_id",
+          "vid"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_fabrics_fabric_id_vlans_vid",
+      "description": "Update VLAN Fabric",
+      "input_schema": {
+        "properties": {
+          "fabric_id": {
+            "description": "Path parameter fabric_id",
+            "type": "string"
+          },
+          "vid": {
+            "description": "Path parameter vid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fabric_id",
+          "vid"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_fabrics_id",
+      "description": "Delete a fabric",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_fabrics_id",
+      "description": "Read a fabric",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_fabrics_id",
+      "description": "Update fabric Files",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_files",
+      "description": "Delete a file",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_files",
+      "description": "List files",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_files",
+      "description": "Add a new file",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_files_op-get",
+      "description": "Get a named file",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_files_op-get_by_key",
+      "description": "Get a file by key File",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_files_filename",
+      "description": "Delete a file",
+      "input_schema": {
+        "properties": {
+          "filename": {
+            "description": "Path parameter filename",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filename"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_files_filename",
+      "description": "Read a stored file Commissioning results",
+      "input_schema": {
+        "properties": {
+          "filename": {
+            "description": "Path parameter filename",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filename"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_installation-results",
+      "description": "Read commissioning results IP Addresses",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_ipaddresses",
+      "description": "List IP addresses",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_ipaddresses_op-release",
+      "description": "Release an IP address",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_ipaddresses_op-reserve",
+      "description": "Reserve an IP address IP Ranges",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_ipranges",
+      "description": "List all IP ranges",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_ipranges",
+      "description": "Create an IP range IP Range",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_ipranges_id",
+      "description": "Delete an IP range",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_ipranges_id",
+      "description": "Read an IP range",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_ipranges_id",
+      "description": "Update an IP range License Key",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_license-key_osystem_distro_series",
+      "description": "Delete license key",
+      "input_schema": {
+        "properties": {
+          "distro_series": {
+            "description": "Path parameter distro_series",
+            "type": "string"
+          },
+          "osystem": {
+            "description": "Path parameter osystem",
+            "type": "string"
+          }
+        },
+        "required": [
+          "osystem",
+          "distro_series"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_license-key_osystem_distro_series",
+      "description": "Read license key",
+      "input_schema": {
+        "properties": {
+          "distro_series": {
+            "description": "Path parameter distro_series",
+            "type": "string"
+          },
+          "osystem": {
+            "description": "Path parameter osystem",
+            "type": "string"
+          }
+        },
+        "required": [
+          "osystem",
+          "distro_series"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_license-key_osystem_distro_series",
+      "description": "Update license key License Keys",
+      "input_schema": {
+        "properties": {
+          "distro_series": {
+            "description": "Path parameter distro_series",
+            "type": "string"
+          },
+          "osystem": {
+            "description": "Path parameter osystem",
+            "type": "string"
+          }
+        },
+        "required": [
+          "osystem",
+          "distro_series"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_license-keys",
+      "description": "List license keys",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_license-keys",
+      "description": "Define a license key MAAS server",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_maas_op-get_config",
+      "description": "Get a configuration value",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_maas_op-set_config",
+      "description": "Set a configuration value Machines",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_machines",
+      "description": "List Nodes visible to the user",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines",
+      "description": "Create a new machine",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_op-accept",
+      "description": "Accept declared machines",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_op-accept_all",
+      "description": "Accept all declared machines",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_op-add_chassis",
+      "description": "Add special hardware",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_op-allocate",
+      "description": "Allocate a machine",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_op-clone",
+      "description": "Clone storage and/or interface configurations",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_machines_op-is_registered",
+      "description": "MAC address registered",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_machines_op-list_allocated",
+      "description": "List allocated",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_machines_op-power_parameters",
+      "description": "Get power parameters",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_op-release",
+      "description": "Release machines",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_op-set_zone",
+      "description": "Assign nodes to a zone Machine",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_machines_system_id",
+      "description": "Delete a machine",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_machines_system_id",
+      "description": "Read a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_machines_system_id",
+      "description": "Update a machine",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-abort",
+      "description": "Abort a node operation",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-clear_default_gateways",
+      "description": "Clear set default gateways",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-commission",
+      "description": "Commission a machine",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-deploy",
+      "description": "Deploy a machine",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_machines_system_id_op-details",
+      "description": "Get system details",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-exit_rescue_mode",
+      "description": "Exit rescue mode",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_machines_system_id_op-get_curtin_config",
+      "description": "Get curtin configuration",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_machines_system_id_op-get_token",
+      "description": "Get a machine token",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-lock",
+      "description": "Lock a machine",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-mark_broken",
+      "description": "Mark a machine as Broken",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-mark_fixed",
+      "description": "Mark a machine as Fixed",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-mount_special",
+      "description": "Mount a special-purpose filesystem",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-override_failed_testing",
+      "description": "Ignore failed tests",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-power_off",
+      "description": "Power off a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-power_on",
+      "description": "Turn on a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_machines_system_id_op-power_parameters",
+      "description": "Get power parameters",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_machines_system_id_op-query_power_state",
+      "description": "Get the power state of a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-release",
+      "description": "Release a machine",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-rescue_mode",
+      "description": "Enter rescue mode",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-restore_default_configuration",
+      "description": "Restore default configuration",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-restore_networking_configuration",
+      "description": "Restore networking options",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-restore_storage_configuration",
+      "description": "Restore storage configuration",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-set_owner_data",
+      "description": "Deprecated, use set-workload-annotations.",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-set_storage_layout",
+      "description": "Change storage layout",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-set_workload_annotations",
+      "description": "Set key=value data",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-test",
+      "description": "Begin testing process for a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-unlock",
+      "description": "Unlock a machine",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_machines_system_id_op-unmount_special",
+      "description": "Unmount a special-purpose filesystem Networks (deprecated)",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_networks",
+      "description": "NetworksHandler read",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_networks",
+      "description": "NetworksHandler create Network (deprecated)",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_networks_name",
+      "description": "NetworkHandler delete",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_networks_name",
+      "description": "NetworkHandler read",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_networks_name",
+      "description": "NetworkHandler update",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_networks_name_op-connect_macs",
+      "description": "NetworkHandler connect_macs",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_networks_name_op-disconnect_macs",
+      "description": "NetworkHandler disconnect_macs",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_networks_name_op-list_connected_macs",
+      "description": "NetworkHandler list_connected_macs Nodes",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes",
+      "description": "List Nodes visible to the user",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_op-is_registered",
+      "description": "MAC address registered",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_op-set_zone",
+      "description": "Assign nodes to a zone Node",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_nodes_system_id",
+      "description": "Delete a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id",
+      "description": "Read a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_op-details",
+      "description": "Get system details",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_op-power_parameters",
+      "description": "Get power parameters Bcache Cache Set",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_nodes_system_id_bcache-cache-set_id",
+      "description": "Delete a bcache set",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_bcache-cache-set_id",
+      "description": "Read a bcache cache set",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_nodes_system_id_bcache-cache-set_id",
+      "description": "Update a bcache set Bcache Cache Sets",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_bcache-cache-sets",
+      "description": "List bcache sets",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_bcache-cache-sets",
+      "description": "Creates a bcache cache set Bcache Device",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_nodes_system_id_bcache_id",
+      "description": "Delete a bcache",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_bcache_id",
+      "description": "Read a bcache device",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_nodes_system_id_bcache_id",
+      "description": "Update a bcache Bcache Devices",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_bcaches",
+      "description": "List all bcache devices",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_bcaches",
+      "description": "Creates a bcache Block devices",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_blockdevices",
+      "description": "List block devices",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices",
+      "description": "Create a block device Partitions",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_nodes_system_id_blockdevices_device_id_partition_id",
+      "description": "Delete a partition",
+      "input_schema": {
+        "properties": {
+          "device_id": {
+            "description": "Path parameter device_id",
+            "type": "string"
+          },
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "device_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_blockdevices_device_id_partition_id",
+      "description": "Read a partition",
+      "input_schema": {
+        "properties": {
+          "device_id": {
+            "description": "Path parameter device_id",
+            "type": "string"
+          },
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "device_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_device_id_partition_idop-add_tag",
+      "description": "Add a tag",
+      "input_schema": {
+        "properties": {
+          "device_id": {
+            "description": "Path parameter device_id",
+            "type": "string"
+          },
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "device_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_device_id_partition_idop-format",
+      "description": "Format a partition",
+      "input_schema": {
+        "properties": {
+          "device_id": {
+            "description": "Path parameter device_id",
+            "type": "string"
+          },
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "device_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_device_id_partition_idop-mount",
+      "description": "Mount a filesystem",
+      "input_schema": {
+        "properties": {
+          "device_id": {
+            "description": "Path parameter device_id",
+            "type": "string"
+          },
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "device_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_device_id_partition_idop-remove_tag",
+      "description": "Remove a tag",
+      "input_schema": {
+        "properties": {
+          "device_id": {
+            "description": "Path parameter device_id",
+            "type": "string"
+          },
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "device_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_device_id_partition_idop-unformat",
+      "description": "Unformat a partition",
+      "input_schema": {
+        "properties": {
+          "device_id": {
+            "description": "Path parameter device_id",
+            "type": "string"
+          },
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "device_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_device_id_partition_idop-unmount",
+      "description": "Unmount a filesystem",
+      "input_schema": {
+        "properties": {
+          "device_id": {
+            "description": "Path parameter device_id",
+            "type": "string"
+          },
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "device_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_blockdevices_device_id_partitions",
+      "description": "List partitions",
+      "input_schema": {
+        "properties": {
+          "device_id": {
+            "description": "Path parameter device_id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "device_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_device_id_partitions",
+      "description": "Create a partition Block device",
+      "input_schema": {
+        "properties": {
+          "device_id": {
+            "description": "Path parameter device_id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "device_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_nodes_system_id_blockdevices_id",
+      "description": "Delete a block device",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_blockdevices_id",
+      "description": "Read a block device",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_nodes_system_id_blockdevices_id",
+      "description": "Update a block device",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_id_op-add_tag",
+      "description": "Add a tag",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_id_op-format",
+      "description": "Format block device",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_id_op-mount",
+      "description": "Mount a filesystem",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_id_op-remove_tag",
+      "description": "Remove a tag",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_id_op-set_boot_disk",
+      "description": "Set boot disk",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_id_op-unformat",
+      "description": "Unformat a block device",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_blockdevices_id_op-unmount",
+      "description": "Unmount a filesystem Node Devices",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_devices",
+      "description": "Return node devices Node Device",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_nodes_system_id_devices_id",
+      "description": "Delete a node device",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_devices_id",
+      "description": "Return a specific node device Interfaces",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_interfaces",
+      "description": "List interfaces",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_interfaces_op-create_bond",
+      "description": "Create a bond inteface",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_interfaces_op-create_bridge",
+      "description": "Create a bridge interface",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_interfaces_op-create_physical",
+      "description": "Create a physical interface",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_interfaces_op-create_vlan",
+      "description": "Create a VLAN interface Interface",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_nodes_system_id_interfaces_id",
+      "description": "Delete an interface",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_interfaces_id",
+      "description": "Read an interface",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_nodes_system_id_interfaces_id",
+      "description": "Update an interface",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_interfaces_id_op-add_tag",
+      "description": "Add a tag to an interface",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_interfaces_id_op-disconnect",
+      "description": "Disconnect an interface",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_interfaces_id_op-link_subnet",
+      "description": "Link interface to a subnet",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_interfaces_id_op-remove_tag",
+      "description": "Remove a tag from an interface",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_interfaces_id_op-set_default_gateway",
+      "description": "Set the default gateway on a machine",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_interfaces_id_op-unlink_subnet",
+      "description": "Unlink interface from subnet RAID Device",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_nodes_system_id_raid_id",
+      "description": "Delete a RAID",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_raid_id",
+      "description": "Read a RAID",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_nodes_system_id_raid_id",
+      "description": "Update a RAID RAID Devices",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_raids",
+      "description": "List all RAIDs",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_raids",
+      "description": "Set up a RAID Node Script Result",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_results",
+      "description": "Return script results",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_nodes_system_id_results_id",
+      "description": "Delete script results",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_results_id",
+      "description": "Get specific script result",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_nodes_system_id_results_id",
+      "description": "Update specific script result",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_results_id_op-download",
+      "description": "Download script results VMFS datastore",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_nodes_system_id_vmfs-datastore_id",
+      "description": "Delete the specified VMFS datastore.",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_vmfs-datastore_id",
+      "description": "Read a VMFS datastore.",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_nodes_system_id_vmfs-datastore_id",
+      "description": "Update a VMFS datastore. VMFS datastores",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_vmfs-datastores",
+      "description": "List all VMFS datastores.",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_vmfs-datastores",
+      "description": "Create a VMFS datastore. Volume group",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_nodes_system_id_volume-group_id",
+      "description": "Delete volume group",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_volume-group_id",
+      "description": "Read a volume group",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_nodes_system_id_volume-group_id",
+      "description": "Update a volume group",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_volume-group_id_op-create_logical_volume",
+      "description": "Create a logical volume",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_volume-group_id_op-delete_logical_volume",
+      "description": "Delete a logical volume Volume groups",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id",
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_nodes_system_id_volume-groups",
+      "description": "List all volume groups",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_nodes_system_id_volume-groups",
+      "description": "Create a volume group Notifications",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_notifications",
+      "description": "List notifications",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_notifications",
+      "description": "Create a notification Notification",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_notifications_id",
+      "description": "Delete a notification",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_notifications_id",
+      "description": "Read a notification",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_notifications_id",
+      "description": "Update a notification",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_notifications_id_op-dismiss",
+      "description": "Dismiss a notification Package Repositories",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_package-repositories",
+      "description": "List package repositories",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_package-repositories",
+      "description": "Create a package repository Package Repository",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_package-repositories_id",
+      "description": "Delete a package repository",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_package-repositories_id",
+      "description": "Read a package repository",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_package-repositories_id",
+      "description": "Update a package repository Pods (deprecated)",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_pods",
+      "description": "List VM hosts",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_pods",
+      "description": "Create a VM host Pod (deprecated)",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_pods_id",
+      "description": "Deletes a VM host",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_pods_id",
+      "description": "PodHandler read",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_pods_id",
+      "description": "Update a specific VM host",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_pods_id_op-add_tag",
+      "description": "Add a tag to a VM host",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_pods_id_op-compose",
+      "description": "Compose a virtual machine on the host.",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_pods_id_op-parameters",
+      "description": "Obtain VM host parameters",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_pods_id_op-refresh",
+      "description": "Refresh a VM host",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_pods_id_op-remove_tag",
+      "description": "Remove a tag from a VM host RackControllers",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_rackcontrollers",
+      "description": "List Nodes visible to the user",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_rackcontrollers_op-describe_power_types",
+      "description": "Get power information from rack controllers",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_rackcontrollers_op-import_boot_images",
+      "description": "Import boot images on all rack controllers",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_rackcontrollers_op-is_registered",
+      "description": "MAC address registered",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_rackcontrollers_op-power_parameters",
+      "description": "Get power parameters",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_rackcontrollers_op-set_zone",
+      "description": "Assign nodes to a zone RackController",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_rackcontrollers_system_id",
+      "description": "Delete a rack controller",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_rackcontrollers_system_id",
+      "description": "Read a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_rackcontrollers_system_id",
+      "description": "Update a rack controller",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_rackcontrollers_system_id_op-abort",
+      "description": "Abort a node operation",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_rackcontrollers_system_id_op-details",
+      "description": "Get system details",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_rackcontrollers_system_id_op-import_boot_images",
+      "description": "Import boot images",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_rackcontrollers_system_id_op-list_boot_images",
+      "description": "List available boot images",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_rackcontrollers_system_id_op-override_failed_testing",
+      "description": "Ignore failed tests",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_rackcontrollers_system_id_op-power_off",
+      "description": "Power off a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_rackcontrollers_system_id_op-power_on",
+      "description": "Turn on a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_rackcontrollers_system_id_op-power_parameters",
+      "description": "Get power parameters",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_rackcontrollers_system_id_op-query_power_state",
+      "description": "Get the power state of a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_rackcontrollers_system_id_op-test",
+      "description": "Begin testing process for a node RegionControllers",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_regioncontrollers",
+      "description": "List Nodes visible to the user",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_regioncontrollers_op-is_registered",
+      "description": "MAC address registered",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_regioncontrollers_op-set_zone",
+      "description": "Assign nodes to a zone RegionController",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_regioncontrollers_system_id",
+      "description": "Delete a region controller",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_regioncontrollers_system_id",
+      "description": "Read a node",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_regioncontrollers_system_id",
+      "description": "Update a region controller",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_regioncontrollers_system_id_op-details",
+      "description": "Get system details",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_regioncontrollers_system_id_op-power_parameters",
+      "description": "Get power parameters Reserved IPs",
+      "input_schema": {
+        "properties": {
+          "system_id": {
+            "description": "Path parameter system_id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "system_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_reservedips",
+      "description": "List all available Reserved IPs",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_reservedips",
+      "description": "Create a Reserved IP Reserved IP",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_reservedips_id",
+      "description": "Delete a reserved IP",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_reservedips_id",
+      "description": "Read a Reserved IP",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_reservedips_id",
+      "description": "Update a reserved IP Resource pool",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_resourcepool_id",
+      "description": "ResourcePoolHandler delete",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_resourcepool_id",
+      "description": "ResourcePoolHandler read",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_resourcepool_id",
+      "description": "ResourcePoolHandler update Resource pools",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_resourcepools",
+      "description": "ResourcePoolsHandler read",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_resourcepools",
+      "description": "ResourcePoolsHandler create Node Scripts",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_scripts",
+      "description": "List stored scripts",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_scripts",
+      "description": "Create a new script Node Script",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_scripts_name",
+      "description": "Delete a script",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_scripts_name",
+      "description": "Return script metadata",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_scripts_name",
+      "description": "Update a script",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_scripts_nameop-add_tag",
+      "description": "Add a tag",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_scripts_nameop-download",
+      "description": "Download a script",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_scripts_nameop-remove_tag",
+      "description": "Remove a tag",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_scripts_nameop-revert",
+      "description": "Revert a script version Spaces",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_spaces",
+      "description": "List all spaces",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_spaces",
+      "description": "Create a space Space",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_spaces_id",
+      "description": "Delete a space",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_spaces_id",
+      "description": "Reads a space",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_spaces_id",
+      "description": "Update space Static routes",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_static-routes",
+      "description": "List static routes",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_static-routes",
+      "description": "Create a static route Static route",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_static-routes_id",
+      "description": "Delete static route",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_static-routes_id",
+      "description": "Get a static route",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_static-routes_id",
+      "description": "Update a static route Subnets",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_subnets",
+      "description": "List all subnets",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_subnets",
+      "description": "Create a subnet Subnet",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_subnets_id",
+      "description": "Delete a subnet",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_subnets_id",
+      "description": "Get a subnet",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_subnets_id",
+      "description": "Update a subnet",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_subnets_id_op-ip_addresses",
+      "description": "Summary of IP addresses",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_subnets_id_op-reserved_ip_ranges",
+      "description": "List reserved IP ranges",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_subnets_id_op-statistics",
+      "description": "Get subnet statistics",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_subnets_id_op-unreserved_ip_ranges",
+      "description": "List unreserved IP ranges Tags",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_tags",
+      "description": "List tags",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_tags",
+      "description": "Create a new tag Tag",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_tags_name",
+      "description": "Delete a tag",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_tags_name",
+      "description": "Read a specific tag",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_tags_name",
+      "description": "Update a tag",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_tags_name_op-devices",
+      "description": "List devices by tag",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_tags_name_op-machines",
+      "description": "List machines by tag",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_tags_name_op-nodes",
+      "description": "List nodes by tag",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_tags_name_op-rack_controllers",
+      "description": "List rack controllers by tag",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_tags_name_op-rebuild",
+      "description": "Trigger a tag-node mapping rebuild",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_tags_name_op-region_controllers",
+      "description": "List region controllers by tag",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_tags_name_op-update_nodes",
+      "description": "Update nodes associated with this tag Users",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_users",
+      "description": "List users",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_users",
+      "description": "Create a MAAS user account",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_users_op-whoami",
+      "description": "Retrieve logged-in user User",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_users_username",
+      "description": "Delete a user",
+      "input_schema": {
+        "properties": {
+          "username": {
+            "description": "Path parameter username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_users_username",
+      "description": "Retrieve user details MAAS version",
+      "input_schema": {
+        "properties": {
+          "username": {
+            "description": "Path parameter username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_version",
+      "description": "MAAS version information Virtual Machine Clusters",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_vm-clusters",
+      "description": "List VM Clusters Virtual Machine Cluster",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_vm-clusters_id",
+      "description": "Deletes a VM cluster",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_vm-clusters_id",
+      "description": "VmClusterHandler read",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_vm-clusters_id",
+      "description": "Update VMCluster Virtual machine hosts",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_vm-hosts",
+      "description": "List VM hosts",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_vm-hosts",
+      "description": "Create a VM host Virtual machine host",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_vm-hosts_id",
+      "description": "Deletes a VM host",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_vm-hosts_id",
+      "description": "VmHostHandler read",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_vm-hosts_id",
+      "description": "Update a specific VM host",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_vm-hosts_id_op-add_tag",
+      "description": "Add a tag to a VM host",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_vm-hosts_id_op-compose",
+      "description": "Compose a virtual machine on the host.",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_vm-hosts_id_op-parameters",
+      "description": "Obtain VM host parameters",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_vm-hosts_id_op-refresh",
+      "description": "Refresh a VM host",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_vm-hosts_id_op-remove_tag",
+      "description": "Remove a tag from a VM host Zones",
+      "input_schema": {
+        "properties": {
+          "id": {
+            "description": "Path parameter id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_zones",
+      "description": "ZonesHandler read",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_api_2.0_zones",
+      "description": "ZonesHandler create Zone",
+      "input_schema": {
+        "properties": {},
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_delete_api_2.0_zones_name",
+      "description": "ZoneHandler delete",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_get_api_2.0_zones_name",
+      "description": "ZoneHandler read",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_put_api_2.0_zones_name",
+      "description": "ZoneHandler update",
+      "input_schema": {
+        "properties": {
+          "name": {
+            "description": "Path parameter name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_maas_api_2.0_machines_op-power_action",
+      "description": "Perform a power action on a machine using one of the power types.",
+      "input_schema": {
+        "properties": {
+          "amt": {
+            "description": "Intel AMT",
+            "type": "string"
+          },
+          "apc": {
+            "description": "American Power Conversion (APC",
+            "type": "string"
+          },
+          "blade_id": {
+            "description": "Blade ID (Typically 1-24",
+            "type": "string"
+          },
+          "certificate": {
+            "description": "LXD certificate (optional",
+            "type": "string"
+          },
+          "cipher_suite_id": {
+            "description": "Cipher Suite ID",
+            "type": "string"
+          },
+          "dli": {
+            "description": "Digital Loggers, Inc. PDU",
+            "type": "string"
+          },
+          "eaton": {
+            "description": "Eaton PDU",
+            "type": "string"
+          },
+          "hmc": {
+            "description": "IBM Hardware Management Console (HMC",
+            "type": "string"
+          },
+          "hmcz": {
+            "description": "IBM Hardware Management Console (HMC",
+            "type": "string"
+          },
+          "instance_name": {
+            "description": "Instance name",
+            "type": "string"
+          },
+          "ipmi": {
+            "description": "IPMI",
+            "type": "string"
+          },
+          "k_g": {
+            "description": "K_g BMC key",
+            "type": "string"
+          },
+          "key": {
+            "description": "LXD private key (optional",
+            "type": "string"
+          },
+          "lpar": {
+            "description": "HMC logical partition",
+            "type": "string"
+          },
+          "lxd": {
+            "description": "LXD (virtual systems",
+            "type": "string"
+          },
+          "mac_address": {
+            "description": "Power MAC",
+            "type": "string"
+          },
+          "manual": {
+            "description": "Manual",
+            "type": "string"
+          },
+          "moonshot": {
+            "description": "HP Moonshot - iLO4 (IPMI",
+            "type": "string"
+          },
+          "mscm": {
+            "description": "HP Moonshot - iLO Chassis Manager",
+            "type": "string"
+          },
+          "msftocs": {
+            "description": "Microsoft OCS - Chassis Manager",
+            "type": "string"
+          },
+          "node_id": {
+            "description": "Node ID",
+            "type": "string"
+          },
+          "node_outlet": {
+            "description": "Eaton PDU node outlet number (1-24",
+            "type": "string"
+          },
+          "nova": {
+            "description": "OpenStack Nova",
+            "type": "string"
+          },
+          "nova_id": {
+            "description": "Host UUID",
+            "type": "string"
+          },
+          "openbmc": {
+            "description": "OpenBMC Power Driver",
+            "type": "string"
+          },
+          "os_authurl": {
+            "description": "Auth URL",
+            "type": "string"
+          },
+          "os_password": {
+            "description": "Password",
+            "type": "string"
+          },
+          "os_tenantname": {
+            "description": "Tenant name",
+            "type": "string"
+          },
+          "os_username": {
+            "description": "Username",
+            "type": "string"
+          },
+          "outlet_id": {
+            "description": "Outlet ID",
+            "type": "string"
+          },
+          "password": {
+            "description": "LXD password (optional",
+            "type": "string"
+          },
+          "pdu_type": {
+            "description": "PDU type",
+            "type": "string"
+          },
+          "power_address": {
+            "description": "Address",
+            "type": "string"
+          },
+          "power_boot_type": {
+            "description": "Power boot type",
+            "type": "string"
+          },
+          "power_control": {
+            "description": "Power control type",
+            "type": "string"
+          },
+          "power_driver": {
+            "description": "Power driver",
+            "type": "string"
+          },
+          "power_hwaddress": {
+            "description": "Power hardware address",
+            "type": "string"
+          },
+          "power_id": {
+            "description": "Virsh VM ID",
+            "type": "string"
+          },
+          "power_off_regex": {
+            "description": "Regex to confirm the node is off",
+            "type": "string"
+          },
+          "power_off_uri": {
+            "description": "URI to power off the node",
+            "type": "string"
+          },
+          "power_on_delay": {
+            "description": "Power ON outlet delay (seconds",
+            "type": "string"
+          },
+          "power_on_regex": {
+            "description": "Regex to confirm the node is on",
+            "type": "string"
+          },
+          "power_on_uri": {
+            "description": "URI to power on the node",
+            "type": "string"
+          },
+          "power_partition_name": {
+            "description": "HMC partition name",
+            "type": "string"
+          },
+          "power_pass": {
+            "description": "Password (optional",
+            "type": "string"
+          },
+          "power_port": {
+            "description": "VMware API port (optional",
+            "type": "string"
+          },
+          "power_protocol": {
+            "description": "VMware API protocol (optional",
+            "type": "string"
+          },
+          "power_query_uri": {
+            "description": "URI to query the nodes power status",
+            "type": "string"
+          },
+          "power_token": {
+            "description": "Power token, will be used in place of power_user and power_pass",
+            "type": "string"
+          },
+          "power_token_name": {
+            "description": "Proxmox API token name",
+            "type": "string"
+          },
+          "power_token_secret": {
+            "description": "Proxmox API token secret",
+            "type": "string"
+          },
+          "power_user": {
+            "description": "Power user",
+            "type": "string"
+          },
+          "power_uuid": {
+            "description": "VM UUID (if known",
+            "type": "string"
+          },
+          "power_verify_ssl": {
+            "description": "Verify SSL connections with system CA certificates",
+            "type": "string"
+          },
+          "power_vm_name": {
+            "description": "VM Name (if UUID unknown",
+            "type": "string"
+          },
+          "privilege_level": {
+            "description": "Privilege Level",
+            "type": "string"
+          },
+          "project": {
+            "description": "LXD project",
+            "type": "string"
+          },
+          "proxmox": {
+            "description": "Proxmox",
+            "type": "string"
+          },
+          "recs_box": {
+            "description": "Christmann RECS|Box Power Driver",
+            "type": "string"
+          },
+          "redfish": {
+            "description": "Redfish",
+            "type": "string"
+          },
+          "server_name": {
+            "description": "HMC Managed System server name",
+            "type": "string"
+          },
+          "sm15k": {
+            "description": "SeaMicro 15000",
+            "type": "string"
+          },
+          "system_id": {
+            "description": "System ID",
+            "type": "string"
+          },
+          "ucsm": {
+            "description": "Cisco UCS Manager",
+            "type": "string"
+          },
+          "uuid": {
+            "description": "Server UUID",
+            "type": "string"
+          },
+          "virsh": {
+            "description": "Virsh (virtual systems",
+            "type": "string"
+          },
+          "vmware": {
+            "description": "VMware",
+            "type": "string"
+          },
+          "webhook": {
+            "description": "Webhook",
+            "type": "string"
+          },
+          "wedge": {
+            "description": "Facebook's Wedge",
+            "type": "string"
+          },
+          "workaround_flags": {
+            "description": "Workaround Flags",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    {
+      "name": "maas_post_maas_api_2.0_pods_op-type_action",
+      "description": "Perform an action on a pod using one of the pod types.",
+      "input_schema": {
+        "properties": {
+          "certificate": {
+            "description": "LXD certificate (optional",
+            "type": "string"
+          },
+          "instance_name": {
+            "description": "Instance name",
+            "type": "string"
+          },
+          "key": {
+            "description": "LXD private key (optional",
+            "type": "string"
+          },
+          "lxd": {
+            "description": "LXD (virtual systems",
+            "type": "string"
+          },
+          "password": {
+            "description": "LXD password (optional",
+            "type": "string"
+          },
+          "power_address": {
+            "description": "Address",
+            "type": "string"
+          },
+          "power_id": {
+            "description": "Virsh VM ID",
+            "type": "string"
+          },
+          "power_pass": {
+            "description": "Password (optional",
+            "type": "string"
+          },
+          "project": {
+            "description": "LXD project",
+            "type": "string"
+          },
+          "virsh": {
+            "description": "Virsh (virtual systems",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  ]
+}

@@ -62,6 +62,10 @@ We welcome feature suggestions! Please create an issue with:
    make test
    ```
 
+### Updating MAAS Tools
+
+The MAAS tools available through the MCP server are dynamically generated from the MAAS API documentation. If you need to update these tool definitions due to changes in the MAAS API or to improve the parsing/generation process, please refer to the detailed instructions in the [MAAS API Tool Generation documentation (`cmd/gen-tools/README.md`)](cmd/gen-tools/README.md).
+
 ## Coding Standards
 
 ### Go Code
